@@ -1,0 +1,24 @@
+[gd_scene load_steps=2 format=2]
+
+[ext_resource path="res://Gameplay/UI/CastBar/CastBar.gd" type="Script" id=1]
+
+[node name="CastBar" type="ProgressBar"]
+modulate = Color( 0.317647, 0.356863, 1, 1 )
+margin_right = 200.0
+margin_bottom = 40.0
+percent_visible = false
+script = ExtResource( 1 )
+__meta__ = {
+"_edit_group_": true,
+"_edit_use_anchors_": false
+}
+
+[node name="Label" type="Label" parent="."]
+anchor_right = 1.0
+anchor_bottom = 1.0
+text = "Name"
+align = 1
+valign = 1
+__meta__ = {
+"_edit_use_anchors_": false
+}

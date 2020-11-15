@@ -5,9 +5,10 @@ var fireball_texture = load("res://Gameplay/AbilitySystem/Abilities/Fireball/fir
 var target_type = Enums.TargetType.Unit
 var damage := 5
 var _speed := 500
+var cast_time := 1.0
 
 
-func _on_projectile_target_reached(projectile: Projectile, target: Unit):
+func _on_projectile_target_reached(projectile: Projectile, target):
 	projectile.queue_free()
 	
 	if get_tree().is_network_server():

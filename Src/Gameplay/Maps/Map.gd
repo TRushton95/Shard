@@ -16,14 +16,30 @@ func _on_player_path_finished() -> void:
 	$PathDebug.hide()
 
 
-func _on_unit_damage_received(unit, value) -> void:
+func _on_unit_damage_received(value: int, unit: Unit) -> void:
 	if unit == selected_unit:
 		$CanvasLayer/TargetFrame.update()
 
 
-func _on_unit_healing_received(unit, value) -> void:
+func _on_unit_healing_received(value: int, unit: Unit) -> void:
 	if unit == selected_unit:
 		$CanvasLayer/TargetFrame.update()
+
+
+func _on_unit_casting_started(ability_name: String, duration: float, unit: Unit) -> void:
+	if unit == get_node(player_name):
+		$CanvasLayer/CastBar.initialise(ability_name, duration)
+		$CanvasLayer/CastBar.show()
+
+
+func _on_unit_casting_stopped(unit: Unit) -> void:
+	if unit == get_node(player_name):
+		$CanvasLayer/CastBar.hide()
+
+
+func _on_unit_casting_progress(value: float, unit: Unit) -> void:
+	if unit == get_node(player_name):
+		$CanvasLayer/CastBar.set_value(value)
 
 
 func _process(delta: float) -> void:
@@ -63,10 +79,12 @@ func _unhandled_input(event):
 
 remotesync func cast_ability(ability_index, caster_name, target_name):
 	var caster = get_node(caster_name)
-	var target = get_node(target_name)
-	var ability = caster.get_node("Abilities").get_child(ability_index)
 	
-	ability.execute(target, caster)
+	var target = target_name
+	if has_node(target_name):
+		target = get_node(target_name)
+	
+	caster.cast(ability_index, target)
 
 
 func setup(player_name: String, player_lookup: Dictionary):
@@ -74,8 +92,8 @@ func setup(player_name: String, player_lookup: Dictionary):
 	
 	#TEST ENEMY
 	$Enemy.connect("left_clicked", self, "_on_unit_left_clicked", [$Enemy])
-	$Enemy.connect("damage_received", self, "_on_unit_damage_received")
-	$Enemy.connect("healing_received", self, "_on_unit_healing_received")
+	$Enemy.connect("damage_received", self, "_on_unit_damage_received", [$Enemy])
+	$Enemy.connect("healing_received", self, "_on_unit_healing_received", [$Enemy])
 	#END OF TEST ENEMY
 	
 	var player_list = player_lookup.values()
@@ -89,8 +107,11 @@ func setup(player_name: String, player_lookup: Dictionary):
 		unit.position = $PlayerSpawnPoints.get_node(str(spawn_index)).position
 		add_child(unit)
 		unit.connect("left_clicked", self, "_on_unit_left_clicked", [unit])
-		unit.connect("damage_received", self, "_on_unit_damage_received")
-		unit.connect("healing_received", self, "_on_unit_healing_received")
+		unit.connect("damage_received", self, "_on_unit_damage_received", [unit])
+		unit.connect("healing_received", self, "_on_unit_healing_received", [unit])
+		unit.connect("casting_started", self, "_on_unit_casting_started", [unit])
+		unit.connect("casting_stopped", self, "_on_unit_casting_stopped", [unit])
+		unit.connect("casting_progress", self, "_on_unit_casting_progress", [unit])
 		
 		if player == player_name:
 			unit.connect("path_finished", self, "_on_player_path_finished")
