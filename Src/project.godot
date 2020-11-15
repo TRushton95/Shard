@@ -8,9 +8,14 @@
 
 config_version=4
 
-_global_script_classes=[  ]
+_global_script_classes=[ {
+"base": "KinematicBody2D",
+"class": "Unit",
+"language": "GDScript",
+"path": "res://Gameplay/Entities/Unit/Unit.gd"
+} ]
 _global_script_class_icons={
-
+"Unit": ""
 }
 
 [application]
@@ -18,3 +23,15 @@ _global_script_class_icons={
 config/name="Shard"
 run/main_scene="res://Main.tscn"
 config/icon="res://Gameplay/Entities/Unit/icon.png"
+
+[autoload]
+
+Enums="*res://Gameplay/Enums/Enums.gd"
+
+[input]
+
+cast_1={
+"deadzone": 0.5,
+"events": [ Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":0,"alt":false,"shift":false,"control":false,"meta":false,"command":false,"pressed":false,"scancode":49,"unicode":0,"echo":false,"script":null)
+ ]
+}

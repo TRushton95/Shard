@@ -1,9 +1,20 @@
 extends KinematicBody2D
+class_name Unit
 
 var _path : PoolVector2Array
 var speed := 250
+var max_health:= 100
+var current_health := max_health
 
+signal left_clicked
 signal path_finished
+
+
+func _on_Clickbox_input_event(viewport, event, shape_idx):
+	if event is InputEventMouseButton && event.pressed:
+		if event.button_index == BUTTON_LEFT:
+			emit_signal("left_clicked")
+
 
 func _process(delta: float) -> void:
 	if _path && _path.size() > 0:
@@ -12,6 +23,24 @@ func _process(delta: float) -> void:
 
 remotesync func set_path(path: PoolVector2Array) -> void:
 	_path = path
+
+
+remotesync func damage(value: int, source_name: String) -> void:
+	current_health -= value
+	
+	if current_health < 0:
+		current_health = 0
+	
+	print("%s received %s damage from %s" % [name, value, source_name])
+
+
+remotesync func heal(value: int, source_name: String) -> void:
+	current_health += value
+	
+	if current_health > max_health:
+		current_health = max_health
+	
+	print("%s received %s healing from %s" % [name, value, source_name])
 
 
 func _move_along_path(delta: float) -> void:
@@ -29,5 +58,3 @@ func _move_along_path(delta: float) -> void:
 		
 		if _path.size() == 0:
 			emit_signal("path_finished")
-
-
