@@ -1,7 +1,7 @@
 extends KinematicBody2D
 class_name Unit
 
-var _path : PoolVector2Array
+var _movement_path : PoolVector2Array
 var speed := 250
 var max_health := 100
 var current_health := max_health
@@ -32,15 +32,22 @@ func _ready():
 
 
 func _process(delta: float) -> void:
-	if _path && _path.size() > 0:
+	if _movement_path && _movement_path.size() > 0:
+		if is_casting:
+			stop_casting()
+			
 		_move_along_path(delta)
 		
 	if is_casting:
 		emit_signal("casting_progress", $CastTimer.wait_time - $CastTimer.time_left)
 
 
-remotesync func set_path(path: PoolVector2Array) -> void:
-	_path = path
+remotesync func set_movement_path(movement_path: PoolVector2Array) -> void:
+	_movement_path = movement_path
+
+
+func is_moving() -> bool:
+	return _movement_path && _movement_path.size() > 0
 
 
 remotesync func damage(value: int, source_name: String) -> void:
@@ -90,15 +97,15 @@ func stop_casting() -> void:
 func _move_along_path(delta: float) -> void:
 	var distance_to_walk = delta * speed
 	
-	while distance_to_walk > 0 && _path.size() > 0:
-		var distance_to_next_point = position.distance_to(_path[0])
+	while distance_to_walk > 0 && _movement_path.size() > 0:
+		var distance_to_next_point = position.distance_to(_movement_path[0])
 		if distance_to_walk <= distance_to_next_point:
-			position += position.direction_to(_path[0]) * distance_to_walk
+			position += position.direction_to(_movement_path[0]) * distance_to_walk
 		else:
-			position = _path[0]
-			_path.remove(0)
+			position = _movement_path[0]
+			_movement_path.remove(0)
 			
 		distance_to_walk -= distance_to_next_point
 		
-		if _path.size() == 0:
+		if _movement_path.size() == 0:
 			emit_signal("path_finished")

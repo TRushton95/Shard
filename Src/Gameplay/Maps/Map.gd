@@ -49,6 +49,10 @@ func _process(delta: float) -> void:
 		ability_index = 0
 	
 	if ability_index >= 0:
+		if get_node(player_name).is_moving():
+			print("Cannot cast while moving")
+			return
+		
 		var ability = get_node(player_name + "/Abilities").get_child(ability_index)
 		
 		if !"target_type" in ability:
@@ -65,11 +69,11 @@ func _process(delta: float) -> void:
 func _unhandled_input(event):
 	if event is InputEventMouseButton && event.pressed:
 		if event.button_index == BUTTON_RIGHT:
-			var path = $Navigation2D.get_simple_path(get_node(player_name).position, event.position)
+			var movement_path = $Navigation2D.get_simple_path(get_node(player_name).position, event.position)
 			
-			$PathDebug.points = path
+			$PathDebug.points = movement_path
 			$PathDebug.show()
-			get_node(player_name).rpc("set_path", path)
+			get_node(player_name).rpc("set_movement_path", movement_path)
 			
 		elif event.button_index == BUTTON_LEFT:
 			if selected_unit:
