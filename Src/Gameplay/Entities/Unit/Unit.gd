@@ -27,6 +27,10 @@ func _on_CastTimer_timeout(ability, unit) -> void:
 	ability.execute(unit, self)
 
 
+func _on_status_expired(status_effect) -> void:
+	remove_status_effect(status_effect)
+
+
 func _ready():
 	$CastTimer.one_shot = false
 
@@ -95,6 +99,18 @@ func stop_casting() -> void:
 	$CastTimer.stop()
 	$CastTimer.disconnect("timeout", self, "_on_CastTimer_timeout")
 	emit_signal("casting_stopped")
+
+
+remotesync func push_status_effect(status_effect_data: Dictionary) -> void:
+	var status_effect = StatusHelper.build_from_data(status_effect_data)
+	
+	$StatusEffects.add_child(status_effect)
+	status_effect.set_owner(self)
+	status_effect.connect("expired", self, "_on_status_expired", [status_effect])
+
+
+func remove_status_effect(status_effect: Status) -> void:
+	status_effect.queue_free()
 
 
 func _move_along_path(delta: float) -> void:

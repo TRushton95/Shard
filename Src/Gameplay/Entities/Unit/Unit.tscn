@@ -28,5 +28,7 @@ shape = SubResource( 1 )
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Clickbox"]
 shape = SubResource( 2 )
 
+[node name="StatusEffects" type="Node" parent="."]
+
 [node name="CastTimer" type="Timer" parent="."]
 [connection signal="input_event" from="Clickbox" to="." method="_on_Clickbox_input_event"]
