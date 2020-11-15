@@ -4,7 +4,7 @@ var map_scene = load("res://Gameplay/Maps/Map.tscn")
 var lobby_scene = load("res://Lobby/Lobby.tscn")
 var login_scene = load("res://Login/Login.tscn")
 
-var player_list := {}
+var player_lookup := {}
 var player_name : String
 
 
@@ -42,8 +42,8 @@ func _on_network_peer_connected(id) -> void:
 
 
 func _on_network_peer_disconnected(id) -> void:
-	player_list.erase(id)
-	get_node("Lobby").set_players(player_list)
+	player_lookup.erase(id)
+	get_node("Lobby").set_players(player_lookup)
 
 
 func _on_Lobby_disconnect_button_pressed() -> void:
@@ -64,15 +64,15 @@ func _ready() -> void:
 
 remote func register_player(name) -> void:
 	var sender_id = get_tree().get_rpc_sender_id()
-	player_list[sender_id] = name
-	get_node("Lobby").set_players(player_list)
+	player_lookup[sender_id] = name
+	get_node("Lobby").set_players(player_lookup)
 
 
 remotesync func switch_to_game() -> void:
 	get_node("Lobby").queue_free()
 	var map = map_scene.instance()
 	add_child(map)
-	map.setup(player_name, player_list)
+	map.setup(player_name, player_lookup)
 
 
 func switch_to_lobby() -> void:
@@ -80,7 +80,7 @@ func switch_to_lobby() -> void:
 	var lobby = lobby_scene.instance()
 	lobby.player_name = player_name
 	add_child(lobby)
-	lobby.set_players(player_list)
+	lobby.set_players(player_lookup)
 	
 	lobby.connect("disconnect_button_pressed", self, "_on_Lobby_disconnect_button_pressed")
 	lobby.connect("start_game_button_pressed", self, "_on_Lobby_start_game_button_pressed")
@@ -93,5 +93,5 @@ func switch_to_login() -> void:
 	login.connect("server_button_pressed", self, "_on_Login_server_button_pressed")
 	login.connect("client_button_pressed", self, "_on_Login_client_button_pressed")
 	
-	player_list.clear()
+	player_lookup.clear()
 	get_tree().set_network_peer(null)

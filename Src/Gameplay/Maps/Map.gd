@@ -31,7 +31,7 @@ func _process(delta: float) -> void:
 		match ability.target_type:
 			Enums.TargetType.Unit:
 				if selected_unit:
-					ability.execute(selected_unit, get_node(player_name))
+					rpc("cast_ability", ability_index, player_name, selected_unit.name)
 				else:
 					print("No selected unit")
 
@@ -50,16 +50,31 @@ func _unhandled_input(event):
 				selected_unit = null
 
 
-func setup(player_name: String, player_list: Dictionary):
-	self.player_name = player_name
-	var player_unit = unit_scene.instance()
-	player_unit.name = player_name
-	add_child(player_unit)
-	player_unit.connect("path_finished", self, "_on_player_path_finished")
-	player_unit.connect("left_clicked", self, "_on_unit_left_clicked", [player_unit])
+remotesync func cast_ability(ability_index, caster_name, target_name):
+	var caster = get_node(caster_name)
+	var target = get_node(target_name)
+	var ability = caster.get_node("Abilities").get_child(ability_index)
 	
+	ability.execute(target, caster)
+
+
+func setup(player_name: String, player_lookup: Dictionary):
+	self.player_name = player_name
+	$Enemy.connect("left_clicked", self, "_on_unit_left_clicked", [$Enemy])
+	
+	var player_list = player_lookup.values()
+	player_list.append(player_name)
+	player_list.sort()
+	
+	var spawn_index = 0
 	for player in player_list:
 		var unit = unit_scene.instance()
-		unit.name = player_list[player]
+		unit.name = player
+		unit.position = $PlayerSpawnPoints.get_node(str(spawn_index)).position
 		add_child(unit)
 		unit.connect("left_clicked", self, "_on_unit_left_clicked", [unit])
+		
+		if player == player_name:
+			unit.connect("path_finished", self, "_on_player_path_finished")
+		
+		spawn_index += 1

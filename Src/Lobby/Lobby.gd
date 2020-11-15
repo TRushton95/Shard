@@ -19,12 +19,12 @@ func _ready() -> void:
 		$Panel/VBoxContainer/StartGameButton.visible = true
 
 
-func set_players(players: Dictionary) -> void:
+func set_players(player_lookup: Dictionary) -> void:
 	var player_list = $Panel/MarginContainer/VBoxContainer/PlayerList
 	player_list.clear()
 	player_list.add_item(player_name + " (you)")
 
-	for player in players.values():
+	for player in player_lookup.values():
 		player_list.add_item(player)
 	
-	$Panel/MarginContainer/VBoxContainer/PlayerCountLabel.text = str(players.size() + 1) + "/2"
+	$Panel/MarginContainer/VBoxContainer/PlayerCountLabel.text = str(player_lookup.size() + 1) + "/2"
