@@ -1,5 +1,6 @@
 extends Node
 
+var map_scene = load("res://Gameplay/Maps/Map.tscn")
 var lobby_scene = load("res://Lobby/Lobby.tscn")
 var login_scene = load("res://Login/Login.tscn")
 
@@ -49,6 +50,10 @@ func _on_Lobby_disconnect_button_pressed() -> void:
 	switch_to_login()
 
 
+func _on_Lobby_start_game_button_pressed() -> void:
+	rpc("switch_to_game")
+
+
 func _ready() -> void:
 	get_tree().connect("connected_to_server", self, "_on_connection_successful")
 	get_tree().connect("server_disconnected", self, "_on_server_disconnected")
@@ -63,6 +68,13 @@ remote func register_player(name) -> void:
 	get_node("Lobby").set_players(player_list)
 
 
+remotesync func switch_to_game() -> void:
+	get_node("Lobby").queue_free()
+	var map = map_scene.instance()
+	add_child(map)
+	map.setup(player_name, player_list)
+
+
 func switch_to_lobby() -> void:
 	get_node("Login").queue_free()
 	var lobby = lobby_scene.instance()
@@ -71,6 +83,7 @@ func switch_to_lobby() -> void:
 	lobby.set_players(player_list)
 	
 	lobby.connect("disconnect_button_pressed", self, "_on_Lobby_disconnect_button_pressed")
+	lobby.connect("start_game_button_pressed", self, "_on_Lobby_start_game_button_pressed")
 
 
 func switch_to_login() -> void:

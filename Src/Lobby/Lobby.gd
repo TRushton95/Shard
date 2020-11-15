@@ -7,11 +7,16 @@ var player_name: String
 
 
 func _on_StartGameButton_pressed():
-	pass # Replace with function body.
+	emit_signal("start_game_button_pressed")
 
 
 func _on_DisconnectButton_pressed():
 	emit_signal("disconnect_button_pressed")
+
+
+func _ready() -> void:
+	if get_tree().is_network_server():
+		$Panel/VBoxContainer/StartGameButton.visible = true
 
 
 func set_players(players: Dictionary) -> void:

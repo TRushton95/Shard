@@ -61,6 +61,7 @@ __meta__ = {
 }
 
 [node name="StartGameButton" type="Button" parent="Panel/VBoxContainer"]
+visible = false
 margin_right = 144.0
 margin_bottom = 50.0
 rect_min_size = Vector2( 0, 50 )
@@ -68,9 +69,8 @@ size_flags_vertical = 3
 text = "Start Game"
 
 [node name="DisconnectButton" type="Button" parent="Panel/VBoxContainer"]
-margin_top = 54.0
 margin_right = 144.0
-margin_bottom = 104.0
+margin_bottom = 50.0
 rect_min_size = Vector2( 0, 50 )
 size_flags_horizontal = 3
 text = "Disconnect"

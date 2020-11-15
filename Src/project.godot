@@ -17,4 +17,4 @@ _global_script_class_icons={
 
 config/name="Shard"
 run/main_scene="res://Main.tscn"
-config/icon="res://Gameplay/Entities/icon.png"
+config/icon="res://Gameplay/Entities/Unit/icon.png"
