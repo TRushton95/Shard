@@ -44,6 +44,9 @@ func _process(delta: float) -> void:
 
 remotesync func set_movement_path(movement_path: PoolVector2Array) -> void:
 	_movement_path = movement_path
+	
+	if !is_moving():
+		emit_signal("path_finished")
 
 
 func is_moving() -> bool:

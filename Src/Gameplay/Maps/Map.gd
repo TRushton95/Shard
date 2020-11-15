@@ -50,8 +50,7 @@ func _process(delta: float) -> void:
 	
 	if ability_index >= 0:
 		if get_node(player_name).is_moving():
-			print("Cannot cast while moving")
-			return
+			get_node(player_name).set_movement_path([])
 		
 		var ability = get_node(player_name + "/Abilities").get_child(ability_index)
 		
