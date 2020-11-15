@@ -18,13 +18,6 @@ func _on_projectile_target_reached(projectile: Projectile, target: Unit):
 	if get_tree().is_network_server():
 		target.rpc("damage", damage, name)
 		
-		var status_data = {
-			"damage_per_tick": dot_damage_per_tick,
-			"duration": dot_duration,
-			"tick_rate": dot_tick_rate,
-			"name": dot_name
-		}
-		
 		var dot = StatusHelper.dot(dot_damage_per_tick, dot_duration, dot_tick_rate, dot_name)
 		var test = dot.to_data()
 		
