@@ -7,12 +7,23 @@ var selected_unit : Unit
 
 
 func _on_unit_left_clicked(unit: Unit) -> void:
-	print("selected unit")
 	selected_unit = unit
+	$CanvasLayer/TargetFrame.set_profile(unit)
+	$CanvasLayer/TargetFrame.show()
 
 
 func _on_player_path_finished() -> void:
 	$PathDebug.hide()
+
+
+func _on_unit_damage_received(unit, value) -> void:
+	if unit == selected_unit:
+		$CanvasLayer/TargetFrame.update()
+
+
+func _on_unit_healing_received(unit, value) -> void:
+	if unit == selected_unit:
+		$CanvasLayer/TargetFrame.update()
 
 
 func _process(delta: float) -> void:
@@ -46,8 +57,8 @@ func _unhandled_input(event):
 			
 		elif event.button_index == BUTTON_LEFT:
 			if selected_unit:
-				print("deselected unit")
 				selected_unit = null
+				$CanvasLayer/TargetFrame.hide()
 
 
 remotesync func cast_ability(ability_index, caster_name, target_name):
@@ -60,7 +71,12 @@ remotesync func cast_ability(ability_index, caster_name, target_name):
 
 func setup(player_name: String, player_lookup: Dictionary):
 	self.player_name = player_name
+	
+	#TEST ENEMY
 	$Enemy.connect("left_clicked", self, "_on_unit_left_clicked", [$Enemy])
+	$Enemy.connect("damage_received", self, "_on_unit_damage_received")
+	$Enemy.connect("healing_received", self, "_on_unit_healing_received")
+	#END OF TEST ENEMY
 	
 	var player_list = player_lookup.values()
 	player_list.append(player_name)
@@ -73,6 +89,8 @@ func setup(player_name: String, player_lookup: Dictionary):
 		unit.position = $PlayerSpawnPoints.get_node(str(spawn_index)).position
 		add_child(unit)
 		unit.connect("left_clicked", self, "_on_unit_left_clicked", [unit])
+		unit.connect("damage_received", self, "_on_unit_damage_received")
+		unit.connect("healing_received", self, "_on_unit_healing_received")
 		
 		if player == player_name:
 			unit.connect("path_finished", self, "_on_player_path_finished")

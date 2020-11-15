@@ -8,6 +8,8 @@ var current_health := max_health
 
 signal left_clicked
 signal path_finished
+signal damage_received(unit, value)
+signal healing_received(unit, value)
 
 
 func _on_Clickbox_input_event(viewport, event, shape_idx):
@@ -32,6 +34,7 @@ remotesync func damage(value: int, source_name: String) -> void:
 		current_health = 0
 	
 	print("%s received %s damage from %s" % [name, value, source_name])
+	emit_signal("damage_received", self, value)
 
 
 remotesync func heal(value: int, source_name: String) -> void:
@@ -41,6 +44,7 @@ remotesync func heal(value: int, source_name: String) -> void:
 		current_health = max_health
 	
 	print("%s received %s healing from %s" % [name, value, source_name])
+	emit_signal("healing_received", self, value)
 
 
 func _move_along_path(delta: float) -> void:
