@@ -1,0 +1,56 @@
+[gd_scene load_steps=2 format=2]
+
+[ext_resource path="res://Login/Login.gd" type="Script" id=1]
+
+[node name="Login" type="Control"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+script = ExtResource( 1 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="VBoxContainer" type="VBoxContainer" parent="."]
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+margin_left = -104.0
+margin_top = -27.5
+margin_right = 104.0
+margin_bottom = 27.5
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="NetworkPanel" type="HBoxContainer" parent="VBoxContainer"]
+margin_right = 208.0
+margin_bottom = 37.0
+size_flags_horizontal = 3
+size_flags_vertical = 3
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="ServerButton" type="Button" parent="VBoxContainer/NetworkPanel"]
+margin_right = 102.0
+margin_bottom = 37.0
+size_flags_horizontal = 3
+size_flags_vertical = 3
+text = "Server"
+
+[node name="ClientButton" type="Button" parent="VBoxContainer/NetworkPanel"]
+margin_left = 106.0
+margin_right = 208.0
+margin_bottom = 37.0
+size_flags_horizontal = 3
+size_flags_vertical = 3
+text = "Client"
+
+[node name="Label" type="Label" parent="VBoxContainer"]
+margin_top = 41.0
+margin_right = 208.0
+margin_bottom = 55.0
+align = 1
+[connection signal="pressed" from="VBoxContainer/NetworkPanel/ServerButton" to="." method="_on_ServerButton_pressed"]
+[connection signal="pressed" from="VBoxContainer/NetworkPanel/ClientButton" to="." method="_on_ClientButton_pressed"]
