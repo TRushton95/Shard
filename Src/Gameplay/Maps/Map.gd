@@ -47,6 +47,8 @@ func _process(delta: float) -> void:
 	
 	if Input.is_action_just_pressed("cast_1"):
 		ability_index = 0
+	if Input.is_action_just_pressed("cast_2"):
+		ability_index = 1
 	
 	if ability_index >= 0:
 		if get_node(player_name).is_moving():

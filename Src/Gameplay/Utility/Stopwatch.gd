@@ -34,6 +34,10 @@ func _ready() -> void:
 func setup(duration: float, tick_rate: float) -> void:
 	self.duration = duration
 	self.tick_rate = tick_rate
+	
+	if tick_rate <= 0:
+		print("Stopwatch setup failed: tick rate is set to 0. If this is intentional, consider using a Timer")
+		return
 
 
 func start(initial_tick = false) -> void:
