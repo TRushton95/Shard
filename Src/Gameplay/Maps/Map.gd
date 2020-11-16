@@ -31,6 +31,12 @@ func _on_unit_healing_received(value: int, unit: Unit) -> void:
 		$CanvasLayer/TargetFrame.update()
 
 
+#This should hook into whatever mechanism determines when an ability key is pressed
+func _on_ability_button_pressed(ability_name: String) -> void:
+	var ability = get_node(player_name + "/Abilities/" + ability_name)
+	process_ability_press(ability)
+
+
 func _on_unit_casting_started(ability_name: String, duration: float, unit: Unit) -> void:
 	if unit == get_node(player_name):
 		$CanvasLayer/CastBar.initialise(ability_name, duration)
@@ -80,15 +86,22 @@ func _process(delta: float) -> void:
 			print("No target type on ability " + ability.name)
 			return
 			
-		match ability.target_type:
-			Enums.TargetType.Unit:
-				if selected_unit:
-					rpc("cast_ability_on_unit", ability_index, player_name, selected_unit.name)
-				else:
-					select_ability(ability)
-					
-			Enums.TargetType.Position:
+		# This method can be moved back here but needs to map key inputs properly and expose in a way
+		# that action bar button press can hook into as well
+		process_ability_press(ability)
+
+
+func process_ability_press(ability):
+	match ability.target_type:
+		Enums.TargetType.Unit:
+			if selected_unit:
+				rpc("cast_ability_on_unit", ability.get_index(), player_name, selected_unit.name)
+			else:
 				select_ability(ability)
+				
+		Enums.TargetType.Position:
+			select_ability(ability)
+
 
 func _unhandled_input(event) -> void:
 	if event is InputEventMouseButton && event.pressed:
@@ -158,6 +171,8 @@ func setup(player_name: String, player_lookup: Dictionary) -> void:
 			unit.connect("path_finished", self, "_on_player_path_finished")
 		
 		spawn_index += 1
+		
+	build_ability_container_items()
 
 
 func select_unit(unit: Unit) -> void:
@@ -177,3 +192,13 @@ func select_ability(ability) -> void:
 	else:
 		selected_ability = ability
 		Input.set_custom_mouse_cursor(rainbow_cursor)
+
+
+func build_ability_container_items():
+	var i = 0
+	for ability in get_node(player_name + "/Abilities").get_children():
+		var ability_button = Button.new()
+		ability_button.text = str(i + 1) + ". " + str(ability.name)
+		ability_button.connect("pressed", self, "_on_ability_button_pressed", [ability.name])
+		$CanvasLayer/AbilityContainer/VBoxContainer.add_child(ability_button)
+		i += 1
