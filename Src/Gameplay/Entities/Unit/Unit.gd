@@ -5,6 +5,8 @@ var _movement_path : PoolVector2Array
 var speed := 250
 var max_health := 100
 var current_health := max_health setget _set_current_health
+var max_mana := 50
+var current_mana := max_mana setget _set_current_mana
 var is_casting := false
 var channelling_index := -1 # -1 for not channeling
 
@@ -46,11 +48,17 @@ func _on_ChannelStopwatch_timeout() -> void:
 
 func _set_current_health(value: int) -> void:
 	current_health = value
-	$HealthBar.set_current_value(current_health)
+	$UnitProfile/VBoxContainer/HealthBar.set_current_value(current_health)
+
+
+func _set_current_mana(value: int) -> void:
+	current_mana = value
+	$UnitProfile/VBoxContainer/ManaBar.set_current_value(current_mana)
 
 
 func _ready():
-	$HealthBar.initialise(max_health)
+	$UnitProfile/VBoxContainer/HealthBar.initialise(current_health)
+	$UnitProfile/VBoxContainer/ManaBar.initialise(current_mana)
 	$CastTimer.one_shot = false
 
 

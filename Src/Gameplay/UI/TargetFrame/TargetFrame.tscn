@@ -5,7 +5,7 @@
 
 [node name="TargetFrame" type="PanelContainer"]
 margin_right = 191.0
-margin_bottom = 53.0
+margin_bottom = 87.0
 script = ExtResource( 2 )
 __meta__ = {
 "_edit_use_anchors_": false
@@ -15,17 +15,25 @@ __meta__ = {
 margin_left = 7.0
 margin_top = 7.0
 margin_right = 184.0
-margin_bottom = 46.0
+margin_bottom = 80.0
 
 [node name="NameLabel" type="Label" parent="VBoxContainer"]
 margin_right = 177.0
 margin_bottom = 14.0
 align = 1
 
-[node name="ResourceBar" parent="VBoxContainer" instance=ExtResource( 1 )]
+[node name="HealthBar" parent="VBoxContainer" instance=ExtResource( 1 )]
 modulate = Color( 0.0784314, 1, 0, 1 )
 margin_top = 18.0
 margin_right = 177.0
-margin_bottom = 39.0
+margin_bottom = 43.0
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="ManaBar" parent="VBoxContainer" instance=ExtResource( 1 )]
+modulate = Color( 0, 0.321569, 1, 1 )
+margin_top = 47.0
+margin_right = 177.0
+margin_bottom = 73.0
 size_flags_horizontal = 3
 size_flags_vertical = 3

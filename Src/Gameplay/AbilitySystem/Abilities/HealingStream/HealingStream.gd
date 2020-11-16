@@ -3,6 +3,7 @@ extends Node
 var channel_duration := 5.0
 var healing_per_tick := 1
 var tick_rate := 0.5
+var cast_time := 2
 
 var target_type = Enums.TargetType.Unit
 

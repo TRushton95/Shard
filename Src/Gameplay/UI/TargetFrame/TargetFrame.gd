@@ -10,5 +10,7 @@ func set_profile(unit: Unit) -> void:
 
 func update() -> void:
 	$VBoxContainer/NameLabel.text = selected_unit.name
-	$VBoxContainer/ResourceBar.set_max_value(selected_unit.max_health)
-	$VBoxContainer/ResourceBar.set_current_value(selected_unit.current_health)
+	$VBoxContainer/HealthBar.set_max_value(selected_unit.max_health)
+	$VBoxContainer/HealthBar.set_current_value(selected_unit.current_health)
+	$VBoxContainer/ManaBar.set_max_value(selected_unit.max_mana)
+	$VBoxContainer/ManaBar.set_current_value(selected_unit.current_mana)
