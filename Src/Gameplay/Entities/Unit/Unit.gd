@@ -4,7 +4,7 @@ class_name Unit
 var _movement_path : PoolVector2Array
 var speed := 250
 var max_health := 100
-var current_health := max_health
+var current_health := max_health setget _set_current_health
 var is_casting := false
 var channelling_index := -1 # -1 for not channeling
 
@@ -44,7 +44,13 @@ func _on_ChannelStopwatch_timeout() -> void:
 	stop_channelling()
 
 
+func _set_current_health(value: int) -> void:
+	current_health = value
+	$HealthBar.set_current_value(current_health)
+
+
 func _ready():
+	$HealthBar.initialise(max_health)
 	$CastTimer.one_shot = false
 
 
@@ -75,20 +81,24 @@ func is_moving() -> bool:
 
 
 remotesync func damage(value: int, source_name: String) -> void:
-	current_health -= value
+	var new_health = current_health - value
 	
-	if current_health < 0:
-		current_health = 0
+	if new_health < 0:
+		new_health = 0
+		
+	_set_current_health(new_health)
 	
 	print("%s received %s damage from %s" % [name, value, source_name])
 	emit_signal("damage_received", value)
 
 
 remotesync func heal(value: int, source_name: String) -> void:
-	current_health += value
+	var new_health = current_health + value
 	
-	if current_health > max_health:
-		current_health = max_health
+	if new_health > max_health:
+		new_health = max_health
+		
+	_set_current_health(new_health)
 	
 	print("%s received %s healing from %s" % [name, value, source_name])
 	emit_signal("healing_received", value)
