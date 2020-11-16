@@ -1,15 +1,20 @@
 extends Node
 
+var rainbow_cursor = load("res://pointer.png")
 var unit_scene = load("Gameplay/Entities/Unit/Unit.tscn")
 
 var player_name : String
 var selected_unit : Unit
+var selected_ability
 
 
 func _on_unit_left_clicked(unit: Unit) -> void:
-	selected_unit = unit
-	$CanvasLayer/TargetFrame.set_profile(unit)
-	$CanvasLayer/TargetFrame.show()
+	if selected_ability:
+		select_unit(unit)
+		rpc("cast_ability_on_unit", selected_ability.get_index(), player_name, unit.name)
+		select_ability(null)
+	else:
+		select_unit(unit)
 
 
 func _on_player_path_finished() -> void:
@@ -51,9 +56,6 @@ func _process(delta: float) -> void:
 		ability_index = 1
 	
 	if ability_index >= 0:
-		if get_node(player_name).is_moving():
-			get_node(player_name).rpc("set_movement_path", [])
-		
 		var ability = get_node(player_name + "/Abilities").get_child(ability_index)
 		
 		if !"target_type" in ability:
@@ -63,36 +65,49 @@ func _process(delta: float) -> void:
 		match ability.target_type:
 			Enums.TargetType.Unit:
 				if selected_unit:
-					rpc("cast_ability", ability_index, player_name, selected_unit.name)
+					rpc("cast_ability_on_unit", ability_index, player_name, selected_unit.name)
 				else:
-					print("No selected unit")
+					select_ability(ability)
+					
+			Enums.TargetType.Position:
+				select_ability(ability)
 
-func _unhandled_input(event):
+func _unhandled_input(event) -> void:
 	if event is InputEventMouseButton && event.pressed:
 		if event.button_index == BUTTON_RIGHT:
-			var movement_path = $Navigation2D.get_simple_path(get_node(player_name).position, event.position)
-			
-			$PathDebug.points = movement_path
-			$PathDebug.show()
-			get_node(player_name).rpc("set_movement_path", movement_path)
+			if selected_ability:
+				select_ability(null)
+			else:
+				var movement_path = $Navigation2D.get_simple_path(get_node(player_name).position, event.position)
+				
+				$PathDebug.points = movement_path
+				$PathDebug.show()
+				get_node(player_name).rpc("set_movement_path", movement_path)
 			
 		elif event.button_index == BUTTON_LEFT:
-			if selected_unit:
-				selected_unit = null
-				$CanvasLayer/TargetFrame.hide()
+			if selected_ability && selected_ability.target_type == Enums.TargetType.Position:
+				rpc("cast_ability_at_position", selected_ability.get_index(), player_name, event.position)
+				select_ability(null)
+			else:
+				select_unit(null)
 
 
-remotesync func cast_ability(ability_index, caster_name, target_name):
+remotesync func cast_ability_on_unit(ability_index: int, caster_name: String, target_name: String) -> void:
 	var caster = get_node(caster_name)
 	
-	var target = target_name
-	if has_node(target_name):
-		target = get_node(target_name)
-	
+	if !has_node(target_name):
+		print("No target with name: " + target_name)
+		
+	var target = get_node(target_name)
 	caster.cast(ability_index, target)
 
 
-func setup(player_name: String, player_lookup: Dictionary):
+remotesync func cast_ability_at_position(ability_index: int, caster_name, target_position: Vector2) -> void:
+	var caster = get_node(caster_name)
+	caster.cast(ability_index, target_position)
+
+
+func setup(player_name: String, player_lookup: Dictionary) -> void:
 	self.player_name = player_name
 	
 	#TEST ENEMY
@@ -122,3 +137,22 @@ func setup(player_name: String, player_lookup: Dictionary):
 			unit.connect("path_finished", self, "_on_player_path_finished")
 		
 		spawn_index += 1
+
+
+func select_unit(unit: Unit) -> void:
+	if unit:
+		selected_unit = unit
+		$CanvasLayer/TargetFrame.set_profile(unit)
+		$CanvasLayer/TargetFrame.show()
+	else:
+		selected_unit = null
+		$CanvasLayer/TargetFrame.hide()
+
+
+func select_ability(ability) -> void:
+	if !ability:
+		selected_ability = null
+		Input.set_custom_mouse_cursor(null)
+	else:
+		selected_ability = ability
+		Input.set_custom_mouse_cursor(rainbow_cursor)

@@ -34,9 +34,10 @@ func _physics_process(delta: float) -> void:
 
 
 # Provide 0 duration for an instant transient zone
-func setup(target, duration: float, tick_rate: int, radius: int) -> void:
+func setup(target, duration: float, tick_rate: int, radius: int, texture: Texture) -> void:
 	self.target = target
 	$CollisionShape2D.shape.radius = radius
+	$Sprite.texture = texture
 	
 	if target is Vector2:
 		position = target # Set vector2 position here to avoid resetting every _physics_process

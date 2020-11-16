@@ -81,10 +81,13 @@ func cast(index: int, target) -> void:
 	if is_casting:
 		print("Already casting")
 		return
-		
-	var ability = $Abilities.get_child(index)
 	
+	var ability = $Abilities.get_child(index)
+		
 	if "cast_time" in ability && ability.cast_time > 0:
+		if is_moving():
+			rpc("set_movement_path", [])
+		
 		$CastTimer.connect("timeout", self, "_on_CastTimer_timeout", [ability, target])
 		$CastTimer.start(ability.cast_time)
 		is_casting = true
