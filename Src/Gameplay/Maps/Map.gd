@@ -10,8 +10,8 @@ var selected_ability
 
 func _on_unit_left_clicked(unit: Unit) -> void:
 	if selected_ability:
-		select_unit(unit)
 		rpc("cast_ability_on_unit", selected_ability.get_index(), player_name, unit.name)
+		select_unit(unit)
 		select_ability(null)
 	else:
 		select_unit(unit)
@@ -37,14 +37,30 @@ func _on_unit_casting_started(ability_name: String, duration: float, unit: Unit)
 		$CanvasLayer/CastBar.show()
 
 
+func _on_unit_casting_progressed(time_elapsed: float, unit: Unit) -> void:
+	if unit == get_node(player_name):
+		$CanvasLayer/CastBar.set_value(time_elapsed)
+
+
 func _on_unit_casting_stopped(unit: Unit) -> void:
 	if unit == get_node(player_name):
 		$CanvasLayer/CastBar.hide()
 
 
-func _on_unit_casting_progress(value: float, unit: Unit) -> void:
+func _on_unit_channelling_started(ability_name: String, channel_duration: float, unit: Unit) -> void:
 	if unit == get_node(player_name):
-		$CanvasLayer/CastBar.set_value(value)
+		$CanvasLayer/CastBar.initialise(ability_name, channel_duration)
+		$CanvasLayer/CastBar.show()
+
+
+func _on_unit_channelling_progressed(time_remaining: float, unit: Unit) -> void:
+	if unit == get_node(player_name):
+		$CanvasLayer/CastBar.set_value(time_remaining)
+
+
+func _on_unit_channelling_stopped(unit: Unit) -> void:
+	if unit == get_node(player_name):
+		$CanvasLayer/CastBar.hide()
 
 
 func _process(delta: float) -> void:
@@ -54,6 +70,8 @@ func _process(delta: float) -> void:
 		ability_index = 0
 	if Input.is_action_just_pressed("cast_2"):
 		ability_index = 1
+	if Input.is_action_just_pressed("cast_3"):
+		ability_index = 2
 	
 	if ability_index >= 0:
 		var ability = get_node(player_name + "/Abilities").get_child(ability_index)
@@ -130,8 +148,11 @@ func setup(player_name: String, player_lookup: Dictionary) -> void:
 		unit.connect("damage_received", self, "_on_unit_damage_received", [unit])
 		unit.connect("healing_received", self, "_on_unit_healing_received", [unit])
 		unit.connect("casting_started", self, "_on_unit_casting_started", [unit])
+		unit.connect("casting_progressed", self, "_on_unit_casting_progressed", [unit])
 		unit.connect("casting_stopped", self, "_on_unit_casting_stopped", [unit])
-		unit.connect("casting_progress", self, "_on_unit_casting_progress", [unit])
+		unit.connect("channelling_started", self, "_on_unit_channelling_started", [unit])
+		unit.connect("channelling_progressed", self, "_on_unit_channelling_progressed", [unit])
+		unit.connect("channelling_stopped", self, "_on_unit_channelling_stopped", [unit])
 		
 		if player == player_name:
 			unit.connect("path_finished", self, "_on_player_path_finished")

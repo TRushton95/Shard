@@ -6,12 +6,17 @@ var speed := 250
 var max_health := 100
 var current_health := max_health
 var is_casting := false
+var channelling_index := -1 # -1 for not channeling
 
 signal left_clicked
 signal path_finished
-signal casting_started
+signal casting_started(ability_name, duration)
+signal casting_progressed(time_elapsed)
 signal casting_stopped
-signal casting_progress
+signal channelling_started(ability_name, duration)
+signal channelling_progressed(time_remaining)
+signal channelling_stopped
+signal channelling_ticked()
 signal damage_received(value)
 signal healing_received(unit, value)
 
@@ -22,13 +27,21 @@ func _on_Clickbox_input_event(viewport, event, shape_idx):
 			emit_signal("left_clicked")
 
 
-func _on_CastTimer_timeout(ability, unit) -> void:
+func _on_CastTimer_timeout(ability, target) -> void:
 	stop_casting()
-	ability.execute(unit, self)
+	execute_ability(ability, target)
 
 
 func _on_status_expired(status_effect) -> void:
 	remove_status_effect(status_effect)
+
+
+func _on_ChannelStopwatch_tick() -> void:
+	emit_signal("channelling_ticked")
+
+
+func _on_ChannelStopwatch_timeout() -> void:
+	stop_channelling()
 
 
 func _ready():
@@ -39,11 +52,15 @@ func _process(delta: float) -> void:
 	if _movement_path && _movement_path.size() > 0:
 		if is_casting:
 			stop_casting()
+		elif channelling_index >= 0:
+			stop_channelling()
 			
 		_move_along_path(delta)
 		
 	if is_casting:
-		emit_signal("casting_progress", $CastTimer.wait_time - $CastTimer.time_left)
+		emit_signal("casting_progressed", $CastTimer.wait_time - $CastTimer.time_left)
+	elif channelling_index >= 0:
+		emit_signal("channelling_progressed", $ChannelStopwatch.get_time_remaining())
 
 
 remotesync func set_movement_path(movement_path: PoolVector2Array) -> void:
@@ -82,26 +99,71 @@ func cast(index: int, target) -> void:
 		print("Already casting")
 		return
 	
+	if channelling_index >= 0:
+		stop_channelling()
+	
 	var ability = $Abilities.get_child(index)
 		
 	if "cast_time" in ability && ability.cast_time > 0:
 		if is_moving():
 			rpc("set_movement_path", [])
-		
+			
 		$CastTimer.connect("timeout", self, "_on_CastTimer_timeout", [ability, target])
 		$CastTimer.start(ability.cast_time)
 		is_casting = true
 		emit_signal("casting_started", ability.name, ability.cast_time)
 	else:
-		ability.execute(target, self)
+		execute_ability(ability, target)
 
 
 func stop_casting() -> void:
+	if !is_casting:
+		print("Unit is not casting")
+		return
+		
 	print("Stopping cast")
 	is_casting = false
 	$CastTimer.stop()
 	$CastTimer.disconnect("timeout", self, "_on_CastTimer_timeout")
 	emit_signal("casting_stopped")
+
+
+func channel(ability) -> void:
+	if is_casting || channelling_index >= 0:
+		print("Already casting")
+		
+	if !"channel_duration" in ability || ability.channel_duration <= 0:
+		print("Invalid channel_duration property on ability " + ability.Name)
+		
+	if is_moving():
+		rpc("set_movement_path", [])
+			
+	$ChannelStopwatch.setup(ability.channel_duration, ability.tick_rate)
+	$ChannelStopwatch.connect("tick", self, "_on_ChannelStopwatch_tick")
+	$ChannelStopwatch.connect("timeout", self, "_on_ChannelStopwatch_timeout")
+	$ChannelStopwatch.start()
+	channelling_index = ability.get_index()
+	emit_signal("channelling_started", ability.name, ability.channel_duration)
+
+
+func stop_channelling() -> void:
+	if channelling_index == -1:
+		print("Unit is not channelling")
+		return
+		
+	print("Stopping channel")
+	channelling_index = -1
+	$ChannelStopwatch.stop()
+	$ChannelStopwatch.disconnect("tick", self, "_on_ChannelStopwatch_tick")
+	$ChannelStopwatch.disconnect("timeout", self, "_on_ChannelStopwatch_timeout")
+	emit_signal("channelling_stopped")
+
+
+func execute_ability(ability, target) -> void:
+	ability.execute(target, self)
+	
+	if "channel_duration" in ability:
+		channel(ability)
 
 
 remotesync func push_status_effect(status_effect_data: Dictionary) -> void:

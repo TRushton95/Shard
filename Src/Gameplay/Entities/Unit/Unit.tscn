@@ -1,9 +1,11 @@
-[gd_scene load_steps=7 format=2]
+[gd_scene load_steps=9 format=2]
 
 [ext_resource path="res://Gameplay/Entities/Unit/Unit.gd" type="Script" id=1]
 [ext_resource path="res://Gameplay/Entities/Unit/icon.png" type="Texture" id=2]
 [ext_resource path="res://Gameplay/AbilitySystem/Abilities/Fireball/Fireball.tscn" type="PackedScene" id=3]
 [ext_resource path="res://Gameplay/AbilitySystem/Abilities/Consecration/Consecration.tscn" type="PackedScene" id=4]
+[ext_resource path="res://Gameplay/AbilitySystem/Abilities/HealingStream/HealingStream.tscn" type="PackedScene" id=5]
+[ext_resource path="res://Gameplay/Utility/Stopwatch.tscn" type="PackedScene" id=6]
 
 [sub_resource type="CircleShape2D" id=1]
 radius = 32.0
@@ -26,6 +28,8 @@ shape = SubResource( 1 )
 
 [node name="Consecration" parent="Abilities" instance=ExtResource( 4 )]
 
+[node name="HealingStream" parent="Abilities" instance=ExtResource( 5 )]
+
 [node name="Clickbox" type="Area2D" parent="."]
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Clickbox"]
@@ -34,4 +38,6 @@ shape = SubResource( 2 )
 [node name="StatusEffects" type="Node" parent="."]
 
 [node name="CastTimer" type="Timer" parent="."]
+
+[node name="ChannelStopwatch" parent="." instance=ExtResource( 6 )]
 [connection signal="input_event" from="Clickbox" to="." method="_on_Clickbox_input_event"]
