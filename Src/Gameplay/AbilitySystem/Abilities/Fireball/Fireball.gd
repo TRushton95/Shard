@@ -10,6 +10,7 @@ var dot_tick_rate = 1.0
 var dot_name = "Burn"
 var _projectile_speed := 500
 var cast_time := 1.0
+var cost := 5
 
 
 func _on_projectile_target_reached(projectile: Projectile, target: Unit):

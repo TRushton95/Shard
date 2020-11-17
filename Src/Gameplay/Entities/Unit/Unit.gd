@@ -5,7 +5,7 @@ var _movement_path : PoolVector2Array
 var speed := 250
 var max_health := 100
 var current_health := max_health setget _set_current_health
-var max_mana := 50
+var max_mana := 20
 var current_mana := max_mana setget _set_current_mana
 var is_casting := false
 var channelling_index := -1 # -1 for not channeling
@@ -38,7 +38,15 @@ func _on_status_expired(status_effect) -> void:
 	remove_status_effect(status_effect)
 
 
-func _on_ChannelStopwatch_tick() -> void:
+func _on_ChannelStopwatch_tick(ability) -> void:
+	if "channel_cost" in ability:
+		if current_mana < ability.channel_cost:
+			print("Insufficient mana to continue channel")
+			stop_channelling()
+			return
+		else:
+			_set_current_mana(current_mana - ability.channel_cost)
+			
 	emit_signal("channelling_ticked")
 
 
@@ -116,11 +124,15 @@ func cast(index: int, target) -> void:
 	if is_casting:
 		print("Already casting")
 		return
+		
+	var ability = $Abilities.get_child(index)
 	
+	if "cost" in ability && current_mana < ability.cost:
+		print("Insufficient mana to cast")
+		return
+		
 	if channelling_index >= 0:
 		stop_channelling()
-	
-	var ability = $Abilities.get_child(index)
 		
 	if "cast_time" in ability && ability.cast_time > 0:
 		if is_moving():
@@ -157,16 +169,17 @@ func channel(ability) -> void:
 		rpc("set_movement_path", [])
 			
 	$ChannelStopwatch.setup(ability.channel_duration, ability.tick_rate)
-	$ChannelStopwatch.connect("tick", self, "_on_ChannelStopwatch_tick")
+	$ChannelStopwatch.connect("tick", self, "_on_ChannelStopwatch_tick", [ability])
 	$ChannelStopwatch.connect("timeout", self, "_on_ChannelStopwatch_timeout")
-	$ChannelStopwatch.start()
 	channelling_index = ability.get_index()
 	emit_signal("channelling_started", ability.name, ability.channel_duration)
+	
+	$ChannelStopwatch.start(true)
 
 
 func stop_channelling() -> void:
 	if channelling_index == -1:
-		print("Unit is not channelling")
+		print("Cannot stop channelling: unit is not channelling already")
 		return
 		
 	print("Stopping channel")
@@ -178,7 +191,14 @@ func stop_channelling() -> void:
 
 
 func execute_ability(ability, target) -> void:
+	if "cost" in ability && current_mana < ability.cost:
+		print("Insufficient mana to execute")
+		return
+		
 	ability.execute(target, self)
+	
+	if "cost" in ability:
+		_set_current_mana(current_mana - ability.cost)
 	
 	if "channel_duration" in ability:
 		channel(ability)
