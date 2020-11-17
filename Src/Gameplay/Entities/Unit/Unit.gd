@@ -2,18 +2,22 @@ extends KinematicBody2D
 class_name Unit
 
 var _movement_path : PoolVector2Array
-var max_health := 100
+var max_health : int
 var current_health := max_health setget _set_current_health
 var max_mana := 20
 remotesync var current_mana := max_mana setget _set_current_mana # Remove remotesync when test_mana_refill is removed
 var casting_index := -1 # -1 for not casting
 var channelling_index := -1 # -1 for not channeling
 
-var base_movement_speed := 250
-var base_spell_power := 10
+const HEALTH_PER_STAMINA := 10
 
-var movement_speed : ModifiableAttribute
-var spell_power : ModifiableAttribute
+var base_movement_speed := 250
+var base_stamina := 5
+var base_spell_power := 0
+
+var movement_speed_attr : ModifiableAttribute
+var stamina_attr : ModifiableAttribute
+var spell_power_attr : ModifiableAttribute
 
 signal left_clicked
 signal path_finished
@@ -59,20 +63,24 @@ func _on_ChannelStopwatch_timeout() -> void:
 	stop_channelling()
 
 
-func _set_current_health(value: int) -> void:
-	current_health = value
-	$UnitProfile/VBoxContainer/HealthBar.set_current_value(current_health)
+# Stat change handlers
 
+func _on_stamina_attr_changed(stamina: int) -> void:
+	var health = stamina * HEALTH_PER_STAMINA
+	_set_max_health(health, true)
 
-func _set_current_mana(value: int) -> void:
-	current_mana = value
-	$UnitProfile/VBoxContainer/ManaBar.set_current_value(current_mana)
+# End of Stat change handlers
 
 
 func _ready():
-	movement_speed = ModifiableAttribute.new(base_movement_speed)
-	spell_power = ModifiableAttribute.new(base_spell_power)
+	movement_speed_attr = ModifiableAttribute.new(base_movement_speed)
+	stamina_attr = ModifiableAttribute.new(base_stamina)
+	spell_power_attr = ModifiableAttribute.new(base_spell_power)
 	
+	stamina_attr.connect("changed", self, "_on_stamina_attr_changed")
+	
+	var max_health = stamina_attr.value * HEALTH_PER_STAMINA
+	_set_max_health(max_health, true)
 	$UnitProfile/VBoxContainer/HealthBar.initialise(current_health)
 	$UnitProfile/VBoxContainer/ManaBar.initialise(current_mana)
 	$CastTimer.one_shot = false
@@ -241,7 +249,7 @@ func set_name(name: String) -> void:
 
 
 func _move_along_path(delta: float) -> void:
-	var distance_to_walk = delta * movement_speed.value
+	var distance_to_walk = delta * movement_speed_attr.value
 	
 	while distance_to_walk > 0 && _movement_path.size() > 0:
 		var distance_to_next_point = position.distance_to(_movement_path[0])
@@ -255,3 +263,34 @@ func _move_along_path(delta: float) -> void:
 		
 		if _movement_path.size() == 0:
 			emit_signal("path_finished")
+
+
+func _set_current_health(value: int) -> void:
+	current_health = value
+	
+	if current_health < 0:
+		current_health = 0
+	elif current_health > max_health:
+		current_health = max_health
+	$UnitProfile/VBoxContainer/HealthBar.set_current_value(current_health)
+
+
+func _set_current_mana(value: int) -> void:
+	current_mana = value
+	
+	if current_mana < 0:
+		current_mana = 0
+	elif current_mana > max_mana:
+		current_mana = max_mana
+	$UnitProfile/VBoxContainer/ManaBar.set_current_value(current_mana)
+
+
+func _set_max_health(value: int, reset_current_health: bool = false) -> void:
+	var missing_health = 0
+		
+	max_health = value
+	$UnitProfile/VBoxContainer/HealthBar.set_max_value(max_health)
+	
+	if reset_current_health:
+		current_health = value
+		$UnitProfile/VBoxContainer/HealthBar.set_current_value(current_health)

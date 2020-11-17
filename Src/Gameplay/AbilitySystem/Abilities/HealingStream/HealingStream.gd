@@ -13,7 +13,7 @@ var channel_cost := 5
 
 
 func _on_caster_channelling_ticked(target: Unit, caster: Unit) -> void:
-	var healing = base_tick_healing + (tick_healing_per_sp * caster.spell_power.value)
+	var healing = base_tick_healing + (tick_healing_per_sp * caster.spell_power_attr.value)
 	target.heal(healing, name)
 
 

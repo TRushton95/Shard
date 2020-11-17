@@ -17,7 +17,7 @@ var target_type = Enums.TargetType.Position
 func _on_zone_tick(affected_bodies: Array, caster: Unit) -> void:
 	for body in affected_bodies:
 		if get_tree().is_network_server():
-			var damage = tick_damage + (tick_damage_per_sp * caster.spell_power.value)
+			var damage = tick_damage + (tick_damage_per_sp * caster.spell_power_attr.value)
 			body.rpc("damage", damage, name)
 
 

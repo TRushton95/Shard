@@ -23,10 +23,10 @@ func _on_projectile_target_reached(projectile: Projectile, target: Unit, caster:
 	projectile.queue_free()
 	
 	if get_tree().is_network_server():
-		var damage = base_damage + (damage_per_sp * caster.spell_power.value)
+		var damage = base_damage + (damage_per_sp * caster.spell_power_attr.value)
 		target.rpc("damage", damage, name)
 		
-		var dot_damage = base_dot_damage + (dot_damage_per_sp * caster.spell_power.value)
+		var dot_damage = base_dot_damage + (dot_damage_per_sp * caster.spell_power_attr.value)
 		var dot = StatusHelper.dot(dot_damage, dot_duration, dot_tick_rate, dot_name)
 		var test = dot.to_data()
 		
