@@ -10,8 +10,10 @@ var casting_index := -1 # -1 for not casting
 var channelling_index := -1 # -1 for not channeling
 
 var base_movement_speed := 250
+var base_spell_power := 10
 
 var movement_speed : ModifiableAttribute
+var spell_power : ModifiableAttribute
 
 signal left_clicked
 signal path_finished
@@ -69,6 +71,7 @@ func _set_current_mana(value: int) -> void:
 
 func _ready():
 	movement_speed = ModifiableAttribute.new(base_movement_speed)
+	spell_power = ModifiableAttribute.new(base_spell_power)
 	
 	$UnitProfile/VBoxContainer/HealthBar.initialise(current_health)
 	$UnitProfile/VBoxContainer/ManaBar.initialise(current_mana)
