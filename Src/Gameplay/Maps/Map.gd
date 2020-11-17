@@ -73,12 +73,12 @@ func _process(delta: float) -> void:
 	
 	var ability_index = -1
 	
-	# For all sorts of debugging purposes
+	# Test commands for testing whatever
 	if Input.is_action_just_pressed("test_right"):
 		pass
 	if Input.is_action_just_pressed("test_left"):
 		pass
-	# End
+	# End of test commands
 	
 	if Input.is_action_just_pressed("cast_1"):
 		ability_index = 0

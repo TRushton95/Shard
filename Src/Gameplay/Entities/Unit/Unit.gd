@@ -67,7 +67,7 @@ func _on_ChannelStopwatch_timeout() -> void:
 
 func _on_stamina_attr_changed(stamina: int) -> void:
 	var health = stamina * HEALTH_PER_STAMINA
-	_set_max_health(health, true)
+	_set_max_health(health)
 
 # End of Stat change handlers
 
