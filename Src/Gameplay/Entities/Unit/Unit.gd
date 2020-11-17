@@ -71,7 +71,7 @@ func _ready():
 
 
 func _process(delta: float) -> void:
-	if _movement_path && _movement_path.size() > 0:
+	if is_moving():
 		if is_casting:
 			stop_casting()
 		elif channelling_index >= 0:
@@ -87,7 +87,7 @@ func _process(delta: float) -> void:
 
 remotesync func set_movement_path(movement_path: PoolVector2Array) -> void:
 	_movement_path = movement_path
-	
+	print("setting movement path")
 	if !is_moving():
 		emit_signal("path_finished")
 
@@ -127,7 +127,13 @@ func cast(index: int, target) -> void:
 		
 	var ability = $Abilities.get_child(index)
 	
-	if "cost" in ability && current_mana < ability.cost:
+	var mana_cost = 0
+	if "cost" in ability:
+		mana_cost += ability.cost
+	if "channel_cost":
+		mana_cost += ability.channel_cost
+		
+	if current_mana < mana_cost:
 		print("Insufficient mana to cast")
 		return
 		
@@ -158,6 +164,8 @@ func stop_casting() -> void:
 	emit_signal("casting_stopped")
 
 
+# Channelled abilities will tick immediately and so their mana cost is factored into the cast
+# If the players mana is lower than the initial cast cost + channel tick cost then they cannot cast it
 func channel(ability) -> void:
 	if is_casting || channelling_index >= 0:
 		print("Already casting")
