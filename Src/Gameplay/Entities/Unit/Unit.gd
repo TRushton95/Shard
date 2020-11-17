@@ -136,7 +136,7 @@ func cast(index: int, target) -> void:
 		
 	if "cast_time" in ability && ability.cast_time > 0:
 		if is_moving():
-			rpc("set_movement_path", [])
+			set_movement_path([])
 			
 		$CastTimer.connect("timeout", self, "_on_CastTimer_timeout", [ability, target])
 		$CastTimer.start(ability.cast_time)
@@ -166,7 +166,7 @@ func channel(ability) -> void:
 		print("Invalid channel_duration property on ability " + ability.Name)
 		
 	if is_moving():
-		rpc("set_movement_path", [])
+		set_movement_path([])
 			
 	$ChannelStopwatch.setup(ability.channel_duration, ability.tick_rate)
 	$ChannelStopwatch.connect("tick", self, "_on_ChannelStopwatch_tick", [ability])
