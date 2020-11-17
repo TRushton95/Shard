@@ -9,6 +9,16 @@
 config_version=4
 
 _global_script_classes=[ {
+"base": "Node",
+"class": "ModifiableAttribute",
+"language": "GDScript",
+"path": "res://Gameplay/Entities/Unit/ModifiableAttribute.gd"
+}, {
+"base": "Node",
+"class": "Modifier",
+"language": "GDScript",
+"path": "res://Gameplay/Entities/Unit/Modifier.gd"
+}, {
 "base": "KinematicBody2D",
 "class": "Projectile",
 "language": "GDScript",
@@ -35,6 +45,8 @@ _global_script_classes=[ {
 "path": "res://Gameplay/Entities/Abilities/Zone/Zone.gd"
 } ]
 _global_script_class_icons={
+"ModifiableAttribute": "",
+"Modifier": "",
 "Projectile": "",
 "Status": "",
 "Stopwatch": "",

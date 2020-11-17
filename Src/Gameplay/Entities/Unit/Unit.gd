@@ -2,13 +2,16 @@ extends KinematicBody2D
 class_name Unit
 
 var _movement_path : PoolVector2Array
-var speed := 250
 var max_health := 100
 var current_health := max_health setget _set_current_health
 var max_mana := 20
 remotesync var current_mana := max_mana setget _set_current_mana # Remove remotesync when test_mana_refill is removed
 var casting_index := -1 # -1 for not casting
 var channelling_index := -1 # -1 for not channeling
+
+var base_movement_speed := 250
+
+var movement_speed : ModifiableAttribute
 
 signal left_clicked
 signal path_finished
@@ -65,6 +68,8 @@ func _set_current_mana(value: int) -> void:
 
 
 func _ready():
+	movement_speed = ModifiableAttribute.new(base_movement_speed)
+	
 	$UnitProfile/VBoxContainer/HealthBar.initialise(current_health)
 	$UnitProfile/VBoxContainer/ManaBar.initialise(current_mana)
 	$CastTimer.one_shot = false
@@ -233,7 +238,7 @@ func set_name(name: String) -> void:
 
 
 func _move_along_path(delta: float) -> void:
-	var distance_to_walk = delta * speed
+	var distance_to_walk = delta * movement_speed.value
 	
 	while distance_to_walk > 0 && _movement_path.size() > 0:
 		var distance_to_next_point = position.distance_to(_movement_path[0])

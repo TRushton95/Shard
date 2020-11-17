@@ -68,7 +68,6 @@ func _on_unit_channelling_stopped(unit: Unit) -> void:
 	if unit == get_node(player_name):
 		$CanvasLayer/CastBar.hide()
 
-
 func _process(delta: float) -> void:
 	var ability_index = -1
 	
