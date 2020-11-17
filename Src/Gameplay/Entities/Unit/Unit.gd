@@ -6,7 +6,7 @@ var speed := 250
 var max_health := 100
 var current_health := max_health setget _set_current_health
 var max_mana := 20
-var current_mana := max_mana setget _set_current_mana
+remotesync var current_mana := max_mana setget _set_current_mana # Remove remotesync when test_mana_refill is removed
 var is_casting := false
 var channelling_index := -1 # -1 for not channeling
 
@@ -120,6 +120,16 @@ remotesync func heal(value: int, source_name: String) -> void:
 	emit_signal("healing_received", value)
 
 
+remotesync func interrupt() -> void:
+	if is_casting:
+		print("Interrupted cast")
+		stop_casting()
+		
+	if channelling_index >= 0:
+		print("Interrupted channel")
+		stop_channelling()
+
+
 func cast(index: int, target) -> void:
 	if is_casting:
 		print("Already casting")
@@ -130,7 +140,7 @@ func cast(index: int, target) -> void:
 	var mana_cost = 0
 	if "cost" in ability:
 		mana_cost += ability.cost
-	if "channel_cost":
+	if "channel_cost" in ability:
 		mana_cost += ability.channel_cost
 		
 	if current_mana < mana_cost:

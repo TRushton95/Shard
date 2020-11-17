@@ -79,6 +79,11 @@ func _process(delta: float) -> void:
 	if Input.is_action_just_pressed("cast_3"):
 		ability_index = 2
 	
+	if Input.is_action_just_pressed("test_interrupt"):
+		get_node(player_name).rpc("interrupt")
+	if Input.is_action_just_pressed("test_mana_refill"):
+		get_node(player_name).rset("current_mana", get_node(player_name).max_mana)
+	
 	if ability_index >= 0:
 		var ability = get_node(player_name + "/Abilities").get_child(ability_index)
 		
