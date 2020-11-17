@@ -147,6 +147,7 @@ func setup(player_name: String, player_lookup: Dictionary) -> void:
 	self.player_name = player_name
 	
 	#TEST ENEMY
+	$Enemy.set_name($Enemy.name) # set name label
 	$Enemy.connect("left_clicked", self, "_on_unit_left_clicked", [$Enemy])
 	$Enemy.connect("damage_received", self, "_on_unit_damage_received", [$Enemy])
 	$Enemy.connect("healing_received", self, "_on_unit_healing_received", [$Enemy])
@@ -159,7 +160,7 @@ func setup(player_name: String, player_lookup: Dictionary) -> void:
 	var spawn_index = 0
 	for player in player_list:
 		var unit = unit_scene.instance()
-		unit.name = player
+		unit.set_name(player)
 		unit.position = $PlayerSpawnPoints.get_node(str(spawn_index)).position
 		add_child(unit)
 		unit.connect("left_clicked", self, "_on_unit_left_clicked", [unit])

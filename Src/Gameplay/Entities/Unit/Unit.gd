@@ -227,6 +227,11 @@ func remove_status_effect(status_effect: Status) -> void:
 	status_effect.queue_free()
 
 
+func set_name(name: String) -> void:
+	self.name = name
+	$UnitProfile/VBoxContainer/NameLabel.text = name
+
+
 func _move_along_path(delta: float) -> void:
 	var distance_to_walk = delta * speed
 	
