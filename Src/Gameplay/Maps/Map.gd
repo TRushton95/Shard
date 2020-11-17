@@ -69,6 +69,8 @@ func _on_unit_channelling_stopped(unit: Unit) -> void:
 		$CanvasLayer/CastBar.hide()
 
 func _process(delta: float) -> void:
+	var player = get_node(player_name)
+	
 	var ability_index = -1
 	
 	if Input.is_action_just_pressed("cast_1"):
@@ -77,14 +79,19 @@ func _process(delta: float) -> void:
 		ability_index = 1
 	if Input.is_action_just_pressed("cast_3"):
 		ability_index = 2
+	if Input.is_action_just_pressed("stop"):
+		if player.casting_index >= 0 || player.channelling_index >= 0:
+			player.rpc("interrupt")
+		if player.is_moving():
+			player.rpc("set_movement_path", [])
 	
 	if Input.is_action_just_pressed("test_interrupt"):
-		get_node(player_name).rpc("interrupt")
+		player.rpc("interrupt")
 	if Input.is_action_just_pressed("test_mana_refill"):
-		get_node(player_name).rset("current_mana", get_node(player_name).max_mana)
+		player.rset("current_mana", player.max_mana)
 	
 	if ability_index >= 0:
-		var ability = get_node(player_name + "/Abilities").get_child(ability_index)
+		var ability = player.get_node("Abilities").get_child(ability_index)
 		
 		if !"target_type" in ability:
 			print("No target type on ability " + ability.name)
