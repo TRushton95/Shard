@@ -7,7 +7,7 @@ var max_health := 100
 var current_health := max_health setget _set_current_health
 var max_mana := 20
 remotesync var current_mana := max_mana setget _set_current_mana # Remove remotesync when test_mana_refill is removed
-var is_casting := false
+var casting_index := -1 # -1 for not casting
 var channelling_index := -1 # -1 for not channeling
 
 signal left_clicked
@@ -72,14 +72,14 @@ func _ready():
 
 func _process(delta: float) -> void:
 	if is_moving():
-		if is_casting:
+		if casting_index >= 0:
 			stop_casting()
 		elif channelling_index >= 0:
 			stop_channelling()
 			
 		_move_along_path(delta)
 		
-	if is_casting:
+	if casting_index >= 0:
 		emit_signal("casting_progressed", $CastTimer.wait_time - $CastTimer.time_left)
 	elif channelling_index >= 0:
 		emit_signal("channelling_progressed", $ChannelStopwatch.get_time_remaining())
@@ -121,7 +121,7 @@ remotesync func heal(value: int, source_name: String) -> void:
 
 
 remotesync func interrupt() -> void:
-	if is_casting:
+	if casting_index >= 0:
 		print("Interrupted cast")
 		stop_casting()
 		
@@ -131,7 +131,7 @@ remotesync func interrupt() -> void:
 
 
 func cast(index: int, target) -> void:
-	if is_casting:
+	if casting_index >= 0:
 		print("Already casting")
 		return
 		
@@ -156,19 +156,19 @@ func cast(index: int, target) -> void:
 			
 		$CastTimer.connect("timeout", self, "_on_CastTimer_timeout", [ability, target])
 		$CastTimer.start(ability.cast_time)
-		is_casting = true
+		casting_index = ability.get_index()
 		emit_signal("casting_started", ability.name, ability.cast_time)
 	else:
 		execute_ability(ability, target)
 
 
 func stop_casting() -> void:
-	if !is_casting:
+	if casting_index == -1:
 		print("Unit is not casting")
 		return
 		
 	print("Stopping cast")
-	is_casting = false
+	casting_index = -1
 	$CastTimer.stop()
 	$CastTimer.disconnect("timeout", self, "_on_CastTimer_timeout")
 	emit_signal("casting_stopped")
@@ -177,7 +177,7 @@ func stop_casting() -> void:
 # Channelled abilities will tick immediately and so their mana cost is factored into the cast
 # If the players mana is lower than the initial cast cost + channel tick cost then they cannot cast it
 func channel(ability) -> void:
-	if is_casting || channelling_index >= 0:
+	if casting_index >= 0 || channelling_index >= 0:
 		print("Already casting")
 		
 	if !"channel_duration" in ability || ability.channel_duration <= 0:
