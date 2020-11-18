@@ -9,6 +9,7 @@ var tick_rate := 0.5
 var target_type = Enums.TargetType.Unit
 var channel_duration := 5.0
 var channel_cost := 1
+var icon = load("res://Gameplay/AbilitySystem/Abilities/HealingStream/icon.png") # move this into an ability base class that references icon.png with a relative path
 # End of Convention properties
 
 

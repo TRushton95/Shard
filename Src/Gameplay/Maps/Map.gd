@@ -9,6 +9,11 @@ var selected_unit : Unit
 var selected_ability
 
 
+#This should hook into whatever mechanism determines when an ability key is pressed
+func _on_AbilityBar_ability_button_pressed(ability) -> void:
+	process_ability_press(ability)
+
+
 func _on_unit_left_clicked(unit: Unit) -> void:
 	if selected_ability:
 		rpc("cast_ability_on_unit", selected_ability.get_index(), player_name, unit.name)
@@ -38,12 +43,6 @@ func _on_unit_healing_received(value: int, unit: Unit) -> void:
 	
 	if unit == selected_unit:
 		$CanvasLayer/TargetFrame.update()
-
-
-#This should hook into whatever mechanism determines when an ability key is pressed
-func _on_ability_button_pressed(ability_name: String) -> void:
-	var ability = get_node(player_name + "/Abilities/" + ability_name)
-	process_ability_press(ability)
 
 
 func _on_unit_casting_started(ability_name: String, duration: float, unit: Unit) -> void:
@@ -200,7 +199,8 @@ func setup(player_name: String, player_lookup: Dictionary) -> void:
 		
 		spawn_index += 1
 		
-	build_ability_container_items()
+	var player_abilities = get_node(player_name + "/Abilities").get_children()
+	$CanvasLayer/AbilityBar.setup(player_abilities)
 
 
 func select_unit(unit: Unit) -> void:
@@ -220,13 +220,3 @@ func select_ability(ability) -> void:
 	else:
 		selected_ability = ability
 		Input.set_custom_mouse_cursor(rainbow_cursor)
-
-
-func build_ability_container_items():
-	var i = 0
-	for ability in get_node(player_name + "/Abilities").get_children():
-		var ability_button = Button.new()
-		ability_button.text = str(i + 1) + ". " + str(ability.name)
-		ability_button.connect("pressed", self, "_on_ability_button_pressed", [ability.name])
-		$CanvasLayer/AbilityContainer/VBoxContainer.add_child(ability_button)
-		i += 1

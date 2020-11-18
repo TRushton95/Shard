@@ -1,0 +1,129 @@
+[gd_scene load_steps=2 format=2]
+
+[ext_resource path="res://Gameplay/UI/AbilityBar/AbilityBar.gd" type="Script" id=1]
+
+[node name="AbilityBar" type="PanelContainer"]
+size_flags_horizontal = 3
+size_flags_vertical = 3
+script = ExtResource( 1 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="HBoxContainer" type="HBoxContainer" parent="."]
+margin_left = 7.0
+margin_top = 7.0
+margin_right = 615.0
+margin_bottom = 71.0
+size_flags_horizontal = 3
+size_flags_vertical = 3
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Ability1" type="PanelContainer" parent="HBoxContainer"]
+margin_right = 64.0
+margin_bottom = 64.0
+
+[node name="Icon" type="TextureButton" parent="HBoxContainer/Ability1"]
+margin_left = 7.0
+margin_top = 7.0
+margin_right = 57.0
+margin_bottom = 57.0
+rect_min_size = Vector2( 50, 50 )
+
+[node name="Ability2" type="PanelContainer" parent="HBoxContainer"]
+margin_left = 68.0
+margin_right = 132.0
+margin_bottom = 64.0
+
+[node name="Icon" type="TextureButton" parent="HBoxContainer/Ability2"]
+margin_left = 7.0
+margin_top = 7.0
+margin_right = 57.0
+margin_bottom = 57.0
+rect_min_size = Vector2( 50, 50 )
+
+[node name="Ability3" type="PanelContainer" parent="HBoxContainer"]
+margin_left = 136.0
+margin_right = 200.0
+margin_bottom = 64.0
+
+[node name="Icon" type="TextureButton" parent="HBoxContainer/Ability3"]
+margin_left = 7.0
+margin_top = 7.0
+margin_right = 57.0
+margin_bottom = 57.0
+rect_min_size = Vector2( 50, 50 )
+
+[node name="Ability4" type="PanelContainer" parent="HBoxContainer"]
+margin_left = 204.0
+margin_right = 268.0
+margin_bottom = 64.0
+
+[node name="Icon" type="TextureButton" parent="HBoxContainer/Ability4"]
+margin_left = 7.0
+margin_top = 7.0
+margin_right = 57.0
+margin_bottom = 57.0
+rect_min_size = Vector2( 50, 50 )
+
+[node name="Ability5" type="PanelContainer" parent="HBoxContainer"]
+margin_left = 272.0
+margin_right = 336.0
+margin_bottom = 64.0
+
+[node name="Icon" type="TextureButton" parent="HBoxContainer/Ability5"]
+margin_left = 7.0
+margin_top = 7.0
+margin_right = 57.0
+margin_bottom = 57.0
+rect_min_size = Vector2( 50, 50 )
+
+[node name="Ability6" type="PanelContainer" parent="HBoxContainer"]
+margin_left = 340.0
+margin_right = 404.0
+margin_bottom = 64.0
+
+[node name="Icon" type="TextureButton" parent="HBoxContainer/Ability6"]
+margin_left = 7.0
+margin_top = 7.0
+margin_right = 57.0
+margin_bottom = 57.0
+rect_min_size = Vector2( 50, 50 )
+
+[node name="Ability7" type="PanelContainer" parent="HBoxContainer"]
+margin_left = 408.0
+margin_right = 472.0
+margin_bottom = 64.0
+
+[node name="Icon" type="TextureButton" parent="HBoxContainer/Ability7"]
+margin_left = 7.0
+margin_top = 7.0
+margin_right = 57.0
+margin_bottom = 57.0
+rect_min_size = Vector2( 50, 50 )
+
+[node name="Ability8" type="PanelContainer" parent="HBoxContainer"]
+margin_left = 476.0
+margin_right = 540.0
+margin_bottom = 64.0
+
+[node name="Icon" type="TextureButton" parent="HBoxContainer/Ability8"]
+margin_left = 7.0
+margin_top = 7.0
+margin_right = 57.0
+margin_bottom = 57.0
+rect_min_size = Vector2( 50, 50 )
+
+[node name="Ability9" type="PanelContainer" parent="HBoxContainer"]
+margin_left = 544.0
+margin_right = 608.0
+margin_bottom = 64.0
+
+[node name="Icon" type="TextureButton" parent="HBoxContainer/Ability9"]
+margin_left = 7.0
+margin_top = 7.0
+margin_right = 57.0
+margin_bottom = 57.0
+rect_min_size = Vector2( 50, 50 )
