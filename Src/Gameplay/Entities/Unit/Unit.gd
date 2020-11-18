@@ -4,7 +4,7 @@ class_name Unit
 var _movement_path : PoolVector2Array
 var max_health : int
 var current_health := max_health setget _set_current_health
-var max_mana := 20
+var max_mana := 50
 remotesync var current_mana := max_mana setget _set_current_mana # Remove remotesync when test_mana_refill is removed
 var casting_index := -1 # -1 for not casting
 var channelling_index := -1 # -1 for not channeling

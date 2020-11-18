@@ -24,8 +24,7 @@ func _on_player_path_finished() -> void:
 
 func _on_unit_damage_received(value: int, unit: Unit) -> void:
 	var floating_text = floating_text_scene.instance()
-	floating_text.setup(value, unit.position)
-	floating_text.modulate = Color(255, 0, 0)
+	floating_text.setup(value, unit.position, Color.red)
 	add_child(floating_text)
 	
 	if unit == selected_unit:
@@ -34,8 +33,7 @@ func _on_unit_damage_received(value: int, unit: Unit) -> void:
 
 func _on_unit_healing_received(value: int, unit: Unit) -> void:
 	var floating_text = floating_text_scene.instance()
-	floating_text.setup(value, unit.position)
-	floating_text.modulate = Color(0, 255, 0)
+	floating_text.setup(value, unit.position, Color.green)
 	add_child(floating_text)
 	
 	if unit == selected_unit:

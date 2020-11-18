@@ -8,7 +8,7 @@ var tick_rate := 0.5
 # Convention properties
 var target_type = Enums.TargetType.Unit
 var channel_duration := 5.0
-var channel_cost := 5
+var channel_cost := 1
 # End of Convention properties
 
 

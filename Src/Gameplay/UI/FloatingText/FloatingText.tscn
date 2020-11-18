@@ -2,7 +2,7 @@
 
 [ext_resource path="res://Gameplay/UI/FloatingText/FloatingText.gd" type="Script" id=1]
 
-[node name="FloatingText" type="Label"]
+[node name="FloatingText" type="Control"]
 margin_right = 43.0
 margin_bottom = 14.0
 rect_scale = Vector2( 2, 2 )
@@ -10,6 +10,16 @@ script = ExtResource( 1 )
 __meta__ = {
 "_edit_use_anchors_": false
 }
+
+[node name="Label" type="Label" parent="."]
+margin_right = 40.0
+margin_bottom = 14.0
+text = "test"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Tween" type="Tween" parent="."]
 
 [node name="Timer" type="Timer" parent="."]
 [connection signal="timeout" from="Timer" to="." method="_on_Timer_timeout"]
