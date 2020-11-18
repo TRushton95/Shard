@@ -2,13 +2,13 @@ extends Control
 
 const POSITION_OFFSET_RANGE := 50
 const FLOAT_DISTANCE := 50
+const DURATION := 0.75
 
 var rng := RandomNumberGenerator.new()
 
 
 func _on_Timer_timeout() -> void:
 	queue_free()
-	pass
 
 
 func setup(number: int, position: Vector2, color: Color) -> void:
@@ -23,7 +23,7 @@ func setup(number: int, position: Vector2, color: Color) -> void:
 
 
 func _ready() -> void:
-	$Tween.interpolate_property($Label, "modulate:a", 1.0, 0.0, 1.0, Tween.TRANS_EXPO, Tween.EASE_IN)
-	$Tween.interpolate_property($Label, "rect_position:y", 0, -FLOAT_DISTANCE, 1.0, Tween.TRANS_LINEAR, Tween.EASE_IN)
+	$Tween.interpolate_property($Label, "modulate:a", 1.0, 0.0, DURATION, Tween.TRANS_EXPO, Tween.EASE_IN)
+	$Tween.interpolate_property($Label, "rect_position:y", 0, -FLOAT_DISTANCE, DURATION, Tween.TRANS_LINEAR, Tween.EASE_IN)
 	$Tween.start()
-	$Timer.start(1) # Replace timer with fade out animation
+	$Timer.start(DURATION)
