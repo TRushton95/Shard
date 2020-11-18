@@ -2,6 +2,7 @@ extends Node
 
 var rainbow_cursor = load("res://pointer.png")
 var unit_scene = load("Gameplay/Entities/Unit/Unit.tscn")
+var combat_number_scene = load("Gameplay/UI/CombatNumber/CombatNumber.tscn")
 
 var player_name : String
 var selected_unit : Unit
@@ -22,11 +23,21 @@ func _on_player_path_finished() -> void:
 
 
 func _on_unit_damage_received(value: int, unit: Unit) -> void:
+	var combat_number = combat_number_scene.instance()
+	combat_number.setup(value, unit.position)
+	combat_number.modulate = Color(255, 0, 0)
+	add_child(combat_number)
+	
 	if unit == selected_unit:
 		$CanvasLayer/TargetFrame.update()
 
 
 func _on_unit_healing_received(value: int, unit: Unit) -> void:
+	var combat_number = combat_number_scene.instance()
+	combat_number.setup(value, unit.position)
+	combat_number.modulate = Color(0, 255, 0)
+	add_child(combat_number)
+	
 	if unit == selected_unit:
 		$CanvasLayer/TargetFrame.update()
 
