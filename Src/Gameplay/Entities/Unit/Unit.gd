@@ -81,8 +81,8 @@ func _ready():
 	
 	var max_health = stamina_attr.value * HEALTH_PER_STAMINA
 	_set_max_health(max_health, true)
-	$UnitProfile/VBoxContainer/HealthBar.initialise(current_health)
-	$UnitProfile/VBoxContainer/ManaBar.initialise(current_mana)
+	$UnitProfile/VBoxContainer/SmallHealthBar.max_value = current_health
+#	$UnitProfile/VBoxContainer/ManaBar.initialise(current_mana)
 	$CastTimer.one_shot = false
 
 
@@ -271,7 +271,7 @@ func _set_current_health(value: int) -> void:
 		current_health = 0
 	elif current_health > max_health:
 		current_health = max_health
-	$UnitProfile/VBoxContainer/HealthBar.set_current_value(current_health)
+	$UnitProfile/VBoxContainer/SmallHealthBar.value = current_health
 
 
 func _set_current_mana(value: int) -> void:
@@ -281,15 +281,15 @@ func _set_current_mana(value: int) -> void:
 		current_mana = 0
 	elif current_mana > max_mana:
 		current_mana = max_mana
-	$UnitProfile/VBoxContainer/ManaBar.set_current_value(current_mana)
+#	$UnitProfile/VBoxContainer/ManaBar.set_current_value(current_mana)
 
 
 func _set_max_health(value: int, reset_current_health: bool = false) -> void:
 	var missing_health = 0
 		
 	max_health = value
-	$UnitProfile/VBoxContainer/HealthBar.set_max_value(max_health)
+	$UnitProfile/VBoxContainer/SmallHealthBar.value = max_health
 	
 	if reset_current_health:
 		current_health = value
-		$UnitProfile/VBoxContainer/HealthBar.set_current_value(current_health)
+		$UnitProfile/VBoxContainer/SmallHealthBar.value = current_health
