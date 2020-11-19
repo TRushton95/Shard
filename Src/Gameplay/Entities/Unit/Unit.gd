@@ -29,7 +29,8 @@ signal channelling_progressed(time_remaining)
 signal channelling_stopped
 signal channelling_ticked()
 signal damage_received(value)
-signal healing_received(unit, value)
+signal healing_received(value)
+signal mana_changed(value)
 
 
 func _on_Clickbox_input_event(viewport, event, shape_idx):
@@ -281,7 +282,8 @@ func _set_current_mana(value: int) -> void:
 		current_mana = 0
 	elif current_mana > max_mana:
 		current_mana = max_mana
-#	$UnitProfile/VBoxContainer/ManaBar.set_current_value(current_mana)
+	
+	emit_signal("mana_changed", current_mana)
 
 
 func _set_max_health(value: int, reset_current_health: bool = false) -> void:

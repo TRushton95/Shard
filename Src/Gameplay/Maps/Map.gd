@@ -34,6 +34,9 @@ func _on_unit_damage_received(value: int, unit: Unit) -> void:
 	
 	if unit == selected_unit:
 		$CanvasLayer/TargetFrame.update()
+		
+	if unit == get_node(player_name):
+		$CanvasLayer/PlayerResourcesBar.set_current_health(unit.current_health)
 
 
 func _on_unit_healing_received(value: int, unit: Unit) -> void:
@@ -43,6 +46,14 @@ func _on_unit_healing_received(value: int, unit: Unit) -> void:
 	
 	if unit == selected_unit:
 		$CanvasLayer/TargetFrame.update()
+		
+	if unit == get_node(player_name):
+		$CanvasLayer/PlayerResourcesBar.set_current_health(unit.current_health)
+
+
+func _on_unit_mana_changed(value: int, unit: Unit) -> void:
+	if unit == get_node(player_name):
+		$CanvasLayer/PlayerResourcesBar.set_current_mana(value)
 
 
 func _on_unit_casting_started(ability_name: String, duration: float, unit: Unit) -> void:
@@ -187,6 +198,7 @@ func setup(player_name: String, player_lookup: Dictionary) -> void:
 		unit.connect("left_clicked", self, "_on_unit_left_clicked", [unit])
 		unit.connect("damage_received", self, "_on_unit_damage_received", [unit])
 		unit.connect("healing_received", self, "_on_unit_healing_received", [unit])
+		unit.connect("mana_changed", self, "_on_unit_mana_changed", [unit])
 		unit.connect("casting_started", self, "_on_unit_casting_started", [unit])
 		unit.connect("casting_progressed", self, "_on_unit_casting_progressed", [unit])
 		unit.connect("casting_stopped", self, "_on_unit_casting_stopped", [unit])
@@ -196,11 +208,10 @@ func setup(player_name: String, player_lookup: Dictionary) -> void:
 		
 		if player == player_name:
 			unit.connect("path_finished", self, "_on_player_path_finished")
+			$CanvasLayer/AbilityBar.setup(unit.get_node("Abilities").get_children())
+			$CanvasLayer/PlayerResourcesBar.initialise(unit.max_health, unit.max_mana)
 		
 		spawn_index += 1
-		
-	var player_abilities = get_node(player_name + "/Abilities").get_children()
-	$CanvasLayer/AbilityBar.setup(player_abilities)
 
 
 func select_unit(unit: Unit) -> void:
