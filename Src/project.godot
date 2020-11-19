@@ -66,6 +66,11 @@ Enums="*res://Gameplay/Enums/Enums.gd"
 AbilityHelper="*res://Gameplay/AbilitySystem/Helpers/AbilityHelper.gd"
 StatusHelper="*res://Gameplay/AbilitySystem/Helpers/StatusHelper.gd"
 
+[display]
+
+window/size/width=1980
+window/size/height=1080
+
 [input]
 
 cast_1={
