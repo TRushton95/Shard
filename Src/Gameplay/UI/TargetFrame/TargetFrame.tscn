@@ -29,9 +29,9 @@ __meta__ = {
 
 [node name="Image" type="TextureRect" parent="."]
 margin_left = 12.0
-margin_top = 51.0
+margin_top = 39.0
 margin_right = 76.0
-margin_bottom = 115.0
+margin_bottom = 103.0
 __meta__ = {
 "_edit_use_anchors_": false
 }

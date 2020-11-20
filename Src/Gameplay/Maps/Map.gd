@@ -226,6 +226,7 @@ func select_unit(unit: Unit) -> void:
 		$CanvasLayer/TargetFrame.set_current_health(unit.current_health)
 		$CanvasLayer/TargetFrame.set_current_mana(unit.current_mana)
 		$CanvasLayer/TargetFrame.set_name(unit.name)
+		$CanvasLayer/TargetFrame.set_image(unit.get_node("Sprite").texture)
 		$CanvasLayer/TargetFrame.show()
 	else:
 		selected_unit = null
