@@ -33,7 +33,7 @@ func _on_unit_damage_received(value: int, unit: Unit) -> void:
 	add_child(floating_text)
 	
 	if unit == selected_unit:
-		$CanvasLayer/TargetFrame.update()
+		$CanvasLayer/TargetFrame.set_current_health(unit.current_health)
 		
 	if unit == get_node(player_name):
 		$CanvasLayer/PlayerResourcesBar.set_current_health(unit.current_health)
@@ -45,15 +45,18 @@ func _on_unit_healing_received(value: int, unit: Unit) -> void:
 	add_child(floating_text)
 	
 	if unit == selected_unit:
-		$CanvasLayer/TargetFrame.update()
+		$CanvasLayer/TargetFrame.set_current_health(unit.current_health)
 		
 	if unit == get_node(player_name):
 		$CanvasLayer/PlayerResourcesBar.set_current_health(unit.current_health)
 
 
 func _on_unit_mana_changed(value: int, unit: Unit) -> void:
+	if unit == selected_unit:
+		$CanvasLayer/TargetFrame.set_current_mana(unit.current_mana)
+	
 	if unit == get_node(player_name):
-		$CanvasLayer/PlayerResourcesBar.set_current_mana(value)
+		$CanvasLayer/PlayerResourcesBar.set_current_mana(unit.current_mana)
 
 
 func _on_unit_casting_started(ability_name: String, duration: float, unit: Unit) -> void:
@@ -209,7 +212,8 @@ func setup(player_name: String, player_lookup: Dictionary) -> void:
 		if player == player_name:
 			unit.connect("path_finished", self, "_on_player_path_finished")
 			$CanvasLayer/AbilityBar.setup(unit.get_node("Abilities").get_children())
-			$CanvasLayer/PlayerResourcesBar.initialise(unit.max_health, unit.max_mana)
+			$CanvasLayer/PlayerResourcesBar.set_max_health(unit.max_health)
+			$CanvasLayer/PlayerResourcesBar.set_max_mana(unit.max_mana)
 		
 		spawn_index += 1
 
@@ -217,7 +221,11 @@ func setup(player_name: String, player_lookup: Dictionary) -> void:
 func select_unit(unit: Unit) -> void:
 	if unit:
 		selected_unit = unit
-		$CanvasLayer/TargetFrame.set_profile(unit)
+		$CanvasLayer/TargetFrame.set_max_health(unit.max_health)
+		$CanvasLayer/TargetFrame.set_max_mana(unit.max_mana)
+		$CanvasLayer/TargetFrame.set_current_health(unit.current_health)
+		$CanvasLayer/TargetFrame.set_current_mana(unit.current_mana)
+		$CanvasLayer/TargetFrame.set_name(unit.name)
 		$CanvasLayer/TargetFrame.show()
 	else:
 		selected_unit = null

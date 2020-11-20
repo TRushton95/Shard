@@ -1,16 +1,37 @@
-extends PanelContainer
-
-var selected_unit : Unit
+extends TextureRect
 
 
-func set_profile(unit: Unit) -> void:
-	selected_unit = unit
-	update()
+func set_max_health(max_health: int) -> void:
+	$HealthBar.max_value = max_health
+	_set_health_label($HealthBar.value, max_health)
 
 
-func update() -> void:
-	$VBoxContainer/NameLabel.text = selected_unit.name
-	$VBoxContainer/HealthBar.set_max_value(selected_unit.max_health)
-	$VBoxContainer/HealthBar.set_current_value(selected_unit.current_health)
-	$VBoxContainer/ManaBar.set_max_value(selected_unit.max_mana)
-	$VBoxContainer/ManaBar.set_current_value(selected_unit.current_mana)
+func set_max_mana(max_mana: int) -> void:
+	$ManaBar.max_value = max_mana
+	_set_mana_label($ManaBar.value, max_mana)
+
+
+func set_current_health(health: int) -> void:
+	$HealthBar.value = health
+	_set_health_label(health, $HealthBar.max_value)
+
+
+func set_current_mana(mana: int) -> void:
+	$ManaBar.value = mana
+	_set_mana_label(mana, $ManaBar.max_value)
+
+
+func set_name(name: String) -> void:
+	$NameLabel.text = name
+
+
+func set_image(texture: Texture) -> void:
+	$Image.texture = texture
+
+
+func _set_health_label(value: int, max_value: int) -> void:
+	$HealthBar/MarginContainer/Label.text = str(value) + " / " + str(max_value)
+	
+	
+func _set_mana_label(value: int, max_value: int) -> void:
+	$ManaBar/MarginContainer/Label.text = str(value) + " / " + str(max_value)
