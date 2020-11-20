@@ -2,15 +2,15 @@
 
 importer="texture"
 type="StreamTexture"
-path="res://.import/small_health_bar_background.png-860d62f04a5478fae4b408d19d6495ac.stex"
+path="res://.import/small_green_health_bar.png-15398465218a4365a4949b1443d7cf9c.stex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Gameplay/UI/ResourceBars/SmallHealthBar/small_health_bar_background.png"
-dest_files=[ "res://.import/small_health_bar_background.png-860d62f04a5478fae4b408d19d6495ac.stex" ]
+source_file="res://Gameplay/UI/SmallHealthBar/small_green_health_bar.png"
+dest_files=[ "res://.import/small_green_health_bar.png-15398465218a4365a4949b1443d7cf9c.stex" ]
 
 [params]
 

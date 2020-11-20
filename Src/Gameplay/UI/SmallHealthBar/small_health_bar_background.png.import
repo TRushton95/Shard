@@ -2,15 +2,15 @@
 
 importer="texture"
 type="StreamTexture"
-path="res://.import/blue_mana_bar.png-3db37a9a963f0c51a215a0a19fa4a7ae.stex"
+path="res://.import/small_health_bar_background.png-fd7471fd83198a5ff9d9daf544204981.stex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Gameplay/UI/ResourceBars/PlayerResourcesBar/blue_mana_bar.png"
-dest_files=[ "res://.import/blue_mana_bar.png-3db37a9a963f0c51a215a0a19fa4a7ae.stex" ]
+source_file="res://Gameplay/UI/SmallHealthBar/small_health_bar_background.png"
+dest_files=[ "res://.import/small_health_bar_background.png-fd7471fd83198a5ff9d9daf544204981.stex" ]
 
 [params]
 
@@ -20,7 +20,7 @@ compress/hdr_mode=0
 compress/bptc_ldr=0
 compress/normal_map=0
 flags/repeat=0
-flags/filter=false
+flags/filter=true
 flags/mipmaps=false
 flags/anisotropic=false
 flags/srgb=2
