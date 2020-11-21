@@ -4,7 +4,7 @@
 [ext_resource path="res://Gameplay/Maps/Map.gd" type="Script" id=2]
 [ext_resource path="res://Gameplay/UI/ActionBar/ActionBar.tscn" type="PackedScene" id=3]
 [ext_resource path="res://Gameplay/UI/CastBar/CastBar.tscn" type="PackedScene" id=4]
-[ext_resource path="res://Gameplay/UI/CharacterMenu/CharacterMenu.tscn" type="PackedScene" id=6]
+[ext_resource path="res://Gameplay/UI/CharacterPanel/CharacterPanel.tscn" type="PackedScene" id=6]
 [ext_resource path="res://Gameplay/UI/TargetFrame/TargetFrame.tscn" type="PackedScene" id=8]
 
 [sub_resource type="NavigationPolygon" id=1]
@@ -39,6 +39,7 @@ position = Vector2( 1183, 205 )
 [node name="CanvasLayer" type="CanvasLayer" parent="."]
 
 [node name="CastBar" parent="CanvasLayer" instance=ExtResource( 4 )]
+visible = false
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
@@ -47,17 +48,6 @@ margin_left = -100.0
 margin_top = 266.0
 margin_right = 100.0
 margin_bottom = 306.0
-
-[node name="CharacterMenu" parent="CanvasLayer" instance=ExtResource( 6 )]
-visible = false
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-margin_left = -79.0
-margin_top = -32.0
-margin_right = 79.0
-margin_bottom = 32.0
 
 [node name="TargetFrame" parent="CanvasLayer" instance=ExtResource( 8 )]
 visible = false
@@ -77,3 +67,13 @@ margin_left = -422.0
 margin_top = -183.0
 margin_right = 422.0
 margin_bottom = -15.0
+
+[node name="CharacterPanel" parent="CanvasLayer" instance=ExtResource( 6 )]
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+margin_left = 160.0
+margin_top = -427.0
+margin_right = 668.0
+margin_bottom = 341.0

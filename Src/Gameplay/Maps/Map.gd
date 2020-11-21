@@ -102,6 +102,9 @@ func _process(delta: float) -> void:
 		pass
 	# End of test commands
 	
+	if Input.is_action_just_pressed("toggle_character_panel"):
+		$CanvasLayer/CharacterPanel.visible = !$CanvasLayer/CharacterPanel.visible
+	
 	if Input.is_action_just_pressed("cast_1"):
 		ability_index = 0
 	if Input.is_action_just_pressed("cast_2"):
