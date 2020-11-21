@@ -27,6 +27,35 @@ func _on_player_path_finished() -> void:
 	$PathDebug.hide()
 
 
+func _on_player_health_attr_changed(value: int) -> void:
+	$CanvasLayer/CharacterPanel.set_health_attr(value)
+	$CanvasLayer/ActionBar.set_max_health(value)
+	
+	if selected_unit == get_node(player_name):
+		$CanvasLayer/TargetFrame.set_max_health(value)
+		
+
+
+func _on_player_mana_attr_changed(value: int) -> void:
+	$CanvasLayer/CharacterPanel.set_mana_attr(value)
+	$CanvasLayer/ActionBar.set_max_mana(value)
+	
+	if selected_unit == get_node(player_name):
+		$CanvasLayer/TargetFrame.set_max_mana(value)
+
+
+func _on_player_attack_power_attr_changed(value: int) -> void:
+	$CanvasLayer/CharacterPanel.set_attack_power_attr(value)
+
+
+func _on_player_spell_power_attr_changed(value: int) -> void:
+	$CanvasLayer/CharacterPanel.set_spell_power_attr(value)
+
+
+func _on_player_movement_speed_attr_changed(value: int) -> void:
+	$CanvasLayer/CharacterPanel.set_movement_speed_attr(value)
+
+
 func _on_unit_damage_received(value: int, unit: Unit) -> void:
 	var floating_text = floating_text_scene.instance()
 	floating_text.setup(value, unit.position, Color.red)
@@ -90,6 +119,8 @@ func _on_unit_channelling_stopped(unit: Unit) -> void:
 	if unit == get_node(player_name):
 		$CanvasLayer/CastBar.hide()
 
+var mana_modifier = Modifier.new(Enums.ModifierType.Additive, 5)
+
 func _process(delta: float) -> void:
 	var player = get_node(player_name)
 	
@@ -97,9 +128,9 @@ func _process(delta: float) -> void:
 	
 	# Test commands for testing whatever
 	if Input.is_action_just_pressed("test_right"):
-		pass
+		player.mana_attr.push_modifier(mana_modifier)
 	if Input.is_action_just_pressed("test_left"):
-		pass
+		player.mana_attr.remove_modifier(mana_modifier)
 	# End of test commands
 	
 	if Input.is_action_just_pressed("toggle_character_panel"):
@@ -120,7 +151,7 @@ func _process(delta: float) -> void:
 	if Input.is_action_just_pressed("test_interrupt"):
 		player.rpc("interrupt")
 	if Input.is_action_just_pressed("test_mana_refill"):
-		player.rset("current_mana", player.max_mana)
+		player.rset("current_mana", player.mana_attr.value)
 	
 	if ability_index >= 0:
 		var ability = player.get_node("Abilities").get_child(ability_index)
@@ -213,10 +244,22 @@ func setup(player_name: String, player_lookup: Dictionary) -> void:
 		
 		if player == player_name:
 			unit.connect("path_finished", self, "_on_player_path_finished")
+			unit.connect("health_attr_changed", self, "_on_player_health_attr_changed")
+			unit.connect("mana_attr_changed", self, "_on_player_mana_attr_changed")
+			unit.connect("attack_power_attr_changed", self, "_on_player_attack_power_attr_changed")
+			unit.connect("spell_power_attr_changed", self, "_on_player_spell_power_attr_changed")
+			unit.connect("movement_speed_attr_changed", self, "_on_player_movement_speed_attr_changed")
 			$CanvasLayer/ActionBar.setup_abilities(unit.get_node("Abilities").get_children())
 			$CanvasLayer/ActionBar.set_max_health(unit.health_attr.value)
-			$CanvasLayer/ActionBar.set_max_mana(unit.max_mana)
-		
+			$CanvasLayer/ActionBar.set_max_mana(unit.mana_attr.value)
+			$CanvasLayer/CharacterPanel.set_character_name(player_name)
+			$CanvasLayer/CharacterPanel.set_character_image(unit.get_node("Sprite").texture)
+			$CanvasLayer/CharacterPanel.set_health_attr(unit.health_attr.value)
+			$CanvasLayer/CharacterPanel.set_mana_attr(unit.mana_attr.value)
+			$CanvasLayer/CharacterPanel.set_attack_power_attr(unit.attack_power_attr.value)
+			$CanvasLayer/CharacterPanel.set_spell_power_attr(unit.spell_power_attr.value)
+			$CanvasLayer/CharacterPanel.set_movement_speed_attr(unit.movement_speed_attr.value)
+			
 		spawn_index += 1
 
 
@@ -225,7 +268,7 @@ func select_unit(unit: Unit) -> void:
 		selected_unit = unit
 		print(str(unit.health_attr.value))
 		$CanvasLayer/TargetFrame.set_max_health(unit.health_attr.value)
-		$CanvasLayer/TargetFrame.set_max_mana(unit.max_mana)
+		$CanvasLayer/TargetFrame.set_max_mana(unit.mana_attr.value)
 		$CanvasLayer/TargetFrame.set_current_health(unit.current_health)
 		$CanvasLayer/TargetFrame.set_current_mana(unit.current_mana)
 		$CanvasLayer/TargetFrame.set_name(unit.name)

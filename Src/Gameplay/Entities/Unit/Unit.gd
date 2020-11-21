@@ -3,22 +3,21 @@ class_name Unit
 
 var _movement_path : PoolVector2Array
 var current_health : int setget _set_current_health
-var max_mana := 50
-remotesync var current_mana := max_mana setget _set_current_mana # Remove remotesync when test_mana_refill is removed
+remotesync var current_mana : int setget _set_current_mana # Remove remotesync when test_mana_refill is removed
 var casting_index := -1 # -1 for not casting
 var channelling_index := -1 # -1 for not channeling
 
 var base_movement_speed := 250
 var base_health := 50
+var base_mana := 25
 var base_attack_power := 0
 var base_spell_power := 0
-var base_armour := 0
 
-var movement_speed_attr : ModifiableAttribute
 var health_attr : ModifiableAttribute
+var mana_attr : ModifiableAttribute
 var attack_power_attr : ModifiableAttribute
 var spell_power_attr : ModifiableAttribute
-var armour_attr : ModifiableAttribute
+var movement_speed_attr : ModifiableAttribute
 
 signal left_clicked
 signal path_finished
@@ -32,6 +31,11 @@ signal channelling_ticked()
 signal damage_received(value)
 signal healing_received(value)
 signal mana_changed(value)
+signal health_attr_changed(value)
+signal mana_attr_changed(value)
+signal attack_power_attr_changed(value)
+signal spell_power_attr_changed(value)
+signal movement_speed_attr_changed(value)
 
 
 func _on_Clickbox_input_event(viewport, event, shape_idx):
@@ -67,25 +71,42 @@ func _on_ChannelStopwatch_timeout() -> void:
 
 # Stat change handlers
 
-func _on_health_attr_changed(health: int) -> void:
-	pass
+func _on_health_attr_changed(value: int) -> void:
+	emit_signal("health_attr_changed", value)
+
+
+func _on_mana_attr_changed(value: int) -> void:
+	emit_signal("mana_attr_changed", value)
+
+
+func _on_attack_power_attr_changed(value: int) -> void:
+	emit_signal("attack_power_attr_changed", value)
+
+
+func _on_spell_power_attr_changed(value: int) -> void:
+	emit_signal("spell_power_attr_changed", value)
+
+
+func _on_movement_speed_attr_changed(value: int) -> void:
+	emit_signal("movement_speed_attr_changed", value)
 
 # End of Stat change handlers
 
 
 func _ready():
-	movement_speed_attr = ModifiableAttribute.new(base_movement_speed)
 	health_attr = ModifiableAttribute.new(base_health)
+	mana_attr = ModifiableAttribute.new(base_mana)
 	attack_power_attr = ModifiableAttribute.new(base_attack_power)
 	spell_power_attr = ModifiableAttribute.new(base_spell_power)
-	armour_attr = ModifiableAttribute.new(base_armour)
+	movement_speed_attr = ModifiableAttribute.new(base_movement_speed)
 	current_health = health_attr.value
+	current_mana = mana_attr.value
 	
-#	movement_speed_attr.connect("changed", self, "_on_movement_speed_attr_changed")
-#	health_attr.connect("changed", self, "_on_health_attr_changed")
-#	attack_power_attr.connect("changed", self, "_on_attack_power_attr_changed")
-#	spell_power_attr.connect("changed", self, "_on_spell_power_attr_changed")
-#	armour_attr.connect("changed", self, "_on_armour_attr_changed")
+	health_attr.connect("changed", self, "_on_health_attr_changed")
+	mana_attr.connect("changed", self, "_on_mana_attr_changed")
+	attack_power_attr.connect("changed", self, "_on_attack_power_attr_changed")
+	spell_power_attr.connect("changed", self, "_on_spell_power_attr_changed")
+	movement_speed_attr.connect("changed", self, "_on_movement_speed_attr_changed")
 	
 	$UnitProfile/VBoxContainer/SmallHealthBar.max_value = current_health
 	$CastTimer.one_shot = false
@@ -284,7 +305,7 @@ func _set_current_mana(value: int) -> void:
 	
 	if current_mana < 0:
 		current_mana = 0
-	elif current_mana > max_mana:
-		current_mana = max_mana
+	elif current_mana > mana_attr.value:
+		current_mana = mana_attr.value
 	
 	emit_signal("mana_changed", current_mana)
