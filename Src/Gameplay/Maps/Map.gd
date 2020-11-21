@@ -214,7 +214,7 @@ func setup(player_name: String, player_lookup: Dictionary) -> void:
 		if player == player_name:
 			unit.connect("path_finished", self, "_on_player_path_finished")
 			$CanvasLayer/ActionBar.setup_abilities(unit.get_node("Abilities").get_children())
-			$CanvasLayer/ActionBar.set_max_health(unit.max_health)
+			$CanvasLayer/ActionBar.set_max_health(unit.health_attr.value)
 			$CanvasLayer/ActionBar.set_max_mana(unit.max_mana)
 		
 		spawn_index += 1
@@ -223,7 +223,8 @@ func setup(player_name: String, player_lookup: Dictionary) -> void:
 func select_unit(unit: Unit) -> void:
 	if unit:
 		selected_unit = unit
-		$CanvasLayer/TargetFrame.set_max_health(unit.max_health)
+		print(str(unit.health_attr.value))
+		$CanvasLayer/TargetFrame.set_max_health(unit.health_attr.value)
 		$CanvasLayer/TargetFrame.set_max_mana(unit.max_mana)
 		$CanvasLayer/TargetFrame.set_current_health(unit.current_health)
 		$CanvasLayer/TargetFrame.set_current_mana(unit.current_mana)

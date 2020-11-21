@@ -2,22 +2,23 @@ extends KinematicBody2D
 class_name Unit
 
 var _movement_path : PoolVector2Array
-var max_health : int
-var current_health := max_health setget _set_current_health
+var current_health : int setget _set_current_health
 var max_mana := 50
 remotesync var current_mana := max_mana setget _set_current_mana # Remove remotesync when test_mana_refill is removed
 var casting_index := -1 # -1 for not casting
 var channelling_index := -1 # -1 for not channeling
 
-const HEALTH_PER_STAMINA := 10
-
 var base_movement_speed := 250
-var base_stamina := 5
+var base_health := 50
+var base_attack_power := 0
 var base_spell_power := 0
+var base_armour := 0
 
 var movement_speed_attr : ModifiableAttribute
-var stamina_attr : ModifiableAttribute
+var health_attr : ModifiableAttribute
+var attack_power_attr : ModifiableAttribute
 var spell_power_attr : ModifiableAttribute
+var armour_attr : ModifiableAttribute
 
 signal left_clicked
 signal path_finished
@@ -66,24 +67,27 @@ func _on_ChannelStopwatch_timeout() -> void:
 
 # Stat change handlers
 
-func _on_stamina_attr_changed(stamina: int) -> void:
-	var health = stamina * HEALTH_PER_STAMINA
-	_set_max_health(health)
+func _on_health_attr_changed(health: int) -> void:
+	pass
 
 # End of Stat change handlers
 
 
 func _ready():
 	movement_speed_attr = ModifiableAttribute.new(base_movement_speed)
-	stamina_attr = ModifiableAttribute.new(base_stamina)
+	health_attr = ModifiableAttribute.new(base_health)
+	attack_power_attr = ModifiableAttribute.new(base_attack_power)
 	spell_power_attr = ModifiableAttribute.new(base_spell_power)
+	armour_attr = ModifiableAttribute.new(base_armour)
+	current_health = health_attr.value
 	
-	stamina_attr.connect("changed", self, "_on_stamina_attr_changed")
+#	movement_speed_attr.connect("changed", self, "_on_movement_speed_attr_changed")
+#	health_attr.connect("changed", self, "_on_health_attr_changed")
+#	attack_power_attr.connect("changed", self, "_on_attack_power_attr_changed")
+#	spell_power_attr.connect("changed", self, "_on_spell_power_attr_changed")
+#	armour_attr.connect("changed", self, "_on_armour_attr_changed")
 	
-	var max_health = stamina_attr.value * HEALTH_PER_STAMINA
-	_set_max_health(max_health, true)
 	$UnitProfile/VBoxContainer/SmallHealthBar.max_value = current_health
-#	$UnitProfile/VBoxContainer/ManaBar.initialise(current_mana)
 	$CastTimer.one_shot = false
 
 
@@ -127,8 +131,8 @@ remotesync func damage(value: int, source_name: String) -> void:
 remotesync func heal(value: int, source_name: String) -> void:
 	var new_health = current_health + value
 	
-	if new_health > max_health:
-		new_health = max_health
+	if new_health > health_attr.value:
+		new_health = health_attr.value
 		
 	_set_current_health(new_health)
 	
@@ -270,8 +274,8 @@ func _set_current_health(value: int) -> void:
 	
 	if current_health < 0:
 		current_health = 0
-	elif current_health > max_health:
-		current_health = max_health
+	elif current_health > health_attr.value:
+		current_health = health_attr.value
 	$UnitProfile/VBoxContainer/SmallHealthBar.value = current_health
 
 
@@ -284,14 +288,3 @@ func _set_current_mana(value: int) -> void:
 		current_mana = max_mana
 	
 	emit_signal("mana_changed", current_mana)
-
-
-func _set_max_health(value: int, reset_current_health: bool = false) -> void:
-	var missing_health = 0
-		
-	max_health = value
-	$UnitProfile/VBoxContainer/SmallHealthBar.value = max_health
-	
-	if reset_current_health:
-		current_health = value
-		$UnitProfile/VBoxContainer/SmallHealthBar.value = current_health
