@@ -6,6 +6,7 @@ var current_health : int setget _set_current_health
 remotesync var current_mana : int setget _set_current_mana # Remove remotesync when test_mana_refill is removed
 var casting_index := -1 # -1 for not casting
 var channelling_index := -1 # -1 for not channeling
+var focus: Unit
 
 var base_movement_speed := 250
 var base_health := 50
@@ -20,7 +21,9 @@ var spell_power_attr : ModifiableAttribute
 var movement_speed_attr : ModifiableAttribute
 
 signal left_clicked
+signal right_clicked
 signal path_finished
+signal follow_path_outdated
 signal casting_started(ability_name, duration)
 signal casting_progressed(time_elapsed)
 signal casting_stopped
@@ -42,11 +45,17 @@ func _on_Clickbox_input_event(viewport, event, shape_idx):
 	if event is InputEventMouseButton && event.pressed:
 		if event.button_index == BUTTON_LEFT:
 			emit_signal("left_clicked")
+		if event.button_index == BUTTON_RIGHT:
+			emit_signal("right_clicked")
 
 
 func _on_CastTimer_timeout(ability, target) -> void:
 	stop_casting()
 	execute_ability(ability, target)
+
+
+func _on_FollowPathingTimer_timeout() -> void:
+	emit_signal("follow_path_outdated")
 
 
 func _on_status_expired(status_effect) -> void:
@@ -110,6 +119,7 @@ func _ready():
 	
 	$UnitProfile/VBoxContainer/SmallHealthBar.max_value = current_health
 	$CastTimer.one_shot = false
+	$FollowPathingTimer.one_shot = true
 
 
 func _process(delta: float) -> void:
@@ -309,3 +319,4 @@ func _set_current_mana(value: int) -> void:
 		current_mana = mana_attr.value
 	
 	emit_signal("mana_changed", current_mana)
+

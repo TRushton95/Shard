@@ -23,8 +23,45 @@ func _on_unit_left_clicked(unit: Unit) -> void:
 		select_unit(unit)
 
 
+func _on_unit_right_clicked(unit: Unit) -> void:
+	var player = get_node(player_name)
+	
+	if unit != player:
+		player.focus = unit
+		var movement_path = $Navigation2D.get_simple_path(player.position, unit.position)
+		player.rpc("set_movement_path", movement_path)
+		player.get_node("FollowPathingTimer").start(1.0)
+
+
 func _on_player_path_finished() -> void:
 	$PathDebug.hide()
+
+
+func _on_unit_follow_path_outdated(unit: Unit) -> void:
+	var player = get_node(player_name)
+	
+	if unit == player:
+		var M := 0.0004 # M in a linear equation to calculate the follow path invalidation time based on distance, may need fine tuning as gameplay emerges
+		var PATH_INVALIDATE_TIME_MINIMUM := 0.2 # C in the linear equation
+		var distance = player.position.distance_to(player.focus.position)
+		var invalidate_time = (M * distance) + PATH_INVALIDATE_TIME_MINIMUM # Time until path is next invalidated
+		
+		var movement_path = $Navigation2D.get_simple_path(player.position, player.focus.position)
+		player.rpc("set_movement_path", movement_path)
+		player.get_node("FollowPathingTimer").start(invalidate_time)
+		print(str(invalidate_time))
+
+
+#DEBUG FOLLOW PATHING PURPOSES ONLY
+func _on_enemy_follow_path_outdated(unit: Unit) -> void:
+	if unit == $Enemy:
+		var movement_path = $Navigation2D.get_simple_path($Enemy.position, $Enemy.focus.position)
+		$Enemy.rpc("set_movement_path", movement_path)
+		
+		var UPDATE_CONST = 0.0004
+		var update_rate = (UPDATE_CONST * $Enemy.position.distance_to($Enemy.focus.position)) + 0.2
+		$Enemy.get_node("FollowPathingTimer").start(update_rate)
+#DEBUG FOLLOW PATHING PURPOSES ONLY
 
 
 func _on_player_health_attr_changed(value: int) -> void:
@@ -33,7 +70,6 @@ func _on_player_health_attr_changed(value: int) -> void:
 	
 	if selected_unit == get_node(player_name):
 		$CanvasLayer/TargetFrame.set_max_health(value)
-		
 
 
 func _on_player_mana_attr_changed(value: int) -> void:
@@ -186,6 +222,7 @@ func _unhandled_input(event) -> void:
 			var movement_path = $Navigation2D.get_simple_path(get_node(player_name).position, event.position)
 			$PathDebug.points = movement_path
 			$PathDebug.show()
+			get_node(player_name).get_node("FollowPathingTimer").stop()
 			get_node(player_name).rpc("set_movement_path", movement_path)
 			
 		elif event.button_index == BUTTON_LEFT:
@@ -217,6 +254,8 @@ func setup(player_name: String, player_lookup: Dictionary) -> void:
 	#TEST ENEMY
 	$Enemy.set_name($Enemy.name) # set name label
 	$Enemy.connect("left_clicked", self, "_on_unit_left_clicked", [$Enemy])
+	$Enemy.connect("right_clicked", self, "_on_unit_right_clicked", [$Enemy])
+	$Enemy.connect("follow_path_outdated", self, "_on_enemy_follow_path_outdated", [$Enemy])
 	$Enemy.connect("damage_received", self, "_on_unit_damage_received", [$Enemy])
 	$Enemy.connect("healing_received", self, "_on_unit_healing_received", [$Enemy])
 	#END OF TEST ENEMY
@@ -232,6 +271,8 @@ func setup(player_name: String, player_lookup: Dictionary) -> void:
 		unit.position = $PlayerSpawnPoints.get_node(str(spawn_index)).position
 		add_child(unit)
 		unit.connect("left_clicked", self, "_on_unit_left_clicked", [unit])
+		unit.connect("right_clicked", self, "_on_unit_right_clicked", [unit])
+		unit.connect("follow_path_outdated", self, "_on_unit_follow_path_outdated", [unit])
 		unit.connect("damage_received", self, "_on_unit_damage_received", [unit])
 		unit.connect("healing_received", self, "_on_unit_healing_received", [unit])
 		unit.connect("mana_changed", self, "_on_unit_mana_changed", [unit])
@@ -259,6 +300,16 @@ func setup(player_name: String, player_lookup: Dictionary) -> void:
 			$CanvasLayer/CharacterPanel.set_attack_power_attr(unit.attack_power_attr.value)
 			$CanvasLayer/CharacterPanel.set_spell_power_attr(unit.spell_power_attr.value)
 			$CanvasLayer/CharacterPanel.set_movement_speed_attr(unit.movement_speed_attr.value)
+			
+			var speed_mod = Modifier.new(Enums.ModifierType.Additive, 750)
+			unit.movement_speed_attr.push_modifier(speed_mod)
+			
+			# PATHING TEST #
+			$Enemy.focus = unit
+			var movement_path = $Navigation2D.get_simple_path($Enemy.position, unit.position)
+			$Enemy.rpc("set_movement_path", movement_path)
+			$Enemy.get_node("FollowPathingTimer").start(1.0)
+			# PATHING TEST #
 			
 		spawn_index += 1
 
