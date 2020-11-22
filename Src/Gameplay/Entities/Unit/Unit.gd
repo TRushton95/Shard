@@ -7,6 +7,8 @@ remotesync var current_mana : int setget _set_current_mana # Remove remotesync w
 var casting_index := -1 # -1 for not casting
 var channelling_index := -1 # -1 for not channeling
 var focus: Unit
+var basic_attack_range := 200
+var auto_attack_speed := 1.0
 
 var base_movement_speed := 250
 var base_health := 50
@@ -120,6 +122,7 @@ func _ready():
 	$UnitProfile/VBoxContainer/SmallHealthBar.max_value = current_health
 	$CastTimer.one_shot = false
 	$FollowPathingTimer.one_shot = true
+	$AutoAttackTimer.one_shot = true
 
 
 func _process(delta: float) -> void:
@@ -179,6 +182,10 @@ remotesync func interrupt() -> void:
 	if channelling_index >= 0:
 		print("Interrupted channel")
 		stop_channelling()
+
+
+func auto_attack() -> void:
+	print("Bop!")
 
 
 func cast(index: int, target) -> void:
@@ -287,6 +294,13 @@ func _move_along_path(delta: float) -> void:
 	var distance_to_walk = delta * movement_speed_attr.value
 	
 	while distance_to_walk > 0 && _movement_path.size() > 0:
+		if focus && position.distance_to(focus.position) <= basic_attack_range:
+			if $AutoAttackTimer.time_left == 0:
+				auto_attack()
+				$AutoAttackTimer.start(auto_attack_speed)
+				
+			return
+		
 		var distance_to_next_point = position.distance_to(_movement_path[0])
 		if distance_to_walk <= distance_to_next_point:
 			position += position.direction_to(_movement_path[0]) * distance_to_walk
