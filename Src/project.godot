@@ -71,6 +71,10 @@ StatusHelper="*res://Gameplay/AbilitySystem/Helpers/StatusHelper.gd"
 window/size/width=1980
 window/size/height=1080
 
+[editor_plugins]
+
+enabled=PoolStringArray( "Todo_Manager" )
+
 [input]
 
 cast_1={
