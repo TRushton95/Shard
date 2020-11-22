@@ -27,8 +27,10 @@ func _on_unit_right_clicked(unit: Unit) -> void:
 	var player = get_node(player_name)
 	
 	if unit != player:
-		player.focus = unit
 		var movement_path = $Navigation2D.get_simple_path(player.position, unit.position)
+		$PathDebug.points = movement_path
+		$PathDebug.show()
+		rpc("_set_unit_focus", player_name, unit.name)
 		player.rpc("set_movement_path", movement_path)
 		player.get_node("FollowPathingTimer").start(1.0)
 
@@ -38,7 +40,7 @@ func _on_player_path_finished() -> void:
 
 
 func _on_unit_follow_path_outdated(unit: Unit) -> void:
-	var player = get_node(player_name)
+	var player = get_node(player_name) # Should maybe be using is_networking_master() for this?
 	
 	if unit == player:
 		var M := 0.0004 # M in a linear equation to calculate the follow path invalidation time based on distance, may need fine tuning as gameplay emerges
@@ -47,9 +49,10 @@ func _on_unit_follow_path_outdated(unit: Unit) -> void:
 		var invalidate_time = (M * distance) + PATH_INVALIDATE_TIME_MINIMUM # Time until path is next invalidated
 		
 		var movement_path = $Navigation2D.get_simple_path(player.position, player.focus.position)
+		$PathDebug.points = movement_path
+		$PathDebug.show()
 		player.rpc("set_movement_path", movement_path)
 		player.get_node("FollowPathingTimer").start(invalidate_time)
-		print(str(invalidate_time))
 
 
 #DEBUG FOLLOW PATHING PURPOSES ONLY
@@ -219,11 +222,13 @@ func _unhandled_input(event) -> void:
 			if selected_ability:
 				select_ability(null)
 				
-			var movement_path = $Navigation2D.get_simple_path(get_node(player_name).position, event.position)
+			var player = get_node(player_name)
+			var movement_path = $Navigation2D.get_simple_path(player.position, event.position)
 			$PathDebug.points = movement_path
 			$PathDebug.show()
-			get_node(player_name).get_node("FollowPathingTimer").stop()
-			get_node(player_name).rpc("set_movement_path", movement_path)
+			player.get_node("FollowPathingTimer").stop()
+			player.rpc("set_movement_path", movement_path)
+			rpc("_set_unit_focus", player_name, "")
 			
 		elif event.button_index == BUTTON_LEFT:
 			if selected_ability && selected_ability.target_type == Enums.TargetType.Position:
@@ -301,14 +306,11 @@ func setup(player_name: String, player_lookup: Dictionary) -> void:
 			$CanvasLayer/CharacterPanel.set_spell_power_attr(unit.spell_power_attr.value)
 			$CanvasLayer/CharacterPanel.set_movement_speed_attr(unit.movement_speed_attr.value)
 			
-			var speed_mod = Modifier.new(Enums.ModifierType.Additive, 750)
-			unit.movement_speed_attr.push_modifier(speed_mod)
-			
 			# PATHING TEST #
-			$Enemy.focus = unit
-			var movement_path = $Navigation2D.get_simple_path($Enemy.position, unit.position)
-			$Enemy.rpc("set_movement_path", movement_path)
-			$Enemy.get_node("FollowPathingTimer").start(1.0)
+#			$Enemy.rset("focus", unit)
+#			var movement_path = $Navigation2D.get_simple_path($Enemy.position, unit.position)
+#			$Enemy.rpc("set_movement_path", movement_path)
+#			$Enemy.get_node("FollowPathingTimer").start(1.0)
 			# PATHING TEST #
 			
 		spawn_index += 1
@@ -337,3 +339,10 @@ func select_ability(ability) -> void:
 	else:
 		selected_ability = ability
 		Input.set_custom_mouse_cursor(rainbow_cursor)
+
+
+remotesync func _set_unit_focus(unit_name: String, focus_name: String) -> void:
+	var unit = get_node(unit_name)
+	var focus = get_node(focus_name) if focus_name else null
+	
+	unit.focus = focus

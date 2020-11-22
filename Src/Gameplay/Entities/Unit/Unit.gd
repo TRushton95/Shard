@@ -6,14 +6,14 @@ var current_health : int setget _set_current_health
 remotesync var current_mana : int setget _set_current_mana # Remove remotesync when test_mana_refill is removed
 var casting_index := -1 # -1 for not casting
 var channelling_index := -1 # -1 for not channeling
-var focus: Unit
+remotesync var focus : Unit setget _set_focus
 var basic_attack_range := 200
 var auto_attack_speed := 1.0
 
 var base_movement_speed := 250
 var base_health := 50
 var base_mana := 25
-var base_attack_power := 0
+var base_attack_power := 5
 var base_spell_power := 0
 
 var health_attr : ModifiableAttribute
@@ -184,8 +184,9 @@ remotesync func interrupt() -> void:
 		stop_channelling()
 
 
-func auto_attack() -> void:
-	print("Bop!")
+func auto_attack(target: Unit) -> void:
+	if get_tree().is_network_server():
+		target.rpc("damage", attack_power_attr.value, name)
 
 
 func cast(index: int, target) -> void:
@@ -296,7 +297,8 @@ func _move_along_path(delta: float) -> void:
 	while distance_to_walk > 0 && _movement_path.size() > 0:
 		if focus && position.distance_to(focus.position) <= basic_attack_range:
 			if $AutoAttackTimer.time_left == 0:
-				auto_attack()
+				print("auto attack timer at 0")
+				auto_attack(focus)
 				$AutoAttackTimer.start(auto_attack_speed)
 				
 			return
@@ -333,4 +335,12 @@ func _set_current_mana(value: int) -> void:
 		current_mana = mana_attr.value
 	
 	emit_signal("mana_changed", current_mana)
+	
+func _set_focus(value: Unit) -> void:
+	focus = value
+	
+	if focus:
+		print("Focus set for " + name + ": " + focus.name)
+	else:
+		print("Focus removed for " + name)
 
