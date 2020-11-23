@@ -32,7 +32,10 @@ signal casting_stopped
 signal channelling_started(ability_name, duration)
 signal channelling_progressed(time_remaining)
 signal channelling_stopped
-signal channelling_ticked()
+signal channelling_ticked
+signal auto_attack_cooldown_started(duration)
+signal auto_attack_cooldown_progressed(time_remaining)
+signal auto_attack_cooldown_ended
 signal damage_received(value)
 signal healing_received(value)
 signal mana_changed(value)
@@ -78,6 +81,10 @@ func _on_ChannelStopwatch_tick(ability) -> void:
 
 func _on_ChannelStopwatch_timeout() -> void:
 	stop_channelling()
+
+
+func _on_AutoAttackTimer_timeout():
+	emit_signal("auto_attack_cooldown_ended")
 
 
 # Stat change handlers
@@ -139,6 +146,9 @@ func _process(delta: float) -> void:
 		emit_signal("casting_progressed", $CastTimer.wait_time - $CastTimer.time_left)
 	elif channelling_index >= 0:
 		emit_signal("channelling_progressed", $ChannelStopwatch.get_time_remaining())
+		
+	if $AutoAttackTimer.time_left > 0:
+		emit_signal("auto_attack_cooldown_progressed", $AutoAttackTimer.time_left)
 
 
 remotesync func set_movement_path(movement_path: PoolVector2Array) -> void:
@@ -301,6 +311,7 @@ func _move_along_path(delta: float) -> void:
 				print("auto attack timer at 0")
 				auto_attack(focus)
 				$AutoAttackTimer.start(auto_attack_speed)
+				emit_signal("auto_attack_cooldown_started", auto_attack_speed)
 				
 			return
 		

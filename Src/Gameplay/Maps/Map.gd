@@ -158,6 +158,20 @@ func _on_unit_channelling_stopped(unit: Unit) -> void:
 	if unit == get_node(player_name):
 		$CanvasLayer/CastBar.hide()
 
+
+func _on_auto_attack_cooldown_started(duration: float) -> void:
+	$CanvasLayer/AutoAttackBar.initialise("Basic attack cooldown", duration)
+	$CanvasLayer/AutoAttackBar.show()
+
+
+func _on_auto_attack_cooldown_progressed(time_remaining: float) -> void:
+	$CanvasLayer/AutoAttackBar.set_value(time_remaining)
+
+
+func _on_auto_attack_cooldown_ended() -> void:
+	$CanvasLayer/AutoAttackBar.hide()
+
+
 var mana_modifier = Modifier.new(Enums.ModifierType.Additive, 5)
 
 func _process(delta: float) -> void:
@@ -295,6 +309,9 @@ func setup(player_name: String, player_lookup: Dictionary) -> void:
 			unit.connect("attack_power_attr_changed", self, "_on_player_attack_power_attr_changed")
 			unit.connect("spell_power_attr_changed", self, "_on_player_spell_power_attr_changed")
 			unit.connect("movement_speed_attr_changed", self, "_on_player_movement_speed_attr_changed")
+			unit.connect("auto_attack_cooldown_started", self, "_on_auto_attack_cooldown_started")
+			unit.connect("auto_attack_cooldown_ended", self, "_on_auto_attack_cooldown_ended")
+			unit.connect("auto_attack_cooldown_progressed", self, "_on_auto_attack_cooldown_progressed")
 			$CanvasLayer/ActionBar.setup_abilities(unit.get_node("Abilities").get_children())
 			$CanvasLayer/ActionBar.set_max_health(unit.health_attr.value)
 			$CanvasLayer/ActionBar.set_max_mana(unit.mana_attr.value)
