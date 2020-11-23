@@ -6,7 +6,7 @@ var current_health : int setget _set_current_health
 remotesync var current_mana : int setget _set_current_mana # Remove remotesync when test_mana_refill is removed
 var casting_index := -1 # -1 for not casting
 var channelling_index := -1 # -1 for not channeling
-remotesync var focus : Unit setget _set_focus
+remotesync var focus : Unit
 var basic_attack_range := 200
 var auto_attack_speed := 1.0
 
@@ -120,6 +120,7 @@ func _ready():
 	movement_speed_attr.connect("changed", self, "_on_movement_speed_attr_changed")
 	
 	$UnitProfile/VBoxContainer/SmallHealthBar.max_value = current_health
+	$UnitProfile/VBoxContainer/SmallHealthBar.value = current_health
 	$CastTimer.one_shot = false
 	$FollowPathingTimer.one_shot = true
 	$AutoAttackTimer.one_shot = true
@@ -335,12 +336,3 @@ func _set_current_mana(value: int) -> void:
 		current_mana = mana_attr.value
 	
 	emit_signal("mana_changed", current_mana)
-	
-func _set_focus(value: Unit) -> void:
-	focus = value
-	
-	if focus:
-		print("Focus set for " + name + ": " + focus.name)
-	else:
-		print("Focus removed for " + name)
-
