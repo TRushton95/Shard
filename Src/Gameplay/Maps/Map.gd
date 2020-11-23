@@ -3,6 +3,7 @@ extends Node
 var rainbow_cursor = load("res://pointer.png")
 var unit_scene = load("Gameplay/Entities/Unit/Unit.tscn")
 var floating_text_scene = load("Gameplay/UI/FloatingText/FloatingText.tscn")
+var status_effect_widget_scene = load("Gameplay/UI/StatusEffectWidget/StatusEffectWidget.tscn")
 
 var player_name : String
 var selected_unit : Unit
@@ -65,6 +66,17 @@ func _on_enemy_follow_path_outdated(unit: Unit) -> void:
 		var update_rate = (UPDATE_CONST * $Enemy.position.distance_to($Enemy.focus.position)) + 0.2
 		$Enemy.get_node("FollowPathingTimer").start(update_rate)
 #DEBUG FOLLOW PATHING PURPOSES ONLY
+
+
+func _on_unit_status_effect_applied(status_effect: Status) -> void:
+	var icon_texture = load(status_effect.icon_texture_path)
+	var status_effect_widget = status_effect_widget_scene.instance()
+	status_effect_widget.setup(icon_texture, status_effect.duration)
+	$CanvasLayer/ItemList.add_item(str(status_effect.duration), icon_texture, false)
+
+
+func _on_unit_status_effect_removed(status_effect: Status, index: int) -> void:
+	$CanvasLayer/ItemList.remove_item(index)
 
 
 func _on_player_health_attr_changed(value: int) -> void:
@@ -216,6 +228,10 @@ func _process(delta: float) -> void:
 		# This method can be moved back here but needs to map key inputs properly and expose in a way
 		# that action bar button press can hook into as well
 		process_ability_press(ability)
+		
+	for status in player.get_node("StatusEffects").get_children():
+		var index = status.get_index()
+		$CanvasLayer/ItemList.set_item_text(index, str(ceil(status.get_time_remaining())) + "s")
 
 
 func process_ability_press(ability):
@@ -304,6 +320,8 @@ func setup(player_name: String, player_lookup: Dictionary) -> void:
 		
 		if player == player_name:
 			unit.connect("path_finished", self, "_on_player_path_finished")
+			unit.connect("status_effect_applied", self, "_on_unit_status_effect_applied")
+			unit.connect("status_effect_removed", self, "_on_unit_status_effect_removed")
 			unit.connect("health_attr_changed", self, "_on_player_health_attr_changed")
 			unit.connect("mana_attr_changed", self, "_on_player_mana_attr_changed")
 			unit.connect("attack_power_attr_changed", self, "_on_player_attack_power_attr_changed")

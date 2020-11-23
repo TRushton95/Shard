@@ -2,6 +2,7 @@ extends Node
 class_name Status
 
 var is_debuff : bool
+var icon_texture_path: String
 var duration : float
 var tick_rate := 0.0
 var tick_damage := 0
@@ -26,10 +27,10 @@ func _on_stopwatch_timeout():
 	emit_signal("expired")
 
 
-func _init(is_debuff : float, duration : float, tick_rate: float = 0.0) -> void:
+func _init(is_debuff : float, duration : float, icon_texture_path: String) -> void:
 	self.is_debuff = is_debuff
 	self.duration = duration
-	self.tick_rate = tick_rate
+	self.icon_texture_path = icon_texture_path
 
 
 func _ready() -> void:
@@ -41,9 +42,14 @@ func _ready() -> void:
 		stopwatch.start()
 
 
+func get_time_remaining() -> float:
+	return stopwatch.get_time_remaining()
+
+
 func to_data() -> Dictionary:
 	return {
 		"name": name,
+		"icon_texture_path": icon_texture_path,
 		"is_debuff": is_debuff,
 		"duration": duration,
 		"tick_rate": tick_rate,

@@ -36,6 +36,8 @@ signal channelling_ticked
 signal auto_attack_cooldown_started(duration)
 signal auto_attack_cooldown_progressed(time_remaining)
 signal auto_attack_cooldown_ended
+signal status_effect_applied(status_effect)
+signal status_effect_removed(status_effect, index)
 signal damage_received(value)
 signal healing_received(value)
 signal mana_changed(value)
@@ -149,7 +151,6 @@ func _process(delta: float) -> void:
 		
 	if $AutoAttackTimer.time_left > 0:
 		emit_signal("auto_attack_cooldown_progressed", $AutoAttackTimer.time_left)
-
 
 remotesync func set_movement_path(movement_path: PoolVector2Array) -> void:
 	_movement_path = movement_path
@@ -291,9 +292,13 @@ remotesync func push_status_effect(status_effect_data: Dictionary) -> void:
 	$StatusEffects.add_child(status_effect)
 	status_effect.set_owner(self)
 	status_effect.connect("expired", self, "_on_status_expired", [status_effect])
+	emit_signal("status_effect_applied", status_effect)
 
 
 func remove_status_effect(status_effect: Status) -> void:
+	var index = status_effect.get_index()
+	$StatusEffects.remove_child(status_effect)
+	emit_signal("status_effect_removed", status_effect, index)
 	status_effect.queue_free()
 
 
