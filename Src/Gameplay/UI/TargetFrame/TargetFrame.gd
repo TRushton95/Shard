@@ -29,9 +29,26 @@ func set_image(texture: Texture) -> void:
 	$Image.texture = texture
 
 
+func add_status_effect(status_effect: Status) -> void:
+	$StatusEffectBar.add_status_effect(status_effect)
+
+
+func remove_status_effect(index: int) -> void:
+	$StatusEffectBar.remove_status_effect(index)
+
+
+func update_status_effect_duration(index: int, duration: float) -> void:
+	$StatusEffectBar.update_duration(index, duration)
+
+
+func clear_status_effects() -> void:
+	$StatusEffectBar.clear()
+
+
 func _set_health_label(value: int, max_value: int) -> void:
 	$HealthBar/MarginContainer/Label.text = str(value) + " / " + str(max_value)
-	
-	
+
+
 func _set_mana_label(value: int, max_value: int) -> void:
 	$ManaBar/MarginContainer/Label.text = str(value) + " / " + str(max_value)
+

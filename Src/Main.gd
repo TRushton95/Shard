@@ -19,7 +19,7 @@ func _on_server_disconnected() -> void:
 
 func _on_Login_server_button_pressed() -> void:
 	var peer = NetworkedMultiplayerENet.new()
-	peer.create_server(80, 2)
+	peer.create_server(1026, 2)
 	get_tree().set_network_peer(peer)
 	player_name = "Server"
 	switch_to_lobby()
@@ -27,7 +27,7 @@ func _on_Login_server_button_pressed() -> void:
 
 func _on_Login_client_button_pressed() -> void:
 	var peer = NetworkedMultiplayerENet.new()
-	peer.create_client("127.0.0.1", 80)
+	peer.create_client("86.170.198.135", 1026)
 	get_tree().set_network_peer(peer)
 	player_name = "Client"
 	$Login/VBoxContainer/Label.text = "Connecting..."

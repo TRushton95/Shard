@@ -1,9 +1,10 @@
-[gd_scene load_steps=13 format=2]
+[gd_scene load_steps=9 format=2]
 
 [ext_resource path="res://Gameplay/Entities/Unit/Unit.tscn" type="PackedScene" id=1]
 [ext_resource path="res://Gameplay/Maps/Map.gd" type="Script" id=2]
 [ext_resource path="res://Gameplay/UI/ActionBar/ActionBar.tscn" type="PackedScene" id=3]
 [ext_resource path="res://Gameplay/UI/CastBar/CastBar.tscn" type="PackedScene" id=4]
+[ext_resource path="res://Gameplay/UI/StatusEffectBar/StatusEffectBar.tscn" type="PackedScene" id=5]
 [ext_resource path="res://Gameplay/UI/CharacterPanel/CharacterPanel.tscn" type="PackedScene" id=6]
 [ext_resource path="res://Gameplay/UI/TargetFrame/TargetFrame.tscn" type="PackedScene" id=8]
 
@@ -11,16 +12,6 @@
 vertices = PoolVector2Array( 1980, 0, 1980, 1080, 0, 1080, 0, 0 )
 polygons = [ PoolIntArray( 0, 1, 2, 3 ) ]
 outlines = [ PoolVector2Array( 0, 0, 0, 1080, 1980, 1080, 1980, 0 ) ]
-
-[sub_resource type="StyleBoxEmpty" id=3]
-
-[sub_resource type="StyleBoxEmpty" id=4]
-
-[sub_resource type="StyleBoxEmpty" id=5]
-
-[sub_resource type="StyleBoxEmpty" id=6]
-
-[sub_resource type="StyleBoxEmpty" id=2]
 
 [node name="Map" type="Node2D"]
 script = ExtResource( 2 )
@@ -100,21 +91,12 @@ margin_top = -427.0
 margin_right = 668.0
 margin_bottom = 341.0
 
-[node name="ItemList" type="ItemList" parent="CanvasLayer"]
-margin_left = 793.0
-margin_top = 851.0
-margin_right = 1191.0
-margin_bottom = 904.0
-custom_styles/selected_focus = SubResource( 3 )
-custom_styles/bg_focus = SubResource( 4 )
-custom_styles/cursor_unfocused = SubResource( 5 )
-custom_styles/selected = SubResource( 6 )
-custom_styles/bg = SubResource( 2 )
-auto_height = true
-max_columns = 8
-same_column_width = true
-icon_mode = 0
-fixed_icon_size = Vector2( 32, 32 )
-__meta__ = {
-"_edit_use_anchors_": false
-}
+[node name="StatusEffectBar" parent="CanvasLayer" instance=ExtResource( 5 )]
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+margin_left = -142.0
+margin_top = 313.0
+margin_right = 142.0
+margin_bottom = 363.0

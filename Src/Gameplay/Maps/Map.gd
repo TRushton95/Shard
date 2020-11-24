@@ -1,9 +1,8 @@
 extends Node
 
 var rainbow_cursor = load("res://pointer.png")
-var unit_scene = load("Gameplay/Entities/Unit/Unit.tscn")
-var floating_text_scene = load("Gameplay/UI/FloatingText/FloatingText.tscn")
-var status_effect_widget_scene = load("Gameplay/UI/StatusEffectWidget/StatusEffectWidget.tscn")
+var unit_scene = load("res://Gameplay/Entities/Unit/Unit.tscn")
+var floating_text_scene = load("res://Gameplay/UI/FloatingText/FloatingText.tscn")
 
 var player_name : String
 var selected_unit : Unit
@@ -68,15 +67,20 @@ func _on_enemy_follow_path_outdated(unit: Unit) -> void:
 #DEBUG FOLLOW PATHING PURPOSES ONLY
 
 
-func _on_unit_status_effect_applied(status_effect: Status) -> void:
-	var icon_texture = load(status_effect.icon_texture_path)
-	var status_effect_widget = status_effect_widget_scene.instance()
-	status_effect_widget.setup(icon_texture, status_effect.duration)
-	$CanvasLayer/ItemList.add_item(str(status_effect.duration), icon_texture, false)
+func _on_unit_status_effect_applied(status_effect: Status, unit: Unit) -> void:
+	if unit == get_node(player_name):
+		$CanvasLayer/StatusEffectBar.add_status_effect(status_effect)
+	
+	if unit == selected_unit:
+		$CanvasLayer/TargetFrame.add_status_effect(status_effect)
 
 
-func _on_unit_status_effect_removed(status_effect: Status, index: int) -> void:
-	$CanvasLayer/ItemList.remove_item(index)
+func _on_unit_status_effect_removed(status_effect: Status, index: int, unit: Unit) -> void:
+	if unit == get_node(player_name):
+		$CanvasLayer/StatusEffectBar.remove_status_effect(index)
+	
+	if unit == selected_unit:
+		$CanvasLayer/TargetFrame.remove_status_effect(index)
 
 
 func _on_player_health_attr_changed(value: int) -> void:
@@ -231,7 +235,12 @@ func _process(delta: float) -> void:
 		
 	for status in player.get_node("StatusEffects").get_children():
 		var index = status.get_index()
-		$CanvasLayer/ItemList.set_item_text(index, str(ceil(status.get_time_remaining())) + "s")
+		$CanvasLayer/StatusEffectBar.update_duration(index, status.get_time_remaining())
+		
+	if selected_unit:
+		for status in selected_unit.get_node("StatusEffects").get_children():
+			var status_index = status.get_index()
+			$CanvasLayer/TargetFrame.update_status_effect_duration(status_index, status.get_time_remaining())
 
 
 func process_ability_press(ability):
@@ -293,6 +302,8 @@ func setup(player_name: String, player_lookup: Dictionary) -> void:
 	$Enemy.connect("follow_path_outdated", self, "_on_enemy_follow_path_outdated", [$Enemy])
 	$Enemy.connect("damage_received", self, "_on_unit_damage_received", [$Enemy])
 	$Enemy.connect("healing_received", self, "_on_unit_healing_received", [$Enemy])
+	$Enemy.connect("status_effect_applied", self, "_on_unit_status_effect_applied", [$Enemy])
+	$Enemy.connect("status_effect_removed", self, "_on_unit_status_effect_removed", [$Enemy])
 	#END OF TEST ENEMY
 	
 	var player_list = player_lookup.values()
@@ -317,11 +328,11 @@ func setup(player_name: String, player_lookup: Dictionary) -> void:
 		unit.connect("channelling_started", self, "_on_unit_channelling_started", [unit])
 		unit.connect("channelling_progressed", self, "_on_unit_channelling_progressed", [unit])
 		unit.connect("channelling_stopped", self, "_on_unit_channelling_stopped", [unit])
+		unit.connect("status_effect_applied", self, "_on_unit_status_effect_applied", [unit])
+		unit.connect("status_effect_removed", self, "_on_unit_status_effect_removed", [unit])
 		
 		if player == player_name:
 			unit.connect("path_finished", self, "_on_player_path_finished")
-			unit.connect("status_effect_applied", self, "_on_unit_status_effect_applied")
-			unit.connect("status_effect_removed", self, "_on_unit_status_effect_removed")
 			unit.connect("health_attr_changed", self, "_on_player_health_attr_changed")
 			unit.connect("mana_attr_changed", self, "_on_player_mana_attr_changed")
 			unit.connect("attack_power_attr_changed", self, "_on_player_attack_power_attr_changed")
@@ -361,6 +372,10 @@ func select_unit(unit: Unit) -> void:
 		$CanvasLayer/TargetFrame.set_current_mana(unit.current_mana)
 		$CanvasLayer/TargetFrame.set_name(unit.name)
 		$CanvasLayer/TargetFrame.set_image(unit.get_node("Sprite").texture)
+		$CanvasLayer/TargetFrame.clear_status_effects()
+		for status_effect in unit.get_node("StatusEffects").get_children():
+			$CanvasLayer/TargetFrame.add_status_effect(status_effect)
+			
 		$CanvasLayer/TargetFrame.show()
 	else:
 		selected_unit = null
