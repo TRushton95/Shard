@@ -1,4 +1,4 @@
-extends Node
+extends Node2D
 
 var rainbow_cursor = load("res://pointer.png")
 var unit_scene = load("res://Gameplay/Entities/Unit/Unit.tscn")
@@ -10,8 +10,21 @@ var selected_ability
 
 
 #This should hook into whatever mechanism determines when an ability key is pressed
-func _on_AbilityBar_ability_button_pressed(ability) -> void:
+func _on_ActionBar_ability_button_pressed(ability) -> void:
 	process_ability_press(ability)
+
+
+func _on_ActionBar_ability_button_mouse_entered(ability) -> void:
+	$CanvasLayer/Tooltip.set_name(ability.name)
+	$CanvasLayer/Tooltip.set_range(100)
+	$CanvasLayer/Tooltip.set_cost(10)
+	$CanvasLayer/Tooltip.set_description("Hello there")
+	$CanvasLayer/Tooltip.rect_position = get_global_mouse_position() - Vector2(0, $CanvasLayer/Tooltip.get_rect().size.y)
+	$CanvasLayer/Tooltip.show()
+
+
+func _on_ActionBar_ability_button_mouse_exited(ability) -> void:
+	$CanvasLayer/Tooltip.hide()
 
 
 func _on_unit_left_clicked(unit: Unit) -> void:

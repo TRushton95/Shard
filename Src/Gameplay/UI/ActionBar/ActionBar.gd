@@ -1,10 +1,20 @@
 extends TextureRect
 
 signal ability_button_pressed(ability)
+signal ability_button_mouse_entered(ability)
+signal ability_button_mouse_exited(ability)
 
 
-func _on_ability_button_pressed(ability):
+func _on_ability_button_pressed(ability) -> void:
 	emit_signal("ability_button_pressed", ability)
+
+
+func _on_ability_mouse_entered(ability) -> void:
+	emit_signal("ability_button_mouse_entered", ability)
+
+
+func _on_ability_mouse_exited(ability) -> void:
+	emit_signal("ability_button_mouse_exited", ability)
 
 
 func setup_abilities(abilities: Array) -> void:
@@ -15,6 +25,8 @@ func setup_abilities(abilities: Array) -> void:
 			var ability_button = $MarginContainer/HBoxContainer.get_node("Ability" + str(index + 1))
 			ability_button.texture_normal = ability.icon
 			ability_button.connect("pressed", self, "_on_ability_button_pressed", [ability])
+			ability_button.connect("mouse_entered", self, "_on_ability_mouse_entered", [ability])
+			ability_button.connect("mouse_exited", self, "_on_ability_mouse_exited", [ability])
 			
 		index += 1
 
