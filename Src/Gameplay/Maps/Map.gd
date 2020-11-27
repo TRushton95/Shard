@@ -394,7 +394,6 @@ func setup(player_name: String, player_lookup: Dictionary) -> void:
 func select_unit(unit: Unit) -> void:
 	if unit:
 		selected_unit = unit
-		print(str(unit.health_attr.value))
 		$CanvasLayer/TargetFrame.set_max_health(unit.health_attr.value)
 		$CanvasLayer/TargetFrame.set_max_mana(unit.mana_attr.value)
 		$CanvasLayer/TargetFrame.set_current_health(unit.current_health)
