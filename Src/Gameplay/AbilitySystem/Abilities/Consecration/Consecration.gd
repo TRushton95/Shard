@@ -11,7 +11,8 @@ var radius := 100
 
 # Convention properties
 var target_type = Enums.TargetType.Position
-var cost:= 2
+var cost := 10
+var cast_time := 0
 var icon = load("res://Gameplay/AbilitySystem/Abilities/Consecration/icon.png") # move this into an ability base class that references icon.png with a relative path
 # End of Convention properties
 

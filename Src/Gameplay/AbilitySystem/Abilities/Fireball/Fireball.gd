@@ -15,8 +15,8 @@ var _projectile_speed := 500
 
 # Convention properties
 var target_type = Enums.TargetType.Unit
-var cast_time := 1.0
 var cost := 5
+var cast_time := 1.0
 var icon = load("res://Gameplay/AbilitySystem/Abilities/Fireball/icon.png") # move this into an ability base class that references icon.png with a relative path
 # End of Convention properties
 

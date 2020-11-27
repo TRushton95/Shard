@@ -3,12 +3,13 @@ extends Node
 var base_tick_healing := 1
 var tick_healing_per_sp := 1
 
-var tick_rate := 0.5
-
 # Convention properties
 var target_type = Enums.TargetType.Unit
+var cost := 0
+var cast_time := 0
 var channel_duration := 5.0
 var channel_cost := 1
+var tick_rate := 0.5
 var icon = load("res://Gameplay/AbilitySystem/Abilities/HealingStream/icon.png") # move this into an ability base class that references icon.png with a relative path
 # End of Convention properties
 

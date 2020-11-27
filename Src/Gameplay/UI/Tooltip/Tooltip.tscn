@@ -17,7 +17,7 @@ __meta__ = {
 margin_left = 7.0
 margin_top = 7.0
 margin_right = 195.0
-margin_bottom = 57.0
+margin_bottom = 93.0
 mouse_filter = 2
 
 [node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer"]
@@ -57,8 +57,29 @@ margin_right = 188.0
 margin_bottom = 32.0
 text = "Cost"
 
-[node name="DescriptionLabel" type="Label" parent="VBoxContainer"]
+[node name="CastTimeLabel" type="Label" parent="VBoxContainer"]
 margin_top = 36.0
 margin_right = 188.0
 margin_bottom = 50.0
+text = "Cast Time"
+
+[node name="ChannelLabel" type="Label" parent="VBoxContainer"]
+margin_top = 54.0
+margin_right = 188.0
+margin_bottom = 68.0
+text = "Channel Cost"
+
+[node name="DescriptionLabel" type="Label" parent="VBoxContainer"]
+margin_top = 72.0
+margin_right = 188.0
+margin_bottom = 86.0
+text = "test"
 autowrap = true
+
+[node name="MarginContainer" type="MarginContainer" parent="VBoxContainer"]
+visible = false
+margin_top = 90.0
+margin_right = 188.0
+margin_bottom = 110.0
+mouse_filter = 2
+custom_constants/margin_top = 20

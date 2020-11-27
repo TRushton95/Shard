@@ -18,9 +18,19 @@ func _on_ability_button_mouse_entered(button: TextureButton, ability) -> void:
 	$CanvasLayer/Tooltip.set_name(ability.name)
 	$CanvasLayer/Tooltip.set_range(100)
 	$CanvasLayer/Tooltip.set_cost(10)
+	$CanvasLayer/Tooltip.set_cast_time(ability.cast_time)
 	$CanvasLayer/Tooltip.set_description("Hello there")
+	
+	var channel_cost = -1
+	var tick_rate = -1
+	if "channel_cost" in ability && "tick_rate" in ability:
+		channel_cost = ability.channel_cost
+		tick_rate = ability.tick_rate
+		
+	$CanvasLayer/Tooltip.set_channel(channel_cost, tick_rate)
+	$CanvasLayer/Tooltip.rect_size.y = 0 # Needed to force panel to resize after removing items from the HBoxContainer, hide/show should do this, don't know why it's not
+	$CanvasLayer/Tooltip.show() # Must be shown before calculating position to force size recalculation
 	$CanvasLayer/Tooltip.rect_position = button.get_global_rect().position - Vector2(0, $CanvasLayer/Tooltip.rect_size.y + 20)
-	$CanvasLayer/Tooltip.show()
 
 
 func _on_ability_button_mouse_exited(ability) -> void:
