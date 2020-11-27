@@ -10,6 +10,7 @@ func setup_abilities(abilities: Array) -> void:
 
 func add_ability(ability) -> Button:
 	var ability_button = ability_button_scene.instance()
+	ability_button.ability_name = ability.name
 	$MarginContainer/HBoxContainer.add_child(ability_button)
 	ability_button.set_icon(ability.icon)
 	

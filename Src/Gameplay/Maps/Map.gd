@@ -412,10 +412,17 @@ func select_unit(unit: Unit) -> void:
 
 func select_ability(ability) -> void:
 	if !ability:
+		for ability_button in get_tree().get_nodes_in_group("ability_buttons"):
+			if ability_button.ability_name == selected_ability.name:
+				ability_button.darken()
 		selected_ability = null
 		Input.set_custom_mouse_cursor(null)
 	else:
 		selected_ability = ability
+		for ability_button in get_tree().get_nodes_in_group("ability_buttons"):
+			print(str(ability_button.ability_name))
+			if ability_button.ability_name == selected_ability.name:
+				ability_button.lighten()
 		Input.set_custom_mouse_cursor(rainbow_cursor)
 
 
