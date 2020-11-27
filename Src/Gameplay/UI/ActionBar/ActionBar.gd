@@ -2,32 +2,27 @@ extends TextureRect
 
 var ability_button_scene = load("res://Gameplay/UI/AbilityButton/AbilityButton.tscn")
 
-signal ability_button_pressed(ability)
-signal ability_button_mouse_entered(ability)
-signal ability_button_mouse_exited(ability)
-
-
-func _on_ability_button_pressed(ability) -> void:
-	emit_signal("ability_button_pressed", ability)
-
-
-func _on_ability_mouse_entered(ability) -> void:
-	emit_signal("ability_button_mouse_entered", ability)
-
-
-func _on_ability_mouse_exited(ability) -> void:
-	emit_signal("ability_button_mouse_exited", ability)
-
 
 func setup_abilities(abilities: Array) -> void:
 	for ability in abilities:
-		if "icon" in ability:
-			var ability_button = ability_button_scene.instance()
-			$MarginContainer/HBoxContainer.add_child(ability_button)
-			ability_button.set_icon(ability.icon)
-			ability_button.connect("pressed", self, "_on_ability_button_pressed", [ability])
-			ability_button.connect("mouse_entered", self, "_on_ability_mouse_entered", [ability])
-			ability_button.connect("mouse_exited", self, "_on_ability_mouse_exited", [ability])
+		add_ability(ability)
+
+
+func add_ability(ability) -> Button:
+	var ability_button = ability_button_scene.instance()
+	$MarginContainer/HBoxContainer.add_child(ability_button)
+	ability_button.set_icon(ability.icon)
+	
+	return ability_button
+
+
+func remove_ability(index: int) -> void:
+	var ability_button = $MarginContainer/HBoxContainer.get_child(index)
+	ability_button.queue_free()
+
+
+func get_buttons() -> Array:
+	return $MarginContainer/HBoxContainer.get_children()
 
 
 func set_max_health(max_health: int) -> void:

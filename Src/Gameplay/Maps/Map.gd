@@ -10,20 +10,20 @@ var selected_ability
 
 
 #This should hook into whatever mechanism determines when an ability key is pressed
-func _on_ActionBar_ability_button_pressed(ability) -> void:
+func _on_ability_button_pressed(ability) -> void:
 	process_ability_press(ability)
 
 
-func _on_ActionBar_ability_button_mouse_entered(ability) -> void:
+func _on_ability_button_mouse_entered(button: TextureButton, ability) -> void:
 	$CanvasLayer/Tooltip.set_name(ability.name)
 	$CanvasLayer/Tooltip.set_range(100)
 	$CanvasLayer/Tooltip.set_cost(10)
 	$CanvasLayer/Tooltip.set_description("Hello there")
-	$CanvasLayer/Tooltip.rect_position = get_global_mouse_position() - Vector2(0, $CanvasLayer/Tooltip.get_rect().size.y)
+	$CanvasLayer/Tooltip.rect_position = button.get_global_rect().position - Vector2(0, $CanvasLayer/Tooltip.rect_size.y + 20)
 	$CanvasLayer/Tooltip.show()
 
 
-func _on_ActionBar_ability_button_mouse_exited(ability) -> void:
+func _on_ability_button_mouse_exited(ability) -> void:
 	$CanvasLayer/Tooltip.hide()
 
 
@@ -354,7 +354,13 @@ func setup(player_name: String, player_lookup: Dictionary) -> void:
 			unit.connect("auto_attack_cooldown_started", self, "_on_auto_attack_cooldown_started")
 			unit.connect("auto_attack_cooldown_ended", self, "_on_auto_attack_cooldown_ended")
 			unit.connect("auto_attack_cooldown_progressed", self, "_on_auto_attack_cooldown_progressed")
-			$CanvasLayer/ActionBar.setup_abilities(unit.get_node("Abilities").get_children())
+			
+			for ability in unit.get_node("Abilities").get_children():
+				var ability_button = $CanvasLayer/ActionBar.add_ability(ability)
+				ability_button.connect("pressed", self, "_on_ability_button_pressed", [ability])
+				ability_button.connect("mouse_entered", self, "_on_ability_button_mouse_entered", [ability_button, ability])
+				ability_button.connect("mouse_exited", self, "_on_ability_button_mouse_exited", [ability])
+			
 			$CanvasLayer/ActionBar.set_max_health(unit.health_attr.value)
 			$CanvasLayer/ActionBar.set_max_mana(unit.mana_attr.value)
 			$CanvasLayer/CharacterPanel.set_character_name(player_name)
