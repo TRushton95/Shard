@@ -22,8 +22,8 @@ __meta__ = {
 }
 
 [node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer"]
-margin_right = 812.0
-margin_bottom = 64.0
+margin_right = 40.0
+margin_bottom = 40.0
 
 [node name="Health" type="TextureProgress" parent="."]
 margin_left = 222.0
