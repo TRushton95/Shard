@@ -24,6 +24,16 @@ func set_max_cooldown(value: float) -> void:
 	$CooldownTexture.max_value = value
 
 
+func show_cooldown() -> void:
+	$CooldownTexture.show()
+	$CooldownLabel.show()
+
+
+func hide_cooldown() -> void:
+	$CooldownTexture.hide()
+	$CooldownLabel.hide()
+
+
 func set_cooldown(value: float) -> void:
 	$CooldownTexture.value = value
 	$CooldownLabel.text = str(ceil(value))

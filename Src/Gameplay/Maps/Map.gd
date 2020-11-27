@@ -211,6 +211,26 @@ func _on_auto_attack_cooldown_ended() -> void:
 	$CanvasLayer/AutoAttackBar.hide()
 
 
+func _on_ability_cooldown_started(ability) -> void:
+	for ability_button in get_tree().get_nodes_in_group("ability_buttons"):
+		if ability_button.ability_name == ability.name:
+			ability_button.set_max_cooldown(ability.cooldown)
+			ability_button.set_cooldown(ability.cooldown)
+			ability_button.show_cooldown()
+
+
+func _on_ability_cooldown_progressed(ability) -> void:
+	for ability_button in get_tree().get_nodes_in_group("ability_buttons"):
+		if ability_button.ability_name == ability.name:
+			ability_button.set_cooldown(ability.cooldown_timer.time_left)
+
+
+func _on_ability_cooldown_ended(ability) -> void:
+	for ability_button in get_tree().get_nodes_in_group("ability_buttons"):
+		if ability_button.ability_name == ability.name:
+			ability_button.hide_cooldown()
+
+
 var mana_modifier = Modifier.new(Enums.ModifierType.Additive, 5)
 
 func _process(_delta: float) -> void:
@@ -364,6 +384,9 @@ func setup(player_name: String, player_lookup: Dictionary) -> void:
 			unit.connect("auto_attack_cooldown_started", self, "_on_auto_attack_cooldown_started")
 			unit.connect("auto_attack_cooldown_ended", self, "_on_auto_attack_cooldown_ended")
 			unit.connect("auto_attack_cooldown_progressed", self, "_on_auto_attack_cooldown_progressed")
+			unit.connect("ability_cooldown_started", self, "_on_ability_cooldown_started")
+			unit.connect("ability_cooldown_ended", self, "_on_ability_cooldown_ended")
+			unit.connect("ability_cooldown_progressed", self, "_on_ability_cooldown_progressed")
 			
 			for ability in unit.get_node("Abilities").get_children():
 				var ability_button = $CanvasLayer/ActionBar.add_ability(ability)

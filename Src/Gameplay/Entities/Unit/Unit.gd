@@ -36,6 +36,9 @@ signal channelling_ticked
 signal auto_attack_cooldown_started(duration)
 signal auto_attack_cooldown_progressed(time_remaining)
 signal auto_attack_cooldown_ended
+signal ability_cooldown_started(ability)
+signal ability_cooldown_progressed(ability)
+signal ability_cooldown_ended(ability)
 signal status_effect_applied(status_effect)
 signal status_effect_removed(status_effect, index)
 signal damage_received(value)
@@ -110,10 +113,22 @@ func _on_spell_power_attr_changed(value: int) -> void:
 func _on_movement_speed_attr_changed(value: int) -> void:
 	emit_signal("movement_speed_attr_changed", value)
 
+
+func _on_ability_cooldown_started(ability) -> void:
+	emit_signal("ability_cooldown_started", ability)
+
+
+func _on_ability_cooldown_progressed(ability) -> void:
+	emit_signal("ability_cooldown_progressed", ability)
+
+
+func _on_ability_cooldown_ended(ability) -> void:
+	emit_signal("ability_cooldown_ended", ability)
+
 # End of Stat change handlers
 
 
-func _ready():
+func _ready() -> void:
 	health_attr = ModifiableAttribute.new(base_health)
 	mana_attr = ModifiableAttribute.new(base_mana)
 	attack_power_attr = ModifiableAttribute.new(base_attack_power)
@@ -127,6 +142,16 @@ func _ready():
 	attack_power_attr.connect("changed", self, "_on_attack_power_attr_changed")
 	spell_power_attr.connect("changed", self, "_on_spell_power_attr_changed")
 	movement_speed_attr.connect("changed", self, "_on_movement_speed_attr_changed")
+	
+	for ability in get_node("Abilities").get_children():
+		if ability.has_signal("cooldown_started"):
+			ability.connect("cooldown_started", self, "_on_ability_cooldown_started", [ability])
+			
+		if ability.has_signal("cooldown_progressed"):
+			ability.connect("cooldown_progressed", self, "_on_ability_cooldown_progressed", [ability])
+		
+		if ability.has_signal("cooldown_ended"):
+			ability.connect("cooldown_ended", self, "_on_ability_cooldown_ended", [ability])
 	
 	$UnitProfile/VBoxContainer/SmallHealthBar.max_value = current_health
 	$UnitProfile/VBoxContainer/SmallHealthBar.value = current_health
