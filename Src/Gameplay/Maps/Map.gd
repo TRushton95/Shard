@@ -88,7 +88,7 @@ func _on_unit_status_effect_applied(status_effect: Status, unit: Unit) -> void:
 		$CanvasLayer/TargetFrame.add_status_effect(status_effect)
 
 
-func _on_unit_status_effect_removed(status_effect: Status, index: int, unit: Unit) -> void:
+func _on_unit_status_effect_removed(_status_effect: Status, index: int, unit: Unit) -> void:
 	if unit == get_node(player_name):
 		$CanvasLayer/StatusEffectBar.remove_status_effect(index)
 	
@@ -203,7 +203,7 @@ func _on_auto_attack_cooldown_ended() -> void:
 
 var mana_modifier = Modifier.new(Enums.ModifierType.Additive, 5)
 
-func _process(delta: float) -> void:
+func _process(_delta: float) -> void:
 	var player = get_node(player_name)
 	
 	var ability_index = -1

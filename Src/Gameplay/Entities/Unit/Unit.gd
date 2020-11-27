@@ -48,7 +48,7 @@ signal spell_power_attr_changed(value)
 signal movement_speed_attr_changed(value)
 
 
-func _on_Clickbox_input_event(viewport, event, shape_idx):
+func _on_Clickbox_input_event(_viewport, event, _shape_idx):
 	if event is InputEventMouseButton && event.pressed:
 		if event.button_index == BUTTON_LEFT:
 			emit_signal("left_clicked")
@@ -208,7 +208,6 @@ func cast(index: int, target) -> void:
 		
 	var ability = $Abilities.get_child(index)
 	
-	var mana_cost = 0
 	if "cost" in ability && current_mana < ability.cost:
 		print("Insufficient mana to cast")
 		return

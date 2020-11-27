@@ -30,7 +30,7 @@ func get_value() -> float:
 	return value
 
 
-func set_value(value: float) -> void:
+func set_value(_value: float) -> void:
 	print("Attribute value cannot be set directly")
 
 

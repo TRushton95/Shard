@@ -66,6 +66,10 @@ Enums="*res://Gameplay/Enums/Enums.gd"
 AbilityHelper="*res://Gameplay/AbilitySystem/Helpers/AbilityHelper.gd"
 StatusHelper="*res://Gameplay/AbilitySystem/Helpers/StatusHelper.gd"
 
+[debug]
+
+gdscript/warnings/return_value_discarded=false
+
 [display]
 
 window/size/width=1980

@@ -30,7 +30,6 @@ func _on_projectile_target_reached(projectile: Projectile, target: Unit, caster:
 		
 		var dot_damage = base_dot_damage + (dot_damage_per_sp * caster.spell_power_attr.value)
 		var dot = StatusHelper.dot(dot_damage, dot_duration, dot_tick_rate, burn_icon_texture.resource_path, dot_name)
-		var test = dot.to_data()
 		
 		target.rpc("push_status_effect", dot.to_data())
 		

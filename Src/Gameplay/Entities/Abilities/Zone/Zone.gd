@@ -14,7 +14,7 @@ func _on_stopwatch_tick() -> void:
 	emit_signal("tick", affected_bodies)
 
 
-func _physics_process(delta: float) -> void:
+func _physics_process(_delta: float) -> void:
 	if target is Unit:
 		position = target.position
 	

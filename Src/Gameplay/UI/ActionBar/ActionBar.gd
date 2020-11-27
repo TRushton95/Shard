@@ -2,7 +2,6 @@ extends TextureRect
 
 var ability_button_scene = load("res://Gameplay/UI/AbilityButton/AbilityButton.tscn")
 
-
 signal ability_button_pressed(ability)
 signal ability_button_mouse_entered(ability)
 signal ability_button_mouse_exited(ability)
@@ -21,8 +20,6 @@ func _on_ability_mouse_exited(ability) -> void:
 
 
 func setup_abilities(abilities: Array) -> void:
-	var index = 0
-	
 	for ability in abilities:
 		if "icon" in ability:
 			var ability_button = ability_button_scene.instance()
@@ -31,8 +28,6 @@ func setup_abilities(abilities: Array) -> void:
 			ability_button.connect("pressed", self, "_on_ability_button_pressed", [ability])
 			ability_button.connect("mouse_entered", self, "_on_ability_mouse_entered", [ability])
 			ability_button.connect("mouse_exited", self, "_on_ability_mouse_exited", [ability])
-			
-		index += 1
 
 
 func set_max_health(max_health: int) -> void:
