@@ -1,5 +1,8 @@
 extends TextureRect
 
+var ability_button_scene = load("res://Gameplay/UI/AbilityButton/AbilityButton.tscn")
+
+
 signal ability_button_pressed(ability)
 signal ability_button_mouse_entered(ability)
 signal ability_button_mouse_exited(ability)
@@ -22,8 +25,9 @@ func setup_abilities(abilities: Array) -> void:
 	
 	for ability in abilities:
 		if "icon" in ability:
-			var ability_button = $MarginContainer/HBoxContainer.get_node("Ability" + str(index + 1))
-			ability_button.texture_normal = ability.icon
+			var ability_button = ability_button_scene.instance()
+			$MarginContainer/HBoxContainer.add_child(ability_button)
+			ability_button.set_icon(ability.icon)
 			ability_button.connect("pressed", self, "_on_ability_button_pressed", [ability])
 			ability_button.connect("mouse_entered", self, "_on_ability_mouse_entered", [ability])
 			ability_button.connect("mouse_exited", self, "_on_ability_mouse_exited", [ability])
