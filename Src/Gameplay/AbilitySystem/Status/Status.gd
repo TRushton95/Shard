@@ -8,7 +8,7 @@ var tick_rate := 0.0
 var tick_damage := 0
 var tick_healing := 0
 
-var stopwatch := Stopwatch.new()
+var stopwatch : Stopwatch
 
 signal expired
 
@@ -35,11 +35,20 @@ func _init(is_debuff : float, duration : float, icon_texture_path: String) -> vo
 
 func _ready() -> void:
 	if tick_rate > 0.0:
+		stopwatch = Stopwatch.new()
 		stopwatch.setup(duration, tick_rate)
 		add_child(stopwatch)
 		stopwatch.connect("tick", self, "_on_stopwatch_tick")
 		stopwatch.connect("timeout", self, "_on_stopwatch_timeout")
 		stopwatch.start()
+
+
+func restart() -> void:
+	if !stopwatch:
+		print("Cannot restart uninitialised stopwatch")
+		return
+		
+	stopwatch.start()
 
 
 func get_time_remaining() -> float:

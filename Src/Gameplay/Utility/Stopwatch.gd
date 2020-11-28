@@ -46,7 +46,7 @@ func start(initial_tick = false) -> void:
 	
 	duration_timer.one_shot = true
 	duration_timer.start(duration)
-		
+	
 	tick_timer.one_shot = false
 	tick_timer.start(tick_rate)
 

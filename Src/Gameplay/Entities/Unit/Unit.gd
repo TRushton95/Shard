@@ -320,6 +320,12 @@ func execute_ability(ability: Ability, target) -> void:
 remotesync func push_status_effect(status_effect_data: Dictionary) -> void:
 	var status_effect = StatusHelper.build_from_data(status_effect_data)
 	
+	# TODO: Assign uid from global uid helper class to allow for quicker comparisons, this can be used in lots of other places for abilities too
+	for applied_status_effect in $StatusEffects.get_children():
+		if applied_status_effect.name == status_effect.name: 
+			applied_status_effect.restart()
+			return
+	
 	$StatusEffects.add_child(status_effect)
 	status_effect.set_owner(self)
 	status_effect.connect("expired", self, "_on_status_expired", [status_effect])
