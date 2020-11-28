@@ -175,9 +175,8 @@ func _on_unit_casting_started(ability_name: String, duration: float, unit: Unit)
 		$CanvasLayer/CastBar.initialise(ability_name, duration)
 		$CanvasLayer/CastBar.show()
 		
-		for ability_button in get_tree().get_nodes_in_group("ability_buttons"):
-			if ability_button.ability_name == ability_name:
-				ability_button.set_active(true)
+		for ability_button in _get_ability_buttons_by_ability_name(ability_name):
+			ability_button.set_active(true)
 
 
 func _on_unit_casting_progressed(time_elapsed: float, unit: Unit) -> void:
@@ -197,6 +196,9 @@ func _on_unit_channelling_started(ability_name: String, channel_duration: float,
 	if unit == get_node(player_name):
 		$CanvasLayer/CastBar.initialise(ability_name, channel_duration)
 		$CanvasLayer/CastBar.show()
+		
+		for ability_button in _get_ability_buttons_by_ability_name(ability_name):
+			ability_button.set_active(true)
 
 
 func _on_unit_channelling_progressed(time_remaining: float, unit: Unit) -> void:
@@ -204,9 +206,12 @@ func _on_unit_channelling_progressed(time_remaining: float, unit: Unit) -> void:
 		$CanvasLayer/CastBar.set_value(time_remaining)
 
 
-func _on_unit_channelling_stopped(unit: Unit) -> void:
+func _on_unit_channelling_stopped(ability_name: String, unit: Unit) -> void:
 	if unit == get_node(player_name):
 		$CanvasLayer/CastBar.hide()
+		
+		for ability_button in _get_ability_buttons_by_ability_name(ability_name):
+			ability_button.set_active(false)
 
 
 func _on_auto_attack_cooldown_started(duration: float) -> void:

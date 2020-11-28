@@ -15,7 +15,7 @@ func _on_caster_channelling_ticked(target: Unit, caster: Unit) -> void:
 	target.heal(healing, name)
 
 
-func _on_caster_channelling_stopped(caster: Unit) -> void:
+func _on_caster_channelling_stopped(ability_name: String, caster: Unit) -> void:
 	caster.disconnect("channelling_ticked", self, "_on_caster_channelling_ticked")
 	caster.disconnect("channelling_stopped", self, "_on_caster_channelling_stopped")
 

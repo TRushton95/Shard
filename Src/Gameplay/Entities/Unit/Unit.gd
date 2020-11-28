@@ -31,7 +31,7 @@ signal casting_progressed(time_elapsed)
 signal casting_stopped(ability_name)
 signal channelling_started(ability_name, duration)
 signal channelling_progressed(time_remaining)
-signal channelling_stopped
+signal channelling_stopped(ability_name)
 signal channelling_ticked
 signal auto_attack_cooldown_started(duration)
 signal auto_attack_cooldown_progressed(time_remaining)
@@ -295,11 +295,12 @@ func stop_channelling() -> void:
 		return
 		
 	print("Stopping channel")
+	var ability = get_node("Abilities").get_child(channelling_index)
 	channelling_index = -1
 	$ChannelStopwatch.stop()
 	$ChannelStopwatch.disconnect("tick", self, "_on_ChannelStopwatch_tick")
 	$ChannelStopwatch.disconnect("timeout", self, "_on_ChannelStopwatch_timeout")
-	emit_signal("channelling_stopped")
+	emit_signal("channelling_stopped", ability.name)
 
 
 func execute_ability(ability: Ability, target) -> void:
