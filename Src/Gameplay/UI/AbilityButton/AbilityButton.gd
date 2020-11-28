@@ -7,13 +7,13 @@ var _is_hovered := false
 
 func _on_AbilityButton_mouse_entered() -> void:
 	_is_hovered = true
-	$HoverTexture.show()
+	$ActiveTexture.show()
 
 
 func _on_AbilityButton_mouse_exited() -> void:
 	_is_hovered = false
 	if !_active:
-		$HoverTexture.hide()
+		$ActiveTexture.hide()
 
 
 func _ready() -> void:
@@ -54,9 +54,9 @@ func set_active(value: bool) -> void:
 	_active = value
 	
 	if _active:
-		$HoverTexture.show()
+		$ActiveTexture.show()
 	elif !_is_hovered:
-		$HoverTexture.hide()
+		$ActiveTexture.hide()
 
 
 func lighten() -> void:
