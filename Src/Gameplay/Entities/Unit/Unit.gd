@@ -28,7 +28,7 @@ signal path_finished
 signal follow_path_outdated
 signal casting_started(ability_name, duration)
 signal casting_progressed(time_elapsed)
-signal casting_stopped
+signal casting_stopped(ability_name)
 signal channelling_started(ability_name, duration)
 signal channelling_progressed(time_remaining)
 signal channelling_stopped
@@ -261,11 +261,13 @@ func stop_casting() -> void:
 		print("Unit is not casting")
 		return
 		
+	var ability = get_node("Abilities").get_child(casting_index)
+	
 	print("Stopping cast")
 	casting_index = -1
 	$CastTimer.stop()
 	$CastTimer.disconnect("timeout", self, "_on_CastTimer_timeout")
-	emit_signal("casting_stopped")
+	emit_signal("casting_stopped", ability.name)
 
 
 func channel(ability: Ability) -> void:

@@ -1,14 +1,19 @@
 extends TextureButton
 
 var ability_name: String
+var _active := false
+var _is_hovered := false
 
 
 func _on_AbilityButton_mouse_entered() -> void:
+	_is_hovered = true
 	$HoverTexture.show()
 
 
 func _on_AbilityButton_mouse_exited() -> void:
-	$HoverTexture.hide()
+	_is_hovered = false
+	if !_active:
+		$HoverTexture.hide()
 
 
 func _ready() -> void:
@@ -36,6 +41,15 @@ func hide_cooldown() -> void:
 func set_cooldown(value: float) -> void:
 	$CooldownTexture.value = value
 	$CooldownLabel.text = str(ceil(value))
+
+
+func set_active(value: bool) -> void:
+	_active = value
+	
+	if _active:
+		$HoverTexture.show()
+	elif !_is_hovered:
+		$HoverTexture.hide()
 
 
 func lighten() -> void:

@@ -6,6 +6,6 @@
 [node name="Fireball" type="Node"]
 script = ExtResource( 1 )
 cooldown = 5.0
-cast_time = 1.0
+cast_time = 2.0
 cost = 5
 icon = ExtResource( 2 )
