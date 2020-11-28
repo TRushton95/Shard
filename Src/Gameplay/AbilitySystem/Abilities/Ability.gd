@@ -38,8 +38,8 @@ func try_start_cooldown() -> void:
 
 
 func get_remaining_cooldown() -> float:
-	return _cooldown_timer.time_left
+	return _cooldown_timer.time_left if _cooldown_timer else 0.0
 
 
 func is_on_cooldown() -> bool:
-	return _cooldown_timer.time_left > 0
+	return _cooldown_timer.time_left > 0 if _cooldown_timer else false
