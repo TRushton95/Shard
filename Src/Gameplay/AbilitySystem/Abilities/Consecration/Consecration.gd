@@ -1,6 +1,6 @@
 extends Ability
 
-var consecration_texture = load("res://Gameplay/AbilitySystem/Abilities/Consecration/consecration.png")
+var consecration_texture = load("res://Gameplay/AbilitySystem/Abilities/Consecration/zone.png")
 
 var tick_damage := 1
 var tick_damage_per_sp := 0.5
