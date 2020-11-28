@@ -164,6 +164,10 @@ func _on_unit_mana_changed(value: int, unit: Unit) -> void:
 	
 	if unit == get_node(player_name):
 		$CanvasLayer/ActionBar.set_current_mana(unit.current_mana)
+			
+		for ability in unit.get_node("Abilities").get_children():
+			for ability_button in _get_ability_buttons_by_ability_name(ability.name):
+				ability_button.set_unaffordable_filter_visibility(unit.current_mana < ability.cost)
 
 
 func _on_unit_casting_started(ability_name: String, duration: float, unit: Unit) -> void:
@@ -185,9 +189,8 @@ func _on_unit_casting_stopped(ability_name: String, unit: Unit) -> void:
 	if unit == get_node(player_name):
 		$CanvasLayer/CastBar.hide()
 		
-	for ability_button in get_tree().get_nodes_in_group("ability_buttons"):
-		if ability_button.ability_name == ability_name:
-			ability_button.set_active(false)
+	for ability_button in _get_ability_buttons_by_ability_name(ability_name):
+		ability_button.set_active(false)
 
 
 func _on_unit_channelling_started(ability_name: String, channel_duration: float, unit: Unit) -> void:
@@ -220,23 +223,20 @@ func _on_auto_attack_cooldown_ended() -> void:
 
 
 func _on_ability_cooldown_started(ability: Ability) -> void:
-	for ability_button in get_tree().get_nodes_in_group("ability_buttons"):
-		if ability_button.ability_name == ability.name:
-			ability_button.set_max_cooldown(ability.cooldown)
-			ability_button.set_cooldown(ability.cooldown)
-			ability_button.show_cooldown()
+	for ability_button in _get_ability_buttons_by_ability_name(ability.name):
+		ability_button.set_max_cooldown(ability.cooldown)
+		ability_button.set_cooldown(ability.cooldown)
+		ability_button.show_cooldown()
 
 
 func _on_ability_cooldown_progressed(ability: Ability) -> void:
-	for ability_button in get_tree().get_nodes_in_group("ability_buttons"):
-		if ability_button.ability_name == ability.name:
-			ability_button.set_cooldown(ability.get_remaining_cooldown())
+	for ability_button in _get_ability_buttons_by_ability_name(ability.name):
+		ability_button.set_cooldown(ability.get_remaining_cooldown())
 
 
 func _on_ability_cooldown_ended(ability: Ability) -> void:
-	for ability_button in get_tree().get_nodes_in_group("ability_buttons"):
-		if ability_button.ability_name == ability.name:
-			ability_button.hide_cooldown()
+	for ability_button in _get_ability_buttons_by_ability_name(ability.name):
+		ability_button.hide_cooldown()
 
 
 var mana_modifier = Modifier.new(Enums.ModifierType.Additive, 5)
@@ -453,17 +453,18 @@ func select_unit(unit: Unit) -> void:
 
 
 func select_ability(ability: Ability) -> void:
-	var ability_buttons = get_tree().get_nodes_in_group("ability_buttons")
-	
 	# Deselect any currently selected ability buttons
 	if selected_ability:
-		for ability_button in ability_buttons:
-			if ability_button.ability_name == selected_ability.name:
-				ability_button.darken()
+		for ability_button in _get_ability_buttons_by_ability_name(selected_ability.name):
+			ability_button.darken()
 				
 	if !ability:
 		selected_ability = null
 		Input.set_custom_mouse_cursor(null)
+		return
+		
+	if get_node(player_name).current_mana < ability.cost:
+		print("Insufficient mana")
 		return
 		
 	if ability.is_on_cooldown():
@@ -471,9 +472,9 @@ func select_ability(ability: Ability) -> void:
 		return
 	
 	selected_ability = ability
-	for ability_button in ability_buttons:
-		if ability_button.ability_name == selected_ability.name:
-			ability_button.lighten()
+	for ability_button in _get_ability_buttons_by_ability_name(selected_ability.name):
+		ability_button.lighten()
+		
 	Input.set_custom_mouse_cursor(rainbow_cursor)
 
 
@@ -482,3 +483,13 @@ remotesync func _set_unit_focus(unit_name: String, focus_name: String) -> void:
 	var focus = get_node(focus_name) if focus_name else null
 	
 	unit.focus = focus
+
+
+func _get_ability_buttons_by_ability_name(ability_name: String) -> Array:
+	var result = []
+	
+	for ability_button in get_tree().get_nodes_in_group("ability_buttons"):
+		if ability_button.ability_name == ability_name:
+			result.push_back(ability_button)
+				
+	return result

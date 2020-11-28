@@ -43,6 +43,13 @@ func set_cooldown(value: float) -> void:
 	$CooldownLabel.text = str(ceil(value))
 
 
+func set_unaffordable_filter_visibility(show: bool) -> void:
+	if show:
+		$UnaffordableTexture.show()
+	else:
+		$UnaffordableTexture.hide()
+
+
 func set_active(value: bool) -> void:
 	_active = value
 	
