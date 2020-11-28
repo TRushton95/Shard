@@ -1,19 +1,21 @@
 extends Node
 
 
-func dot(damage_per_tick: int, duration: float, tick_rate: float, icon_texture_path: String, status_name: String) -> Status:
-	var result = Status.new(true, duration, icon_texture_path)
-	result.icon_texture_path = icon_texture_path
-	result.damage_per_tick = damage_per_tick
-	result.tick_rate = tick_rate
+func dot(status_name: String, damage_per_tick: int, duration: float, tick_rate: float, icon_texture: Texture) -> Status:
+	var result = Status.new()
 	result.name = status_name
+	result.is_debuff = true
+	result.duration = duration
+	result.tick_rate = tick_rate
+	result.damage_per_tick = damage_per_tick
+	result.icon_texture = icon_texture
 	
 	return result
 
 
 func build_from_data(data: Dictionary) -> Status:
 	var status_name = data["name"]
-	var icon_texture_path = data["icon_texture_path"]
+	var icon_texture_path = data["icon_texture"]
 	var is_debuff = data["is_debuff"]
 	var duration = data["duration"]
 	var tick_rate = data["tick_rate"]
@@ -25,8 +27,11 @@ func build_from_data(data: Dictionary) -> Status:
 	var spell_power_modifier = _build_modifier_from_data(data["spell_power_modifier"])
 	var movement_speed_modifier = _build_modifier_from_data(data["movement_speed_modifier"])
 	
-	var result = Status.new(is_debuff, duration, icon_texture_path)
+	var result = Status.new()
 	result.name = status_name
+	result.is_debuff = is_debuff
+	result.duration = duration
+	result.icon_texture = load(icon_texture_path)
 	result.tick_rate = tick_rate
 	result.damage_per_tick = damage_per_tick
 	result.healing_per_tick = healing_per_tick

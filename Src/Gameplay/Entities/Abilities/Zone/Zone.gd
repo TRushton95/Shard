@@ -22,7 +22,6 @@ var damage_per_tick := 0
 var healing_per_tick := 0
 var texture : Texture setget _set_texture
 var status : Status
-var status_texture_path : String
 
 
 func _on_Zone_body_entered(body) -> void:

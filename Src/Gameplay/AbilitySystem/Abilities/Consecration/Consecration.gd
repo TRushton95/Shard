@@ -14,7 +14,7 @@ var radius := 100
 var status_name = "Hallowed Ground"
 var status_speed_multiplier = 0.5
 var status_duration = -1.0
-var is_status_debuff = true
+var is_debuff = true
 
 
 func _ready() -> void:
@@ -37,7 +37,11 @@ func execute(target, caster: Unit) -> void:
 	get_tree().get_root().add_child(zone) # TODO: This shouldn't be added to the tree root
 	zone.setup()
 	
-	var status = Status.new(is_status_debuff, status_duration, hallowed_ground_texture.resource_path)
+	var status = Status.new()
+	status.is_debuff = is_debuff
+	status.duration = status_duration
 	status.name = status_name
 	status.movement_speed_modifier = Modifier.new(status_speed_multiplier, Enums.ModifierType.Multiplicative)
+	status.icon_texture = hallowed_ground_texture
+	
 	zone.status = status

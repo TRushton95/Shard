@@ -1,9 +1,9 @@
 extends Node
 class_name Status
 
-var is_debuff : bool
-var icon_texture_path: String
-var duration : float
+var is_debuff := false
+var icon_texture: Texture
+var duration := 0.0
 var tick_rate := 0.0
 
 var damage_per_tick := 0
@@ -60,12 +60,6 @@ func on_remove() -> void:
 		get_owner().movement_speed_attr.remove_modifier(movement_speed_modifier)
 
 
-func _init(is_debuff : float, duration : float, icon_texture_path: String) -> void:
-	self.is_debuff = is_debuff
-	self.duration = duration
-	self.icon_texture_path = icon_texture_path
-
-
 func _ready() -> void:
 	if duration > 0.0:
 		stopwatch = Stopwatch.new()
@@ -96,7 +90,7 @@ func get_time_remaining() -> float:
 func to_data() -> Dictionary:
 	return {
 		"name": name,
-		"icon_texture_path": icon_texture_path,
+		"icon_texture": icon_texture.resource_path if icon_texture else "",
 		"is_debuff": is_debuff,
 		"duration": duration,
 		"tick_rate": tick_rate,

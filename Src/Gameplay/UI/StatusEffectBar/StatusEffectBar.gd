@@ -5,9 +5,7 @@ var status_effect_widget_scene = load("res://Gameplay/UI/StatusEffectBar/StatusE
 
 func add_status_effect(status_effect: Status) -> void:
 	var status_effect_widget = status_effect_widget_scene.instance()
-	
-	var icon_texture = load(status_effect.icon_texture_path)
-	status_effect_widget.setup(icon_texture, status_effect.duration)
+	status_effect_widget.setup(status_effect.icon_texture, status_effect.duration)
 	add_child(status_effect_widget)
 
 
