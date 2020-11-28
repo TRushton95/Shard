@@ -21,7 +21,10 @@ func _on_tick_timer_timeout():
 	emit_signal("tick")
 
 
-func _ready() -> void:
+func setup(duration: float, tick_rate: float) -> void:
+	self.duration = duration
+	self.tick_rate = tick_rate
+	
 	#If multiple timers are started in the same frame, processing order is determined by node index
 	if tick_rate > 0.0:
 		tick_timer = Timer.new()
@@ -32,11 +35,6 @@ func _ready() -> void:
 	add_child(duration_timer)
 	
 	duration_timer.connect("timeout", self, "_on_duration_timer_timeout")
-
-
-func setup(duration: float, tick_rate: float) -> void:
-	self.duration = duration
-	self.tick_rate = tick_rate
 
 
 func start(initial_tick = false) -> void:
