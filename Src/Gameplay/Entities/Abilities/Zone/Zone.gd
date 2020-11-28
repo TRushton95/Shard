@@ -13,10 +13,14 @@ var target
 var one_shot := false
 var stopwatch = Stopwatch.new()
 
+var duration := 0.0 # Provide 0 duration for an instant transient zone
 var impact_damage := 0
 var impact_healing := 0
+var tick_rate := 0.0
+var radius := 0  setget _set_radius
 var damage_per_tick := 0
 var healing_per_tick := 0
+var texture : Texture setget _set_texture
 var status : Status
 var status_texture_path : String
 
@@ -79,12 +83,7 @@ func _physics_process(_delta: float) -> void:
 		queue_free()
 
 
-# Provide 0 duration for an instant transient zone
-func setup(target, duration: float, tick_rate: int, radius: int, texture: Texture) -> void:
-	self.target = target
-	$CollisionShape2D.shape.radius = radius
-	$Sprite.texture = texture
-	
+func setup() -> void:
 	if target is Vector2:
 		position = target # Set vector2 position here to avoid resetting every _physics_process
 	
@@ -101,6 +100,16 @@ func setup(target, duration: float, tick_rate: int, radius: int, texture: Textur
 		# be used for immediate calculation, but that must be accessed in _physics_process
 		# only, so a one_shot zone should be flagged and handled there.
 		one_shot = true
+
+
+func _set_radius(value: int) -> void:
+	radius = value
+	$CollisionShape2D.shape.radius = value
+
+
+func _set_texture(value: Texture) -> void:
+	texture = value
+	$Sprite.texture = texture
 
 
 # Overridable hooks
