@@ -68,9 +68,9 @@ config/icon="res://Gameplay/Entities/Unit/icon.png"
 
 [autoload]
 
-Enums="*res://Gameplay/Enums/Enums.gd"
 AbilityHelper="*res://Gameplay/AbilitySystem/Helpers/AbilityHelper.gd"
 StatusHelper="*res://Gameplay/AbilitySystem/Helpers/StatusHelper.gd"
+Enums="*res://Gameplay/Global/Enums.gd"
 
 [debug]
 
