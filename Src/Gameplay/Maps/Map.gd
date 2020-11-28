@@ -441,17 +441,21 @@ func select_ability(ability: Ability) -> void:
 		for ability_button in ability_buttons:
 			if ability_button.ability_name == selected_ability.name:
 				ability_button.darken()
-	
-	
+				
 	if !ability:
 		selected_ability = null
 		Input.set_custom_mouse_cursor(null)
-	else:
-		selected_ability = ability
-		for ability_button in ability_buttons:
-			if ability_button.ability_name == selected_ability.name:
-				ability_button.lighten()
-		Input.set_custom_mouse_cursor(rainbow_cursor)
+		return
+		
+	if ability.is_on_cooldown():
+		print("Ability is on cooldown")
+		return
+	
+	selected_ability = ability
+	for ability_button in ability_buttons:
+		if ability_button.ability_name == selected_ability.name:
+			ability_button.lighten()
+	Input.set_custom_mouse_cursor(rainbow_cursor)
 
 
 remotesync func _set_unit_focus(unit_name: String, focus_name: String) -> void:
