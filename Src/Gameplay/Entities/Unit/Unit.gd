@@ -233,6 +233,10 @@ func cast(index: int, target) -> void:
 		
 	var ability = $Abilities.get_child(index)
 	
+	if ability.is_on_cooldown():
+		print("Ability is still on cooldown")
+		return
+	
 	if "cost" in ability && current_mana < ability.cost:
 		print("Insufficient mana to cast")
 		return

@@ -222,7 +222,7 @@ func _on_ability_cooldown_started(ability) -> void:
 func _on_ability_cooldown_progressed(ability) -> void:
 	for ability_button in get_tree().get_nodes_in_group("ability_buttons"):
 		if ability_button.ability_name == ability.name:
-			ability_button.set_cooldown(ability.cooldown_timer.time_left)
+			ability_button.set_cooldown(ability.get_remaining_cooldown())
 
 
 func _on_ability_cooldown_ended(ability) -> void:

@@ -4,4 +4,4 @@
 
 [node name="Consecration" type="Node"]
 script = ExtResource( 1 )
-cooldown = 1.0
+cooldown = 5.0
