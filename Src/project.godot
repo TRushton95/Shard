@@ -10,6 +10,11 @@ config_version=4
 
 _global_script_classes=[ {
 "base": "Node",
+"class": "Ability",
+"language": "GDScript",
+"path": "res://Gameplay/AbilitySystem/Abilities/Ability.gd"
+}, {
+"base": "Node",
 "class": "ModifiableAttribute",
 "language": "GDScript",
 "path": "res://Gameplay/Entities/Unit/ModifiableAttribute.gd"
@@ -45,6 +50,7 @@ _global_script_classes=[ {
 "path": "res://Gameplay/Entities/Abilities/Zone/Zone.gd"
 } ]
 _global_script_class_icons={
+"Ability": "",
 "ModifiableAttribute": "",
 "Modifier": "",
 "Projectile": "",

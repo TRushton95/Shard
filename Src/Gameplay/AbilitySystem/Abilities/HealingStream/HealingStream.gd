@@ -1,4 +1,4 @@
-extends Node
+extends Ability
 
 var base_tick_healing := 1
 var tick_healing_per_sp := 1
@@ -32,5 +32,6 @@ func execute(target, caster) -> void:
 	if !target is Unit:
 		return
 	
+	.try_start_cooldown()
 	caster.connect("channelling_ticked", self, "_on_caster_channelling_ticked", [target, caster])
 	caster.connect("channelling_stopped", self, "_on_caster_channelling_stopped", [caster])

@@ -4,3 +4,4 @@
 
 [node name="Fireball" type="Node"]
 script = ExtResource( 1 )
+cooldown = 5.0

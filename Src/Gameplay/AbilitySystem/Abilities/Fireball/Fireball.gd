@@ -1,11 +1,7 @@
-extends Node
+extends Ability
 
 var fireball_texture = load("res://Gameplay/AbilitySystem/Abilities/Fireball/fireball.png")
 var burn_icon_texture = load("res://Gameplay/AbilitySystem/Abilities/Fireball/burn_icon.png")
-
-signal cooldown_started
-signal cooldown_progressed
-signal cooldown_ended
 
 var base_damage := 10
 var damage_per_sp := 1.0
@@ -21,8 +17,6 @@ var _projectile_speed := 500
 var target_type = Enums.TargetType.Unit
 var cost := 5
 var cast_time := 1.0
-var cooldown := 5.0 # TODO: Refactor cooldown functionality into a generic Ability node
-var cooldown_timer := Timer.new()
 var icon = load("res://Gameplay/AbilitySystem/Abilities/Fireball/icon.png") # move this into an ability base class that references icon.png with a relative path
 # End of Convention properties
 
@@ -40,27 +34,11 @@ func _on_projectile_target_reached(projectile: Projectile, target: Unit, caster:
 		target.rpc("push_status_effect", dot.to_data())
 
 
-func _on_cooldown_timer_timeout() -> void:
-	emit_signal("cooldown_ended")
-
-
-func _ready() -> void:
-	cooldown_timer.one_shot = true
-	add_child(cooldown_timer)
-	cooldown_timer.connect("timeout", self, "_on_cooldown_timer_timeout")
-
-
-func _process(delta: float) -> void:
-	if cooldown_timer.time_left > 0:
-		emit_signal("cooldown_progressed")
-
-
 remotesync func execute(target, caster: Unit) -> void:
 	if !target is Unit:
 		return
 	
+	.try_start_cooldown()
 	var radius = fireball_texture.get_width() / 2
 	var projectile = AbilityHelper.create_projectile(target, caster.position, _projectile_speed, radius, fireball_texture)
 	projectile.connect("target_reached", self, "_on_projectile_target_reached", [projectile, target, caster])
-	cooldown_timer.start(cooldown)
-	emit_signal("cooldown_started")

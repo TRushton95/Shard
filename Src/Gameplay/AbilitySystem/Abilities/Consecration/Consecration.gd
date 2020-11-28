@@ -1,4 +1,4 @@
-extends Node
+extends Ability
 
 var consecration_texture = load("res://Gameplay/AbilitySystem/Abilities/Consecration/consecration.png")
 
@@ -28,5 +28,6 @@ func execute(target, caster: Unit) -> void:
 	if !target is Vector2:
 		return
 		
+	.try_start_cooldown()
 	var zone = AbilityHelper.create_zone(target, duration, tick_rate, radius, consecration_texture)
 	zone.connect("tick", self, "_on_zone_tick", [caster])
