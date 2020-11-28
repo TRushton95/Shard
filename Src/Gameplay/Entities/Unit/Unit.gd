@@ -321,18 +321,20 @@ remotesync func push_status_effect(status_effect_data: Dictionary) -> void:
 	var status_effect = StatusHelper.build_from_data(status_effect_data)
 	
 	# TODO: Assign uid from global uid helper class to allow for quicker type comparisons, this can be used in lots of other places for abilities too
-	for applied_status_effect in $StatusEffects.get_children():
-		if applied_status_effect.name == status_effect.name: 
-			applied_status_effect.restart()
+	for existing_status_effect in $StatusEffects.get_children():
+		if existing_status_effect.name == status_effect.name: 
+			existing_status_effect.restart()
 			return
-	
+			
 	$StatusEffects.add_child(status_effect)
 	status_effect.set_owner(self)
+	status_effect.on_apply()
 	status_effect.connect("expired", self, "_on_status_expired", [status_effect])
 	emit_signal("status_effect_applied", status_effect)
 
 
 func remove_status_effect(status_effect: Status) -> void:
+	status_effect.on_remove()
 	var index = status_effect.get_index()
 	$StatusEffects.remove_child(status_effect)
 	emit_signal("status_effect_removed", status_effect, index)

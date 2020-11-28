@@ -23,6 +23,11 @@ texture = ExtResource( 2 )
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 shape = SubResource( 1 )
 
+[node name="Clickbox" type="Area2D" parent="."]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Clickbox"]
+shape = SubResource( 2 )
+
 [node name="Abilities" type="Node" parent="."]
 
 [node name="Fireball" parent="Abilities" instance=ExtResource( 3 )]
@@ -31,12 +36,9 @@ shape = SubResource( 1 )
 
 [node name="HealingStream" parent="Abilities" instance=ExtResource( 5 )]
 
-[node name="Clickbox" type="Area2D" parent="."]
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Clickbox"]
-shape = SubResource( 2 )
-
 [node name="StatusEffects" type="Node" parent="."]
+
+[node name="Auras" type="Node" parent="."]
 
 [node name="CastTimer" type="Timer" parent="."]
 
