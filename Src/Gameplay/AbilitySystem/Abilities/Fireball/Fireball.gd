@@ -13,13 +13,6 @@ var dot_tick_rate = 1.0
 var dot_name = "Burn"
 var _projectile_speed := 500
 
-# Convention properties
-var target_type = Enums.TargetType.Unit
-var cost := 5
-var cast_time := 1.0
-var icon = load("res://Gameplay/AbilitySystem/Abilities/Fireball/icon.png") # move this into an ability base class that references icon.png with a relative path
-# End of Convention properties
-
 
 func _on_projectile_target_reached(projectile: Projectile, target: Unit, caster: Unit) -> void:
 	projectile.queue_free()
@@ -32,6 +25,10 @@ func _on_projectile_target_reached(projectile: Projectile, target: Unit, caster:
 		var dot = StatusHelper.dot(dot_damage, dot_duration, dot_tick_rate, burn_icon_texture.resource_path, dot_name)
 		
 		target.rpc("push_status_effect", dot.to_data())
+
+
+func _ready() -> void:
+	target_type = Enums.TargetType.Unit
 
 
 remotesync func execute(target, caster: Unit) -> void:

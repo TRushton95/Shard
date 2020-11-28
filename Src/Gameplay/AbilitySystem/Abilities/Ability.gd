@@ -9,6 +9,10 @@ signal cooldown_ended
 # Convention properties
 
 export var cooldown := 0.0
+export var cast_time := 0.0
+export var cost := 0
+export var icon : Texture
+var target_type = Enums.TargetType.Unset # Must be set in code in each ability, not exported as it is not customisable
 var _cooldown_timer : Timer
 
 # End of  Convention properties

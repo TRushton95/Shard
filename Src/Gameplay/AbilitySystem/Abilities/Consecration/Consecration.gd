@@ -9,19 +9,16 @@ var duration := 5.0
 var tick_rate := 1.0
 var radius := 100
 
-# Convention properties
-var target_type = Enums.TargetType.Position
-var cost := 10
-var cast_time := 0
-var icon = load("res://Gameplay/AbilitySystem/Abilities/Consecration/icon.png") # move this into an ability base class that references icon.png with a relative path
-# End of Convention properties
-
 
 func _on_zone_tick(affected_bodies: Array, caster: Unit) -> void:
 	for body in affected_bodies:
 		if get_tree().is_network_server():
 			var damage = tick_damage + (tick_damage_per_sp * caster.spell_power_attr.value)
 			body.rpc("damage", damage, name)
+
+
+func _ready() -> void:
+	target_type = Enums.TargetType.Position
 
 
 func execute(target, caster: Unit) -> void:

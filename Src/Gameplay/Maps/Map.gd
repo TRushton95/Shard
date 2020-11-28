@@ -268,8 +268,8 @@ func _process(_delta: float) -> void:
 	if ability_index >= 0:
 		var ability = player.get_node("Abilities").get_child(ability_index)
 		
-		if !"target_type" in ability:
-			print("No target type on ability " + ability.name)
+		if ability.target_type == Enums.TargetType.Unset:
+			print("Target type not set on casted ability " + ability.name)
 			return
 			
 		# This method can be moved back here but needs to map key inputs properly and expose in a way
@@ -296,6 +296,9 @@ func process_ability_press(ability: Ability):
 				
 		Enums.TargetType.Position:
 			select_ability(ability)
+			
+		_:
+			print("Invalid target type on ability press")
 
 
 func _unhandled_input(event) -> void:

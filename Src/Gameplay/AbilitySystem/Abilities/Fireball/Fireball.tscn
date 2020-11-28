@@ -1,7 +1,11 @@
-[gd_scene load_steps=2 format=2]
+[gd_scene load_steps=3 format=2]
 
 [ext_resource path="res://Gameplay/AbilitySystem/Abilities/Fireball/Fireball.gd" type="Script" id=1]
+[ext_resource path="res://Gameplay/AbilitySystem/Abilities/Fireball/icon.png" type="Texture" id=2]
 
 [node name="Fireball" type="Node"]
 script = ExtResource( 1 )
 cooldown = 5.0
+cast_time = 1.0
+cost = 5
+icon = ExtResource( 2 )
