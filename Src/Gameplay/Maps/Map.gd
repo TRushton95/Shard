@@ -314,6 +314,7 @@ func process_ability_press(ability: Ability):
 		Enums.TargetType.Unit:
 			if selected_unit:
 				rpc("cast_ability_on_unit", ability.get_index(), player_name, selected_unit.name)
+				select_ability(null)
 			else:
 				select_ability(ability)
 				
