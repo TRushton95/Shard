@@ -244,7 +244,7 @@ func _on_ability_cooldown_ended(ability: Ability) -> void:
 		ability_button.hide_cooldown()
 
 
-var mana_modifier = Modifier.new(Enums.ModifierType.Additive, 5)
+var mana_modifier = Modifier.new(5, Enums.ModifierType.Additive)
 
 func _process(_delta: float) -> void:
 	var player = get_node(player_name)
@@ -299,12 +299,14 @@ func _process(_delta: float) -> void:
 		
 	for status in player.get_node("StatusEffects").get_children():
 		var index = status.get_index()
-		$CanvasLayer/StatusEffectBar.update_duration(index, status.get_time_remaining())
+		if status.get_time_remaining() > 0:
+			$CanvasLayer/StatusEffectBar.update_duration(index, status.get_time_remaining())
 		
 	if selected_unit:
 		for status in selected_unit.get_node("StatusEffects").get_children():
 			var status_index = status.get_index()
-			$CanvasLayer/TargetFrame.update_status_effect_duration(status_index, status.get_time_remaining())
+			if status.get_time_remaining() > 0:
+				$CanvasLayer/TargetFrame.update_status_effect_duration(status_index, status.get_time_remaining())
 
 
 func process_ability_press(ability: Ability):

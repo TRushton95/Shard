@@ -69,7 +69,7 @@ func _on_FollowPathingTimer_timeout() -> void:
 
 
 func _on_status_expired(status_effect) -> void:
-	remove_status_effect(status_effect)
+	remove_status_effect(status_effect.name)
 
 
 func _on_ChannelStopwatch_tick(ability: Ability) -> void:
@@ -333,7 +333,9 @@ remotesync func push_status_effect(status_effect_data: Dictionary) -> void:
 	emit_signal("status_effect_applied", status_effect)
 
 
-func remove_status_effect(status_effect: Status) -> void:
+remotesync func remove_status_effect(status_effect_name: String) -> void:
+	var status_effect = get_node("StatusEffects/" + status_effect_name)
+	
 	status_effect.on_remove()
 	var index = status_effect.get_index()
 	$StatusEffects.remove_child(status_effect)

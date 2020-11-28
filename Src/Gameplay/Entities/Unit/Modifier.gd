@@ -1,10 +1,9 @@
 extends Node
 class_name Modifier
 
-
-var modifier_type : int
 var value : float
+var modifier_type : int
 
-func _init(modifier_type: int, value: float) -> void:
-	self.modifier_type = modifier_type
+func _init(value: float, modifier_type: int) -> void:
 	self.value = value
+	self.modifier_type = modifier_type

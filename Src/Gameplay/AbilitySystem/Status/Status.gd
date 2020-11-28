@@ -15,6 +15,7 @@ var spell_power_modifier : Modifier
 var movement_speed_modifier : Modifier
 
 var stopwatch : Stopwatch
+var timer : Timer
 
 signal expired
 
@@ -66,7 +67,7 @@ func _init(is_debuff : float, duration : float, icon_texture_path: String) -> vo
 
 
 func _ready() -> void:
-	if tick_rate > 0.0:
+	if duration > 0.0:
 		stopwatch = Stopwatch.new()
 		stopwatch.setup(duration, tick_rate)
 		add_child(stopwatch)
@@ -84,7 +85,12 @@ func restart() -> void:
 
 
 func get_time_remaining() -> float:
-	return stopwatch.get_time_remaining()
+	var result = -1.0
+	
+	if stopwatch:
+		result = stopwatch.get_time_remaining()
+		
+	return result
 
 
 func to_data() -> Dictionary:
@@ -100,7 +106,7 @@ func to_data() -> Dictionary:
 		"mana_modifier": _modifier_to_data(mana_modifier),
 		"attack_power_modifier": _modifier_to_data(attack_power_modifier),
 		"spell_power_modifier": _modifier_to_data(spell_power_modifier),
-		"movement_speed_modifier": _modifier_to_data(movement_speed_modifier),
+		"movement_speed_modifier": _modifier_to_data(movement_speed_modifier)
 	}
 
 

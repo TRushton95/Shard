@@ -1,9 +1,12 @@
 extends VBoxContainer
 
-func setup(icon_texture: Texture, duration: float) -> void:
+func setup(icon_texture: Texture, duration: float = 0.0) -> void:
 	$Icon.texture = icon_texture
-	set_duration(duration)
+	
+	if duration > 0.0:
+		set_duration(duration)
+		$DurationLabel.show()
 
 
 func set_duration(duration: float) -> void:
-	$Label.text = "%ss" % [ceil(duration)]
+	$DurationLabel.text = "%ss" % [ceil(duration)]

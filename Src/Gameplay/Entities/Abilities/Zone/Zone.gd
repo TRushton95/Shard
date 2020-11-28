@@ -1,3 +1,11 @@
+# Self contained instance of a zone that can provide predesigned on enter, on leave and tick effects
+# For more complex zone behaviour, create a new scene with your ability that inherits from this scene, and
+# and assign it a new script that extends Zone. In that script, override any of the necessary following hook methods:
+#	_on_one_shot_details(affected_bodies: Array)
+#	_on_tick_details(affected_bodies: Array)
+#	_on_enter_details(body: Unit)
+#	_on_leave_details(body: Unit)
+
 extends Area2D
 class_name Zone
 
@@ -5,13 +13,45 @@ var target
 var one_shot := false
 var stopwatch = Stopwatch.new()
 
-signal tick(affected_bodies)
-signal one_shot(affected_bodies)
+var impact_damage := 0
+var impact_healing := 0
+var damage_per_tick := 0
+var healing_per_tick := 0
+var status : Status
+var status_texture_path : String
+
+
+func _on_Zone_body_entered(body) -> void:
+	if !body is Unit:
+		return
+	
+	if status:
+		if get_tree().is_network_server():
+			body.rpc("push_status_effect", status.to_data())
+	
+	_on_enter_details(body)
+
+
+func _on_Zone_body_exited(body) -> void:
+	if !body is Unit:
+		return
+		
+	if status:
+		if get_tree().is_network_server():
+			body.rpc("remove_status_effect", status.name)
+		
+	_on_leave_details(body)
 
 
 func _on_stopwatch_tick() -> void:
-	var affected_bodies = get_overlapping_bodies()
-	emit_signal("tick", affected_bodies)
+	if get_tree().is_network_server():
+		for affected_body in get_overlapping_bodies():
+			if damage_per_tick > 0:
+				affected_body.rpc("damage", damage_per_tick, name)
+			if healing_per_tick > 0:
+				affected_body.rpc("heal", healing_per_tick, name)
+				
+	_on_tick_details(get_overlapping_bodies())
 
 
 func _physics_process(_delta: float) -> void:
@@ -29,7 +69,13 @@ func _physics_process(_delta: float) -> void:
 		for collision_data in query_result:
 			affected_bodies.push_back(collision_data.collider)
 			
-		emit_signal("one_shot", affected_bodies)
+			if get_tree().is_network_server():
+				if impact_damage > 0:
+					collision_data.collider.rpc("damage", impact_damage, name)
+				if impact_healing > 0:
+					collision_data.collider.rpc("heal", impact_healing, name)
+					
+		_on_one_shot_details(affected_bodies)
 		queue_free()
 
 
@@ -55,3 +101,21 @@ func setup(target, duration: float, tick_rate: int, radius: int, texture: Textur
 		# be used for immediate calculation, but that must be accessed in _physics_process
 		# only, so a one_shot zone should be flagged and handled there.
 		one_shot = true
+
+
+# Overridable hooks
+func _on_one_shot_details(_affected_bodies: Array) -> void:
+	pass
+
+
+func _on_tick_details(_affected_bodies: Array) -> void:
+	pass
+
+
+func _on_enter_details(_body: Unit) -> void:
+	pass
+
+
+func _on_leave_details(_body: Unit) -> void:
+	pass
+# Overridable hooks

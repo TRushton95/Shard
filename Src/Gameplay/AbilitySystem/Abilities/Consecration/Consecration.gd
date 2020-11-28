@@ -1,20 +1,16 @@
 extends Ability
 
 var consecration_texture = load("res://Gameplay/AbilitySystem/Abilities/Consecration/zone.png")
+var hallowed_ground_texture = load("res://Gameplay/AbilitySystem/Abilities/Consecration/hallowed_ground.png")
 
 var tick_damage := 1
 var tick_damage_per_sp := 0.5
 
-var duration := 5.0
+var duration := 15.0
 var tick_rate := 1.0
 var radius := 100
 
-
-func _on_zone_tick(affected_bodies: Array, caster: Unit) -> void:
-	for body in affected_bodies:
-		if get_tree().is_network_server():
-			var damage = tick_damage + (tick_damage_per_sp * caster.spell_power_attr.value)
-			body.rpc("damage", damage, name)
+var is_status_debuff = true
 
 
 func _ready() -> void:
@@ -27,4 +23,9 @@ func execute(target, caster: Unit) -> void:
 		
 	.try_start_cooldown()
 	var zone = AbilityHelper.create_zone(target, duration, tick_rate, radius, consecration_texture)
-	zone.connect("tick", self, "_on_zone_tick", [caster])
+	zone.damage_per_tick = tick_damage + (tick_damage_per_sp * caster.spell_power_attr.value)
+	
+	var status = Status.new(is_status_debuff, -1, hallowed_ground_texture.resource_path)
+	status.name = "Hallowed Ground"
+	status.movement_speed_modifier = Modifier.new(0.5, Enums.ModifierType.Multiplicative)
+	zone.status = status
