@@ -1,6 +1,5 @@
 extends TextureButton
 
-
 var ability_name: String
 
 

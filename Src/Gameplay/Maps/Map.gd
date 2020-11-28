@@ -245,6 +245,14 @@ func _process(_delta: float) -> void:
 		player.mana_attr.remove_modifier(mana_modifier)
 	# End of test commands
 	
+	if Input.is_action_just_pressed("cancel"):
+		if $CanvasLayer/CharacterPanel.visible:
+			$CanvasLayer/CharacterPanel.visible = !$CanvasLayer/CharacterPanel.visible
+		elif selected_unit:
+			select_unit(null)
+		elif selected_ability:
+			select_ability(null)
+	
 	if Input.is_action_just_pressed("toggle_character_panel"):
 		$CanvasLayer/CharacterPanel.visible = !$CanvasLayer/CharacterPanel.visible
 	
