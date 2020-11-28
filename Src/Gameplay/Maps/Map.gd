@@ -10,11 +10,11 @@ var selected_ability
 
 
 #This should hook into whatever mechanism determines when an ability key is pressed
-func _on_ability_button_pressed(ability) -> void:
+func _on_ability_button_pressed(ability: Ability) -> void:
 	process_ability_press(ability)
 
 
-func _on_ability_button_mouse_entered(button: TextureButton, ability) -> void:
+func _on_ability_button_mouse_entered(button: TextureButton, ability: Ability) -> void:
 	$CanvasLayer/Tooltip.set_name(ability.name)
 	$CanvasLayer/Tooltip.set_range(100)
 	$CanvasLayer/Tooltip.set_cost(10)
@@ -33,7 +33,7 @@ func _on_ability_button_mouse_entered(button: TextureButton, ability) -> void:
 	$CanvasLayer/Tooltip.rect_position = button.get_global_rect().position - Vector2(0, $CanvasLayer/Tooltip.rect_size.y + 20)
 
 
-func _on_ability_button_mouse_exited(ability) -> void:
+func _on_ability_button_mouse_exited(ability: Ability) -> void:
 	$CanvasLayer/Tooltip.hide()
 
 
@@ -211,7 +211,7 @@ func _on_auto_attack_cooldown_ended() -> void:
 	$CanvasLayer/AutoAttackBar.hide()
 
 
-func _on_ability_cooldown_started(ability) -> void:
+func _on_ability_cooldown_started(ability: Ability) -> void:
 	for ability_button in get_tree().get_nodes_in_group("ability_buttons"):
 		if ability_button.ability_name == ability.name:
 			ability_button.set_max_cooldown(ability.cooldown)
@@ -219,13 +219,13 @@ func _on_ability_cooldown_started(ability) -> void:
 			ability_button.show_cooldown()
 
 
-func _on_ability_cooldown_progressed(ability) -> void:
+func _on_ability_cooldown_progressed(ability: Ability) -> void:
 	for ability_button in get_tree().get_nodes_in_group("ability_buttons"):
 		if ability_button.ability_name == ability.name:
 			ability_button.set_cooldown(ability.get_remaining_cooldown())
 
 
-func _on_ability_cooldown_ended(ability) -> void:
+func _on_ability_cooldown_ended(ability: Ability) -> void:
 	for ability_button in get_tree().get_nodes_in_group("ability_buttons"):
 		if ability_button.ability_name == ability.name:
 			ability_button.hide_cooldown()
@@ -286,7 +286,7 @@ func _process(_delta: float) -> void:
 			$CanvasLayer/TargetFrame.update_status_effect_duration(status_index, status.get_time_remaining())
 
 
-func process_ability_press(ability):
+func process_ability_press(ability: Ability):
 	match ability.target_type:
 		Enums.TargetType.Unit:
 			if selected_unit:
@@ -433,7 +433,7 @@ func select_unit(unit: Unit) -> void:
 		$CanvasLayer/TargetFrame.hide()
 
 
-func select_ability(ability) -> void:
+func select_ability(ability: Ability) -> void:
 	var ability_buttons = get_tree().get_nodes_in_group("ability_buttons")
 	
 	# Deselect any currently selected ability buttons

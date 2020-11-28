@@ -59,7 +59,7 @@ func _on_Clickbox_input_event(_viewport, event, _shape_idx):
 			emit_signal("right_clicked")
 
 
-func _on_CastTimer_timeout(ability, target) -> void:
+func _on_CastTimer_timeout(ability: Ability, target) -> void:
 	stop_casting()
 	execute_ability(ability, target)
 
@@ -72,7 +72,7 @@ func _on_status_expired(status_effect) -> void:
 	remove_status_effect(status_effect)
 
 
-func _on_ChannelStopwatch_tick(ability) -> void:
+func _on_ChannelStopwatch_tick(ability: Ability) -> void:
 	if "channel_cost" in ability:
 		if current_mana < ability.channel_cost:
 			print("Insufficient mana to continue channel")
@@ -114,15 +114,15 @@ func _on_movement_speed_attr_changed(value: int) -> void:
 	emit_signal("movement_speed_attr_changed", value)
 
 
-func _on_ability_cooldown_started(ability) -> void:
+func _on_ability_cooldown_started(ability: Ability) -> void:
 	emit_signal("ability_cooldown_started", ability)
 
 
-func _on_ability_cooldown_progressed(ability) -> void:
+func _on_ability_cooldown_progressed(ability: Ability) -> void:
 	emit_signal("ability_cooldown_progressed", ability)
 
 
-func _on_ability_cooldown_ended(ability) -> void:
+func _on_ability_cooldown_ended(ability: Ability) -> void:
 	emit_signal("ability_cooldown_ended", ability)
 
 # End of Stat change handlers
@@ -268,7 +268,7 @@ func stop_casting() -> void:
 	emit_signal("casting_stopped")
 
 
-func channel(ability) -> void:
+func channel(ability: Ability) -> void:
 	if casting_index >= 0 || channelling_index >= 0:
 		print("Already casting")
 		
@@ -300,7 +300,7 @@ func stop_channelling() -> void:
 	emit_signal("channelling_stopped")
 
 
-func execute_ability(ability, target) -> void:
+func execute_ability(ability: Ability, target) -> void:
 	if "cost" in ability && current_mana < ability.cost:
 		print("Insufficient mana to execute")
 		return
