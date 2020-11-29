@@ -369,6 +369,7 @@ func _move_along_path(delta: float) -> void:
 			elif ability.target_type == Enums.TargetType.Position && position.distance_to(queued_ability_data[1]) <= ability.cast_range:
 				cast(ability.get_index(), queued_ability_data[1])
 				queued_ability_data = []
+				set_movement_path([])
 				return
 				
 		if focus && auto_attack_enabled && position.distance_to(focus.position) <= basic_attack_range:

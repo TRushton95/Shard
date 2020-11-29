@@ -339,11 +339,12 @@ func process_ability_press(ability: Ability):
 
 func _unhandled_input(event) -> void:
 	if event is InputEventMouseButton && event.pressed:
+		var player = get_node(player_name)
+		
 		if event.button_index == BUTTON_RIGHT:
 			if selected_ability:
 				select_ability(null)
 				
-			var player = get_node(player_name)
 			player.rpc("interrupt")
 			
 			var movement_path = $Navigation2D.get_simple_path(player.position, event.position)
@@ -357,7 +358,12 @@ func _unhandled_input(event) -> void:
 			
 		elif event.button_index == BUTTON_LEFT:
 			if selected_ability && selected_ability.target_type == Enums.TargetType.Position:
-				rpc("cast_ability_at_position", selected_ability.get_index(), player_name, event.position)
+				#rpc("cast_ability_at_position", selected_ability.get_index(), player_name, event.position)
+				var movement_path = $Navigation2D.get_simple_path(player.position, event.position)
+				$PathDebug.points = movement_path
+				$PathDebug.show()
+				player.rpc("set_movement_path", movement_path)
+				rpc("_set_unit_queued_ability_data", player_name, event.position, selected_ability.get_index())
 				select_ability(null)
 			else:
 				select_unit(null)
