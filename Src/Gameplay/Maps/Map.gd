@@ -39,7 +39,11 @@ func _on_ability_button_mouse_exited(ability: Ability) -> void:
 
 func _on_unit_left_clicked(unit: Unit) -> void:
 	if selected_ability:
-		rpc("cast_ability_on_unit", selected_ability.get_index(), player_name, unit.name)
+		var player = get_node(player_name)
+		
+		player.rpc("set_queued_ability", selected_ability.get_index())
+		player.rset("auto_attack_enabled", true)
+		_pursue_target(unit.name)
 		select_unit(unit)
 		select_ability(null)
 	else:
@@ -50,12 +54,8 @@ func _on_unit_right_clicked(unit: Unit) -> void:
 	var player = get_node(player_name)
 	
 	if unit != player:
-		var movement_path = $Navigation2D.get_simple_path(player.position, unit.position)
-		$PathDebug.points = movement_path
-		$PathDebug.show()
-		rpc("_set_unit_focus", player_name, unit.name)
-		player.rpc("set_movement_path", movement_path)
-		player.get_node("FollowPathingTimer").start(1.0)
+		player.rset("auto_attack_enabled", true)
+		_pursue_target(unit.name)
 
 
 func _on_player_path_finished() -> void:
@@ -63,7 +63,7 @@ func _on_player_path_finished() -> void:
 
 
 func _on_unit_follow_path_outdated(unit: Unit) -> void:
-	var player = get_node(player_name) # Should maybe be using is_networking_master() for this?
+	var player = get_node(player_name) # TODO: Should maybe be using is_networking_master() for this?
 	
 	if unit == player:
 		var M := 0.0004 # M in a linear equation to calculate the follow path invalidation time based on distance, may need fine tuning as gameplay emerges
@@ -282,6 +282,8 @@ func _process(_delta: float) -> void:
 			player.rpc("interrupt")
 		if player.is_moving():
 			player.rpc("set_movement_path", [])
+		if player.focus:
+			player.rpc("stop_pursuing")
 	
 	if Input.is_action_just_pressed("test_interrupt"):
 		player.rpc("interrupt")
@@ -312,12 +314,18 @@ func _process(_delta: float) -> void:
 
 
 func process_ability_press(ability: Ability):
+	if ability.is_on_cooldown():
+		print("Ability while it is on cooldown")
+		return
+	
 	match ability.target_type:
 		Enums.TargetType.Self:
 				rpc("cast_ability_on_unit", ability.get_index(), player_name, player_name)
 		Enums.TargetType.Unit:
 			if selected_unit:
-				rpc("cast_ability_on_unit", ability.get_index(), player_name, selected_unit.name)
+				_pursue_target(selected_unit.name)
+				get_node(player_name).rpc("set_queued_ability", ability.get_index())
+				get_node(player_name).rset("auto_attack_enabled", true)
 				select_ability(null)
 			else:
 				select_ability(ability)
@@ -336,12 +344,16 @@ func _unhandled_input(event) -> void:
 				select_ability(null)
 				
 			var player = get_node(player_name)
+			player.rpc("interrupt")
+			
 			var movement_path = $Navigation2D.get_simple_path(player.position, event.position)
 			$PathDebug.points = movement_path
 			$PathDebug.show()
 			player.get_node("FollowPathingTimer").stop()
 			player.rpc("set_movement_path", movement_path)
 			rpc("_set_unit_focus", player_name, "")
+			player.rset("auto_attack_enabled", false)
+			player.rpc("set_queued_ability", -1)
 			
 		elif event.button_index == BUTTON_LEFT:
 			if selected_ability && selected_ability.target_type == Enums.TargetType.Position:
@@ -438,8 +450,10 @@ func setup(player_name: String, player_lookup: Dictionary) -> void:
 			# PATHING TEST #
 #			$Enemy.rset("focus", unit)
 #			var movement_path = $Navigation2D.get_simple_path($Enemy.position, unit.position)
+#			$Enemy.rset("auto_attack_enabled", false)
 #			$Enemy.rpc("set_movement_path", movement_path)
 #			$Enemy.get_node("FollowPathingTimer").start(1.0)
+#			$Enemy.movement_speed_attr.push_modifier(Modifier.new(0.5, Enums.ModifierType.Multiplicative))
 			# PATHING TEST #
 			
 		spawn_index += 1
@@ -495,6 +509,16 @@ remotesync func _set_unit_focus(unit_name: String, focus_name: String) -> void:
 	var focus = get_node(focus_name) if focus_name else null
 	
 	unit.focus = focus
+
+
+func _pursue_target(target_name: String) -> void:
+	var player = get_node(player_name)
+	var movement_path = $Navigation2D.get_simple_path(player.position, get_node(target_name).position)
+	$PathDebug.points = movement_path
+	$PathDebug.show()
+	rpc("_set_unit_focus", player_name, target_name)
+	player.rpc("set_movement_path", movement_path)
+	player.get_node("FollowPathingTimer").start(1.0)
 
 
 func _get_ability_buttons_by_ability_name(ability_name: String) -> Array:

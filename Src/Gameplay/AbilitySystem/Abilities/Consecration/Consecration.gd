@@ -19,6 +19,7 @@ var is_debuff = true
 
 func _ready() -> void:
 	target_type = Enums.TargetType.Position
+	cast_range = 250
 
 
 func execute(target, caster: Unit) -> void:

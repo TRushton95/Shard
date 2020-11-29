@@ -6,9 +6,11 @@ var current_health : int setget _set_current_health
 remotesync var current_mana : int setget _set_current_mana # Remove remotesync when test_mana_refill is removed
 var casting_index := -1 # -1 for not casting
 var channelling_index := -1 # -1 for not channeling
-remotesync var focus : Unit
+var focus : Unit
+remotesync var auto_attack_enabled := false # Requires focus to be set to do anything
 var basic_attack_range := 200
 var auto_attack_speed := 1.0
+var _queued_ability : Ability
 
 var base_movement_speed := 250
 var base_health := 50
@@ -161,13 +163,8 @@ func _ready() -> void:
 
 
 func _process(delta: float) -> void:
-	if is_moving():
-		if casting_index >= 0:
-			stop_casting()
-		elif channelling_index >= 0:
-			stop_channelling()
-			
-		_move_along_path(delta)
+#	if casting_index == -1 && channelling_index == -1:
+	_move_along_path(delta)
 		
 	if casting_index >= 0:
 		emit_signal("casting_progressed", $CastTimer.wait_time - $CastTimer.time_left)
@@ -221,6 +218,12 @@ remotesync func interrupt() -> void:
 		stop_channelling()
 
 
+remotesync func stop_pursuing() -> void:
+	_queued_ability = null
+	auto_attack_enabled = false
+	$FollowPathingTimer.stop()
+
+
 func auto_attack(target: Unit) -> void:
 	if get_tree().is_network_server():
 		target.rpc("damage", attack_power_attr.value, name)
@@ -249,9 +252,6 @@ func cast(index: int, target) -> void:
 		stop_channelling()
 		
 	if "cast_time" in ability && ability.cast_time > 0:
-		if is_moving():
-			set_movement_path([])
-			
 		$CastTimer.connect("timeout", self, "_on_CastTimer_timeout", [ability, target])
 		$CastTimer.start(ability.cast_time)
 		casting_index = ability.get_index()
@@ -280,9 +280,6 @@ func channel(ability: Ability) -> void:
 		
 	if !"channel_duration" in ability || ability.channel_duration <= 0:
 		print("Invalid channel_duration property on ability " + ability.Name)
-		
-	if is_moving():
-		set_movement_path([])
 			
 	$ChannelStopwatch.setup(ability.channel_duration, ability.tick_rate)
 	$ChannelStopwatch.connect("tick", self, "_on_ChannelStopwatch_tick", [ability])
@@ -356,17 +353,24 @@ func set_name(name: String) -> void:
 
 
 func _move_along_path(delta: float) -> void:
+	if casting_index > -1 || channelling_index > -1:
+		return
+	
 	var distance_to_walk = delta * movement_speed_attr.value
 	
 	while distance_to_walk > 0 && _movement_path.size() > 0:
-		if focus && position.distance_to(focus.position) <= basic_attack_range:
-			if $AutoAttackTimer.time_left == 0:
-				print("auto attack timer at 0")
-				auto_attack(focus)
-				$AutoAttackTimer.start(auto_attack_speed)
-				emit_signal("auto_attack_cooldown_started", auto_attack_speed)
-				
-			return
+		if focus:
+			if _queued_ability && position.distance_to(focus.position) <= _queued_ability.cast_range:
+				cast(_queued_ability.get_index(), focus)
+				_queued_ability = null
+				return
+			elif auto_attack_enabled && position.distance_to(focus.position) <= basic_attack_range:
+				if $AutoAttackTimer.time_left == 0:
+					print("auto attack timer at 0")
+					auto_attack(focus)
+					$AutoAttackTimer.start(auto_attack_speed)
+					emit_signal("auto_attack_cooldown_started", auto_attack_speed)
+				return
 		
 		var distance_to_next_point = position.distance_to(_movement_path[0])
 		if distance_to_walk <= distance_to_next_point:
@@ -379,6 +383,13 @@ func _move_along_path(delta: float) -> void:
 		
 		if _movement_path.size() == 0:
 			emit_signal("path_finished")
+
+
+remotesync func set_queued_ability(ability_index: int) -> void:
+	if ability_index == -1:
+		_queued_ability = null
+	else:
+		_queued_ability = get_node("Abilities").get_child(ability_index)
 
 
 func _set_current_health(value: int) -> void:

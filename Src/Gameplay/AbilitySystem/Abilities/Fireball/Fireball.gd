@@ -29,6 +29,7 @@ func _on_projectile_target_reached(projectile: Projectile, target: Unit, caster:
 
 func _ready() -> void:
 	target_type = Enums.TargetType.Unit
+	cast_range = 500
 
 
 remotesync func execute(target, caster: Unit) -> void:
