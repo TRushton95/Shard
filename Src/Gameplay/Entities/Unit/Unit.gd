@@ -237,6 +237,10 @@ func cast(index: int, target) -> void:
 		print("Cannot cast ability while it is on cooldown")
 		return
 	
+	if "toggled" in ability && ability.toggled && ability.active:
+		ability.deactivate()
+		return
+	
 	if "cost" in ability && current_mana < ability.cost:
 		print("Insufficient mana to cast")
 		return

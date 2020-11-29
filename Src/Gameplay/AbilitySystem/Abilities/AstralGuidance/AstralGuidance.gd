@@ -7,9 +7,17 @@ var status_texture = load("res://Gameplay/AbilitySystem/Abilities/AstralGuidance
 var duration := Constants.INDEFINITE_DURATION
 var radius := 100
 
+var active := false
+var zone : Zone
 
 func _ready() -> void:
 	target_type = Enums.TargetType.Self
+	toggled = true
+
+
+func deactivate() -> void:
+	zone.queue_free()
+	active = false
 
 
 func execute(target, caster: Unit) -> void:
@@ -18,7 +26,7 @@ func execute(target, caster: Unit) -> void:
 		
 	.try_start_cooldown()
 	
-	var zone = zone_scene.instance()
+	zone = zone_scene.instance()
 	zone.target = target
 	zone.duration = duration
 	zone.tick_rate = 0.0
@@ -36,3 +44,4 @@ func execute(target, caster: Unit) -> void:
 	status.icon_texture = status_texture
 	
 	zone.status = status
+	active = true
