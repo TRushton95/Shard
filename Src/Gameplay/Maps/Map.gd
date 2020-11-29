@@ -275,6 +275,8 @@ func _process(_delta: float) -> void:
 		ability_index = 1
 	if Input.is_action_just_pressed("cast_3"):
 		ability_index = 2
+	if Input.is_action_just_pressed("cast_4"):
+		ability_index = 3
 	if Input.is_action_just_pressed("stop"):
 		if player.casting_index >= 0 || player.channelling_index >= 0:
 			player.rpc("interrupt")
@@ -311,6 +313,8 @@ func _process(_delta: float) -> void:
 
 func process_ability_press(ability: Ability):
 	match ability.target_type:
+		Enums.TargetType.Self:
+				rpc("cast_ability_on_unit", ability.get_index(), player_name, player_name)
 		Enums.TargetType.Unit:
 			if selected_unit:
 				rpc("cast_ability_on_unit", ability.get_index(), player_name, selected_unit.name)

@@ -1,5 +1,5 @@
 extends Node
 
 
-enum TargetType { Unset, Unit, Position }
+enum TargetType { Unset, Self, Unit, Position }
 enum ModifierType { Additive, Multiplicative }

@@ -14,10 +14,10 @@ var one_shot := false
 var stopwatch = Stopwatch.new()
 
 var duration := 0.0 # 0.0 duration for an instant transient zone, -1.0 for permenant zone - see Constants.gd
-var impact_damage := 0
-var impact_healing := 0
 var tick_rate := 0.0
 var radius := 0  setget _set_radius
+var impact_damage := 0
+var impact_healing := 0
 var damage_per_tick := 0
 var healing_per_tick := 0
 var texture : Texture setget _set_texture
