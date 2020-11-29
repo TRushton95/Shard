@@ -7,13 +7,13 @@ var hallowed_ground_texture = load("res://Gameplay/AbilitySystem/Abilities/Conse
 var tick_damage := 1
 var tick_damage_per_sp := 0.5
 
-var duration := 15.0
+var duration := Constants.INDEFINITE_DURATION
 var tick_rate := 1.0
 var radius := 100
 
 var status_name = "Hallowed Ground"
 var status_speed_multiplier = 0.5
-var status_duration = -1.0
+var status_duration = Constants.INDEFINITE_DURATION
 var is_debuff = true
 
 

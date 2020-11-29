@@ -1,6 +1,9 @@
-[gd_scene load_steps=2 format=2]
+[gd_scene load_steps=3 format=2]
 
 [ext_resource path="res://Gameplay/AbilitySystem/Abilities/AstralGuidance/AstralGuidance.gd" type="Script" id=1]
+[ext_resource path="res://Gameplay/AbilitySystem/Abilities/AstralGuidance/icon.png" type="Texture" id=2]
 
 [node name="AstralGuidance" type="Node"]
 script = ExtResource( 1 )
+cooldown = 1.0
+icon = ExtResource( 2 )

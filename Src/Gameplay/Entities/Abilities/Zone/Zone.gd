@@ -13,7 +13,7 @@ var target
 var one_shot := false
 var stopwatch = Stopwatch.new()
 
-var duration := 0.0 # Provide 0 duration for an instant transient zone
+var duration := 0.0 # 0.0 duration for an instant transient zone, -1.0 for permenant zone - see Constants.gd
 var impact_damage := 0
 var impact_healing := 0
 var tick_rate := 0.0
@@ -57,6 +57,11 @@ func _on_stopwatch_tick() -> void:
 	_on_tick_details(get_overlapping_bodies())
 
 
+func _on_stopwatch_timeout() -> void:
+	if duration == Constants.INDEFINITE_DURATION:
+		stopwatch.start()
+
+
 func _physics_process(_delta: float) -> void:
 	if target is Unit:
 		position = target.position
@@ -86,10 +91,11 @@ func setup() -> void:
 	if target is Vector2:
 		position = target # Set vector2 position here to avoid resetting every _physics_process
 	
-	if duration > 0:
-		stopwatch.setup(duration, tick_rate)
+	if duration != Constants.ONE_SHOT_DURATION:
+		var adjusted_duration = tick_rate if duration == Constants.INDEFINITE_DURATION else duration
+		stopwatch.setup(adjusted_duration, tick_rate)
 		add_child(stopwatch)
-		stopwatch.connect("timeout", self, "queue_free")
+		stopwatch.connect("timeout", self, "_on_stopwatch_timeout")
 		stopwatch.connect("tick", self, "_on_stopwatch_tick")
 		stopwatch.start()
 		

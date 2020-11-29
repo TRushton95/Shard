@@ -15,7 +15,6 @@ var spell_power_modifier : Modifier
 var movement_speed_modifier : Modifier
 
 var stopwatch : Stopwatch
-var timer : Timer
 
 signal expired
 
@@ -31,7 +30,10 @@ func _on_stopwatch_tick():
 
 
 func _on_stopwatch_timeout():
-	emit_signal("expired")
+	if duration == Constants.INDEFINITE_DURATION:
+		stopwatch.start()
+	else:
+		emit_signal("expired")
 
 
 func on_apply() -> void:
@@ -61,9 +63,11 @@ func on_remove() -> void:
 
 
 func _ready() -> void:
-	if duration > 0.0:
+	if duration > 0:
 		stopwatch = Stopwatch.new()
-		stopwatch.setup(duration, tick_rate)
+		
+		var adjusted_duration = tick_rate if duration == Constants.INDEFINITE_DURATION else duration
+		stopwatch.setup(adjusted_duration, tick_rate)
 		add_child(stopwatch)
 		stopwatch.connect("tick", self, "_on_stopwatch_tick")
 		stopwatch.connect("timeout", self, "_on_stopwatch_timeout")

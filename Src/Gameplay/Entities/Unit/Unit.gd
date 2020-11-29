@@ -335,11 +335,10 @@ remotesync func push_status_effect(status_effect_data: Dictionary) -> void:
 
 # FIXME: If two zones overlap, exiting one will remove the status despite still being in the other
 remotesync func remove_status_effect(status_effect_name: String) -> void:
-	var status_effect = get_node("StatusEffects/" + status_effect_name)
-	
-	if !status_effect:
+	if !has_node("StatusEffects/" + status_effect_name):
 		return
 	
+	var status_effect = get_node("StatusEffects/" + status_effect_name)
 	status_effect.on_remove()
 	var index = status_effect.get_index()
 	$StatusEffects.remove_child(status_effect)
