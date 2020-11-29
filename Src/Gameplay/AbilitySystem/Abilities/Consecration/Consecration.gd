@@ -26,8 +26,6 @@ func execute(target, caster: Unit) -> void:
 	if !target is Vector2:
 		return
 		
-	.try_start_cooldown()
-	
 	var zone = zone_scene.instance()
 	zone.target = target
 	zone.duration = duration

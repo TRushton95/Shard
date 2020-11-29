@@ -227,10 +227,10 @@ func _on_auto_attack_cooldown_ended() -> void:
 	$CanvasLayer/AutoAttackBar.hide()
 
 
-func _on_ability_cooldown_started(ability: Ability) -> void:
+func _on_ability_cooldown_started(ability: Ability, duration: int) -> void:
 	for ability_button in _get_ability_buttons_by_ability_name(ability.name):
-		ability_button.set_max_cooldown(ability.cooldown)
-		ability_button.set_cooldown(ability.cooldown)
+		ability_button.set_max_cooldown(duration)
+		ability_button.set_cooldown(duration)
 		ability_button.show_cooldown()
 
 
@@ -358,7 +358,6 @@ func _unhandled_input(event) -> void:
 			
 		elif event.button_index == BUTTON_LEFT:
 			if selected_ability && selected_ability.target_type == Enums.TargetType.Position:
-				#rpc("cast_ability_at_position", selected_ability.get_index(), player_name, event.position)
 				var movement_path = $Navigation2D.get_simple_path(player.position, event.position)
 				$PathDebug.points = movement_path
 				$PathDebug.show()

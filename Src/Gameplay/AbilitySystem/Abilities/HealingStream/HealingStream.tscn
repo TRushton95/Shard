@@ -5,4 +5,6 @@
 
 [node name="HealingStream" type="Node"]
 script = ExtResource( 1 )
+off_global_cooldown = true
+cast_range = 500
 icon = ExtResource( 2 )

@@ -1,7 +1,7 @@
 extends Node
 class_name Ability
 
-signal cooldown_started
+signal cooldown_started(duration)
 signal cooldown_progressed
 signal cooldown_ended
 
@@ -9,6 +9,7 @@ signal cooldown_ended
 # Convention properties
 
 export var cooldown := 0.0
+export var off_global_cooldown := false
 export var cast_time := 0.0
 export var cast_range := 0
 export var cost := 0
@@ -25,27 +26,26 @@ func _on_cooldown_timer_timeout() -> void:
 
 
 func _ready() -> void:
-	if cooldown > 0:
-		_cooldown_timer = Timer.new()
-		_cooldown_timer.one_shot = true
-		add_child(_cooldown_timer)
-		_cooldown_timer.connect("timeout", self, "_on_cooldown_timer_timeout") # TODO Does this call on superclass or only on this class?
+	_cooldown_timer = Timer.new()
+	_cooldown_timer.one_shot = true
+	add_child(_cooldown_timer)
+	_cooldown_timer.connect("timeout", self, "_on_cooldown_timer_timeout") # TODO Does this call on superclass or only on this class?
 
 
 func _process(delta: float) -> void:
-	if _cooldown_timer && _cooldown_timer.time_left > 0:
+	if _cooldown_timer.time_left > 0:
 		emit_signal("cooldown_progressed")
 
 
-func try_start_cooldown() -> void:
-	if _cooldown_timer:
-		_cooldown_timer.start(cooldown)
-		emit_signal("cooldown_started")
+func try_start_cooldown(duration) -> void:
+	if duration > 0 && duration > _cooldown_timer.time_left:
+		_cooldown_timer.start(duration)
+		emit_signal("cooldown_started", duration)
 
 
 func get_remaining_cooldown() -> float:
-	return _cooldown_timer.time_left if _cooldown_timer else 0.0
+	return _cooldown_timer.time_left
 
 
 func is_on_cooldown() -> bool:
-	return _cooldown_timer.time_left > 0 if _cooldown_timer else false
+	return _cooldown_timer.time_left > 0

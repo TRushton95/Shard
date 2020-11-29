@@ -36,7 +36,6 @@ remotesync func execute(target, caster: Unit) -> void:
 	if !target is Unit:
 		return
 	
-	.try_start_cooldown()
 	var radius = fireball_texture.get_width() / 2
 	var projectile = AbilityHelper.create_projectile(target, caster.position, _projectile_speed, radius, fireball_texture)
 	projectile.connect("target_reached", self, "_on_projectile_target_reached", [projectile, target, caster])

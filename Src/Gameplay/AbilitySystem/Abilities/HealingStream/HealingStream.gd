@@ -23,13 +23,11 @@ func _on_caster_channelling_stopped(ability_name: String, caster: Unit) -> void:
 func _ready():
 	name = "Healing Stream"
 	target_type = Enums.TargetType.Unit
-	cast_range = 500
 
 
 func execute(target, caster) -> void:
 	if !target is Unit:
 		return
 	
-	.try_start_cooldown()
 	caster.connect("channelling_ticked", self, "_on_caster_channelling_ticked", [target, caster])
 	caster.connect("channelling_stopped", self, "_on_caster_channelling_stopped", [caster])

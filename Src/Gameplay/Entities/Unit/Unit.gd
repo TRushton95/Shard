@@ -64,6 +64,9 @@ func _on_Clickbox_input_event(_viewport, event, _shape_idx):
 func _on_CastTimer_timeout(ability: Ability, target) -> void:
 	stop_casting()
 	execute_ability(ability, target)
+	
+	if ability.cooldown > 0:
+		ability.try_start_cooldown(ability.cooldown)
 
 
 func _on_FollowPathingTimer_timeout() -> void:
@@ -116,8 +119,8 @@ func _on_movement_speed_attr_changed(value: int) -> void:
 	emit_signal("movement_speed_attr_changed", value)
 
 
-func _on_ability_cooldown_started(ability: Ability) -> void:
-	emit_signal("ability_cooldown_started", ability)
+func _on_ability_cooldown_started(duration: int, ability: Ability) -> void:
+	emit_signal("ability_cooldown_started", ability, duration)
 
 
 func _on_ability_cooldown_progressed(ability: Ability) -> void:
@@ -256,8 +259,22 @@ func cast(index: int, target) -> void:
 		$CastTimer.start(ability.cast_time)
 		casting_index = ability.get_index()
 		emit_signal("casting_started", ability.name, ability.cast_time)
+		
+		if !ability.off_global_cooldown:
+			for a in get_node("Abilities").get_children():
+				if !a.off_global_cooldown:
+					a.try_start_cooldown(Constants.GLOBAL_COOLDOWN)
 	else:
 		execute_ability(ability, target)
+		
+		if !ability.off_global_cooldown:
+			for a in get_node("Abilities").get_children():
+				if a == ability:
+					var cooldown = a.cooldown if a.cooldown > Constants.GLOBAL_COOLDOWN else Constants.GLOBAL_COOLDOWN
+					a.try_start_cooldown(cooldown)
+				else:
+					if !a.off_global_cooldown:
+						a.try_start_cooldown(Constants.GLOBAL_COOLDOWN)
 
 
 func stop_casting() -> void:

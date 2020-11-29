@@ -24,8 +24,6 @@ func execute(target, caster: Unit) -> void:
 	if !target is Unit:
 		return
 		
-	.try_start_cooldown()
-	
 	zone = zone_scene.instance()
 	zone.target = target
 	zone.duration = duration
