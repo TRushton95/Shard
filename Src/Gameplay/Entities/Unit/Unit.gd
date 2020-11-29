@@ -10,7 +10,7 @@ var focus : Unit
 remotesync var auto_attack_enabled := false # Requires focus to be set to do anything
 var basic_attack_range := 200
 var auto_attack_speed := 1.0
-var _queued_ability : Ability
+var queued_ability_data : Array
 
 var base_movement_speed := 250
 var base_health := 50
@@ -219,7 +219,7 @@ remotesync func interrupt() -> void:
 
 
 remotesync func stop_pursuing() -> void:
-	_queued_ability = null
+	queued_ability_data = []
 	auto_attack_enabled = false
 	$FollowPathingTimer.stop()
 
@@ -359,18 +359,25 @@ func _move_along_path(delta: float) -> void:
 	var distance_to_walk = delta * movement_speed_attr.value
 	
 	while distance_to_walk > 0 && _movement_path.size() > 0:
-		if focus:
-			if _queued_ability && position.distance_to(focus.position) <= _queued_ability.cast_range:
-				cast(_queued_ability.get_index(), focus)
-				_queued_ability = null
+		if queued_ability_data.size() == 2:
+			var ability = get_node("Abilities").get_child(queued_ability_data[0])
+			
+			if ability.target_type == Enums.TargetType.Unit && position.distance_to(queued_ability_data[1].position) <= ability.cast_range:
+				cast(ability.get_index(), queued_ability_data[1])
+				queued_ability_data = []
 				return
-			elif auto_attack_enabled && position.distance_to(focus.position) <= basic_attack_range:
-				if $AutoAttackTimer.time_left == 0:
-					print("auto attack timer at 0")
-					auto_attack(focus)
-					$AutoAttackTimer.start(auto_attack_speed)
-					emit_signal("auto_attack_cooldown_started", auto_attack_speed)
+			elif ability.target_type == Enums.TargetType.Position && position.distance_to(queued_ability_data[1]) <= ability.cast_range:
+				cast(ability.get_index(), queued_ability_data[1])
+				queued_ability_data = []
 				return
+				
+		if focus && auto_attack_enabled && position.distance_to(focus.position) <= basic_attack_range:
+			if $AutoAttackTimer.time_left == 0:
+				print("auto attack timer at 0")
+				auto_attack(focus)
+				$AutoAttackTimer.start(auto_attack_speed)
+				emit_signal("auto_attack_cooldown_started", auto_attack_speed)
+			return
 		
 		var distance_to_next_point = position.distance_to(_movement_path[0])
 		if distance_to_walk <= distance_to_next_point:
@@ -383,13 +390,6 @@ func _move_along_path(delta: float) -> void:
 		
 		if _movement_path.size() == 0:
 			emit_signal("path_finished")
-
-
-remotesync func set_queued_ability(ability_index: int) -> void:
-	if ability_index == -1:
-		_queued_ability = null
-	else:
-		_queued_ability = get_node("Abilities").get_child(ability_index)
 
 
 func _set_current_health(value: int) -> void:

@@ -41,7 +41,7 @@ func _on_unit_left_clicked(unit: Unit) -> void:
 	if selected_ability:
 		var player = get_node(player_name)
 		
-		player.rpc("set_queued_ability", selected_ability.get_index())
+		rpc("_set_unit_queued_ability_data", player_name, unit.name, selected_ability.get_index())
 		player.rset("auto_attack_enabled", true)
 		_pursue_target(unit.name)
 		select_unit(unit)
@@ -324,7 +324,7 @@ func process_ability_press(ability: Ability):
 		Enums.TargetType.Unit:
 			if selected_unit:
 				_pursue_target(selected_unit.name)
-				get_node(player_name).rpc("set_queued_ability", ability.get_index())
+				rpc("_set_unit_queued_ability_data", player_name, selected_unit.name, ability.get_index())
 				get_node(player_name).rset("auto_attack_enabled", true)
 				select_ability(null)
 			else:
@@ -353,7 +353,7 @@ func _unhandled_input(event) -> void:
 			player.rpc("set_movement_path", movement_path)
 			rpc("_set_unit_focus", player_name, "")
 			player.rset("auto_attack_enabled", false)
-			player.rpc("set_queued_ability", -1)
+			rpc("_set_unit_queued_ability_data", player_name, null, -1)
 			
 		elif event.button_index == BUTTON_LEFT:
 			if selected_ability && selected_ability.target_type == Enums.TargetType.Position:
@@ -509,6 +509,14 @@ remotesync func _set_unit_focus(unit_name: String, focus_name: String) -> void:
 	var focus = get_node(focus_name) if focus_name else null
 	
 	unit.focus = focus
+
+
+remotesync func _set_unit_queued_ability_data(unit_name: String, target, ability_index: int) -> void:
+	if ability_index == -1:
+		get_node(unit_name).queued_ability_data = []
+	else:
+		var adjusted_target = get_node(target) if target is String else target
+		get_node(unit_name).queued_ability_data = [ ability_index, adjusted_target ]
 
 
 func _pursue_target(target_name: String) -> void:
