@@ -60,6 +60,8 @@ func _on_stopwatch_tick() -> void:
 func _on_stopwatch_timeout() -> void:
 	if duration == Constants.INDEFINITE_DURATION:
 		stopwatch.start()
+	else:
+		queue_free()
 
 
 func _physics_process(_delta: float) -> void:
