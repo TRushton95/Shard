@@ -11,6 +11,7 @@ remotesync var auto_attack_enabled := false # Requires focus to be set to do any
 var basic_attack_range := 200
 var auto_attack_speed := 1.0
 var queued_ability_data : Array
+var team := -1
 
 var base_movement_speed := 250
 var base_health := 50
@@ -45,6 +46,7 @@ signal status_effect_applied(status_effect)
 signal status_effect_removed(status_effect, index)
 signal damage_received(value)
 signal healing_received(value)
+signal team_changed
 signal mana_changed(value)
 signal health_attr_changed(value)
 signal mana_attr_changed(value)
@@ -239,6 +241,10 @@ func cast(index: int, target) -> void:
 		
 	var ability = $Abilities.get_child(index)
 	
+	if typeof(target) == TYPE_OBJECT && target.get_type() == "Unit" && ability.target_team != target.team:
+		print("Cannot cast on that target")
+		return
+	
 	if ability.is_on_cooldown():
 		print("Cannot cast ability while it is on cooldown")
 		return
@@ -364,9 +370,27 @@ remotesync func remove_status_effect(status_effect_name: String) -> void:
 	status_effect.queue_free()
 
 
+# TODO: Debug method
+func set_sprite_color(color: Color) -> void:
+	$Sprite.modulate = color
+
+
+func set_health_bar_color(color: Color) -> void:
+	$UnitProfile/VBoxContainer/SmallHealthBar.modulate = color
+
+
 func set_name(name: String) -> void:
 	self.name = name
 	$UnitProfile/VBoxContainer/NameLabel.text = name
+
+
+func set_team(team: int) -> void:
+	self.team = team
+	emit_signal("team_changed")
+
+
+func get_type() -> String:
+	return "Unit"
 
 
 func _move_along_path(delta: float) -> void:

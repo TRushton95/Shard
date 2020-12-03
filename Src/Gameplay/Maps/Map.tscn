@@ -27,7 +27,6 @@ default_color = Color( 1, 1, 1, 1 )
 navpoly = SubResource( 1 )
 
 [node name="Enemy" parent="." instance=ExtResource( 1 )]
-modulate = Color( 1, 0.101961, 0.101961, 1 )
 position = Vector2( 892, 495 )
 
 [node name="PlayerSpawnPoints" type="Node" parent="."]

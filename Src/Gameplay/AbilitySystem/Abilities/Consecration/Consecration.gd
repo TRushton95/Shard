@@ -31,7 +31,9 @@ func execute(target, caster: Unit) -> void:
 	zone.duration = duration
 	zone.tick_rate = tick_rate
 	zone.radius = radius
-	zone.damage_per_tick = tick_damage + (tick_damage_per_sp * caster.spell_power_attr.value)
+	zone.team = caster.team
+	zone.hostile_damage_per_tick = tick_damage + (tick_damage_per_sp * caster.spell_power_attr.value)
+	zone.friendly_healing_per_tick = tick_damage + (tick_damage_per_sp * caster.spell_power_attr.value)
 	zone.texture = consecration_texture
 	get_tree().get_root().add_child(zone) # TODO: This shouldn't be added to the tree root
 	zone.setup()
@@ -43,4 +45,5 @@ func execute(target, caster: Unit) -> void:
 	status.movement_speed_modifier = Modifier.new(status_speed_multiplier, Enums.ModifierType.Multiplicative)
 	status.icon_texture = hallowed_ground_texture
 	
-	zone.status = status
+	zone.hostile_status = status
+	zone.friendly_status = status

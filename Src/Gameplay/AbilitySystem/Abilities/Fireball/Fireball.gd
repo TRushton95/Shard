@@ -29,6 +29,7 @@ func _on_projectile_target_reached(projectile: Projectile, target: Unit, caster:
 
 func _ready() -> void:
 	target_type = Enums.TargetType.Unit
+	target_team = Enums.Team.Enemy
 	cast_range = 500
 
 

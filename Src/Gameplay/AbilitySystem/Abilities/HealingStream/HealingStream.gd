@@ -23,6 +23,7 @@ func _on_caster_channelling_stopped(ability_name: String, caster: Unit) -> void:
 func _ready():
 	name = "Healing Stream"
 	target_type = Enums.TargetType.Unit
+	target_team = Enums.Team.Ally
 
 
 func execute(target, caster) -> void:

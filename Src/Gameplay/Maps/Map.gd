@@ -244,6 +244,13 @@ func _on_ability_cooldown_ended(ability: Ability) -> void:
 		ability_button.hide_cooldown()
 
 
+func _on_unit_team_changed(unit: Unit) -> void:
+	if unit.team == get_node(player_name).team:
+		unit.set_health_bar_color(Color.green)
+	else:
+		unit.set_health_bar_color(Color.red)
+
+
 var mana_modifier = Modifier.new(5, Enums.ModifierType.Additive)
 
 func _process(_delta: float) -> void:
@@ -378,16 +385,14 @@ remotesync func cast_ability_on_unit(ability_index: int, caster_name: String, ta
 	caster.cast(ability_index, target)
 
 
-remotesync func cast_ability_at_position(ability_index: int, caster_name, target_position: Vector2) -> void:
-	var caster = get_node(caster_name)
-	caster.cast(ability_index, target_position)
-
-
 func setup(player_name: String, player_lookup: Dictionary) -> void:
 	self.player_name = player_name
 	
 	#TEST ENEMY
 	$Enemy.set_name($Enemy.name) # set name label
+	$Enemy.set_sprite_color(Color.red)
+	$Enemy.team = Enums.Team.Enemy
+	$Enemy.set_health_bar_color(Color.red)
 	$Enemy.connect("left_clicked", self, "_on_unit_left_clicked", [$Enemy])
 	$Enemy.connect("right_clicked", self, "_on_unit_right_clicked", [$Enemy])
 	$Enemy.connect("follow_path_outdated", self, "_on_enemy_follow_path_outdated", [$Enemy])
@@ -395,6 +400,7 @@ func setup(player_name: String, player_lookup: Dictionary) -> void:
 	$Enemy.connect("healing_received", self, "_on_unit_healing_received", [$Enemy])
 	$Enemy.connect("status_effect_applied", self, "_on_unit_status_effect_applied", [$Enemy])
 	$Enemy.connect("status_effect_removed", self, "_on_unit_status_effect_removed", [$Enemy])
+	$Enemy.connect("team_changed", self, "_on_unit_team_changed", [$Enemy])
 	#END OF TEST ENEMY
 	
 	var player_list = player_lookup.values()
@@ -407,6 +413,8 @@ func setup(player_name: String, player_lookup: Dictionary) -> void:
 		unit.set_name(player)
 		unit.position = $PlayerSpawnPoints.get_node(str(spawn_index)).position
 		add_child(unit)
+		unit.team = Enums.Team.Ally
+		unit.set_health_bar_color(Color.green)
 		unit.connect("left_clicked", self, "_on_unit_left_clicked", [unit])
 		unit.connect("right_clicked", self, "_on_unit_right_clicked", [unit])
 		unit.connect("follow_path_outdated", self, "_on_unit_follow_path_outdated", [unit])
@@ -421,6 +429,7 @@ func setup(player_name: String, player_lookup: Dictionary) -> void:
 		unit.connect("channelling_stopped", self, "_on_unit_channelling_stopped", [unit])
 		unit.connect("status_effect_applied", self, "_on_unit_status_effect_applied", [unit])
 		unit.connect("status_effect_removed", self, "_on_unit_status_effect_removed", [unit])
+		unit.connect("team_changed", self, "_on_unit_team_changed", [unit])
 		
 		if player == player_name:
 			unit.connect("path_finished", self, "_on_player_path_finished")

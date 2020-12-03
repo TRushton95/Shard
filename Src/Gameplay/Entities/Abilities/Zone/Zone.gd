@@ -16,21 +16,29 @@ var stopwatch = Stopwatch.new()
 var duration := 0.0 # 0.0 duration for an instant transient zone, -1.0 for permenant zone - see Constants.gd
 var tick_rate := 0.0
 var radius := 0  setget _set_radius
-var impact_damage := 0
-var impact_healing := 0
-var damage_per_tick := 0
-var healing_per_tick := 0
+var team := -1
+var friendly_impact_damage := 0
+var friendly_impact_healing := 0
+var hostile_impact_damage := 0
+var hostile_impact_healing := 0
+var friendly_damage_per_tick := 0
+var friendly_healing_per_tick := 0
+var hostile_damage_per_tick := 0
+var hostile_healing_per_tick := 0
 var texture : Texture setget _set_texture
-var status : Status
+var hostile_status : Status
+var friendly_status : Status
 
 
 func _on_Zone_body_entered(body) -> void:
 	if !body is Unit:
 		return
 	
-	if status:
-		if get_tree().is_network_server():
-			body.rpc("push_status_effect", status.to_data())
+	if get_tree().is_network_server():
+		if body.team == team && friendly_status:
+			body.rpc("push_status_effect", friendly_status.to_data())
+		elif body.team != team && hostile_status:
+			body.rpc("push_status_effect", hostile_status.to_data())
 	
 	_on_enter_details(body)
 
@@ -39,9 +47,11 @@ func _on_Zone_body_exited(body) -> void:
 	if !body is Unit:
 		return
 		
-	if status:
-		if get_tree().is_network_server():
-			body.rpc("remove_status_effect", status.name)
+	if get_tree().is_network_server():
+		if body.team == team && friendly_status:
+			body.rpc("remove_status_effect", friendly_status.name)
+		elif body.team != team && hostile_status:
+			body.rpc("remove_status_effect", hostile_status.name)
 		
 	_on_leave_details(body)
 
@@ -49,10 +59,16 @@ func _on_Zone_body_exited(body) -> void:
 func _on_stopwatch_tick() -> void:
 	if get_tree().is_network_server():
 		for affected_body in get_overlapping_bodies():
-			if damage_per_tick > 0:
-				affected_body.rpc("damage", damage_per_tick, name)
-			if healing_per_tick > 0:
-				affected_body.rpc("heal", healing_per_tick, name)
+			if affected_body.team == team:
+				if friendly_damage_per_tick > 0:
+					affected_body.rpc("damage", friendly_damage_per_tick, name)
+				if friendly_healing_per_tick > 0:
+					affected_body.rpc("heal", friendly_healing_per_tick, name)
+			else:
+				if hostile_damage_per_tick > 0:
+					affected_body.rpc("damage", hostile_damage_per_tick, name)
+				if hostile_healing_per_tick > 0:
+					affected_body.rpc("heal", hostile_healing_per_tick, name)
 				
 	_on_tick_details(get_overlapping_bodies())
 
@@ -77,13 +93,20 @@ func _physics_process(_delta: float) -> void:
 		
 		var affected_bodies = []
 		for collision_data in query_result:
-			affected_bodies.push_back(collision_data.collider)
+			var affected_body = collision_data.collider
+			affected_bodies.push_back(affected_body)
 			
 			if get_tree().is_network_server():
-				if impact_damage > 0:
-					collision_data.collider.rpc("damage", impact_damage, name)
-				if impact_healing > 0:
-					collision_data.collider.rpc("heal", impact_healing, name)
+				if affected_body.team == team:
+					if friendly_impact_damage > 0:
+						collision_data.collider.rpc("damage", friendly_impact_damage, name)
+					if friendly_impact_healing > 0:
+						collision_data.collider.rpc("heal", friendly_impact_healing, name)
+				else:
+					if hostile_impact_damage > 0:
+						collision_data.collider.rpc("damage", hostile_impact_damage, name)
+					if hostile_impact_healing > 0:
+						collision_data.collider.rpc("heal", hostile_impact_healing, name)
 					
 		_on_one_shot_details(affected_bodies)
 		queue_free()

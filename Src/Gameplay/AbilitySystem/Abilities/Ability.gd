@@ -15,10 +15,11 @@ export var cast_range := 0
 export var cost := 0
 export var icon : Texture
 var target_type = Enums.TargetType.Unset # Must be set in code in each ability, not exported as it is not customisable
+var target_team = -1 # Only relevent for target_type unit
 var toggled := false
 var _cooldown_timer : Timer
 
-# End of  Convention properties
+# End of Convention properties
 
 
 func _on_cooldown_timer_timeout() -> void:
