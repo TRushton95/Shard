@@ -241,11 +241,6 @@ func cast(index: int, target) -> void:
 		
 	var ability = $Abilities.get_child(index)
 	
-	# If ability targets a unit and the target is a unit of a different team to the ability target team
-	if typeof(target) == TYPE_OBJECT && target.get_type() == "Unit" && ability.target_type == Enums.TargetType.Unit && ability.target_team != target.team:
-		print("Cannot cast on that target")
-		return
-	
 	if ability.is_on_cooldown():
 		print("Cannot cast ability while it is on cooldown")
 		return
@@ -406,8 +401,14 @@ func _move_along_path(delta: float) -> void:
 			
 			if ability.target_type == Enums.TargetType.Unit && position.distance_to(queued_ability_data[1].position) <= ability.cast_range:
 				cast(ability.get_index(), queued_ability_data[1])
+				if team == queued_ability_data[1].team:
+					set_movement_path([])
+					stop_pursuing()
+					
 				queued_ability_data = []
+								
 				return
+				
 			elif ability.target_type == Enums.TargetType.Position && position.distance_to(queued_ability_data[1]) <= ability.cast_range:
 				cast(ability.get_index(), queued_ability_data[1])
 				queued_ability_data = []

@@ -41,6 +41,9 @@ func _on_unit_left_clicked(unit: Unit) -> void:
 	if selected_ability:
 		var player = get_node(player_name)
 		
+		if !_is_team_target_valid(selected_ability, unit):
+			print("Invalid target")
+		
 		rpc("_set_unit_queued_ability_data", player_name, unit.name, selected_ability.get_index())
 		_pursue_target(unit.name)
 		select_unit(unit)
@@ -52,7 +55,7 @@ func _on_unit_left_clicked(unit: Unit) -> void:
 func _on_unit_right_clicked(unit: Unit) -> void:
 	var player = get_node(player_name)
 	
-	if unit != player:
+	if unit != player && unit.team != player.team:
 		_pursue_target(unit.name)
 
 
@@ -328,6 +331,10 @@ func process_ability_press(ability: Ability):
 				rpc("cast_ability_on_unit", ability.get_index(), player_name, player_name)
 		Enums.TargetType.Unit:
 			if selected_unit:
+				if !_is_team_target_valid(ability, selected_unit):
+					print("Invalid target")
+					return
+				
 				_pursue_target(selected_unit.name)
 				rpc("_set_unit_queued_ability_data", player_name, selected_unit.name, ability.get_index())
 				select_ability(null)
@@ -540,7 +547,7 @@ func _pursue_target(target_name: String) -> void:
 	player.get_node("FollowPathingTimer").start(1.0)
 	
 	if get_node(target_name).team != player.team:
-			player.rset("auto_attack_enabled", true)
+		player.rset("auto_attack_enabled", true)
 
 
 func _get_ability_buttons_by_ability_name(ability_name: String) -> Array:
@@ -551,3 +558,8 @@ func _get_ability_buttons_by_ability_name(ability_name: String) -> Array:
 			result.push_back(ability_button)
 				
 	return result
+
+
+func _is_team_target_valid(ability: Ability, target) -> bool:
+	# If ability targets a unit and the target is a unit of a different team to the ability target team
+	return !(typeof(target) == TYPE_OBJECT && target.get_type() == "Unit" && ability.target_type == Enums.TargetType.Unit && ability.target_team != target.team)

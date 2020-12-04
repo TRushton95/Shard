@@ -27,7 +27,7 @@ func _on_Login_server_button_pressed() -> void:
 
 func _on_Login_client_button_pressed() -> void:
 	var peer = NetworkedMultiplayerENet.new()
-	peer.create_client("86.170.198.135", 1026)
+	peer.create_client("127.0.0.1", 1026)
 	get_tree().set_network_peer(peer)
 	player_name = "Client"
 	$Login/VBoxContainer/Label.text = "Connecting..."
