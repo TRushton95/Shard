@@ -42,7 +42,6 @@ func _on_unit_left_clicked(unit: Unit) -> void:
 		var player = get_node(player_name)
 		
 		rpc("_set_unit_queued_ability_data", player_name, unit.name, selected_ability.get_index())
-		player.rset("auto_attack_enabled", true)
 		_pursue_target(unit.name)
 		select_unit(unit)
 		select_ability(null)
@@ -54,7 +53,6 @@ func _on_unit_right_clicked(unit: Unit) -> void:
 	var player = get_node(player_name)
 	
 	if unit != player:
-		player.rset("auto_attack_enabled", true)
 		_pursue_target(unit.name)
 
 
@@ -332,7 +330,6 @@ func process_ability_press(ability: Ability):
 			if selected_unit:
 				_pursue_target(selected_unit.name)
 				rpc("_set_unit_queued_ability_data", player_name, selected_unit.name, ability.get_index())
-				get_node(player_name).rset("auto_attack_enabled", true)
 				select_ability(null)
 			else:
 				select_ability(ability)
@@ -541,6 +538,9 @@ func _pursue_target(target_name: String) -> void:
 	rpc("_set_unit_focus", player_name, target_name)
 	player.rpc("set_movement_path", movement_path)
 	player.get_node("FollowPathingTimer").start(1.0)
+	
+	if get_node(target_name).team != player.team:
+			player.rset("auto_attack_enabled", true)
 
 
 func _get_ability_buttons_by_ability_name(ability_name: String) -> Array:
