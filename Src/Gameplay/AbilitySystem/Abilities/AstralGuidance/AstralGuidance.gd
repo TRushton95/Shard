@@ -26,6 +26,7 @@ func execute(target, caster: Unit) -> void:
 		
 	zone = zone_scene.instance()
 	zone.target = target
+	zone.team = caster.team
 	zone.duration = duration
 	zone.tick_rate = 0.0
 	zone.radius = radius
@@ -41,5 +42,5 @@ func execute(target, caster: Unit) -> void:
 	status.mana_modifier = Modifier.new(20, Enums.ModifierType.Additive)
 	status.icon_texture = status_texture
 	
-	zone.status = status
+	zone.friendly_status = status
 	active = true

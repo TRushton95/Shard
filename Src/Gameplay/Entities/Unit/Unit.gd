@@ -241,7 +241,8 @@ func cast(index: int, target) -> void:
 		
 	var ability = $Abilities.get_child(index)
 	
-	if typeof(target) == TYPE_OBJECT && target.get_type() == "Unit" && ability.target_team != target.team:
+	# If ability targets a unit and the target is a unit of a different team to the ability target team
+	if typeof(target) == TYPE_OBJECT && target.get_type() == "Unit" && ability.target_type == Enums.TargetType.Unit && ability.target_team != target.team:
 		print("Cannot cast on that target")
 		return
 	
