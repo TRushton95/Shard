@@ -10,30 +10,38 @@ var selected_ability
 
 
 #This should hook into whatever mechanism determines when an ability key is pressed
-func _on_ability_button_pressed(ability: Ability) -> void:
-	process_ability_press(ability)
+func _on_ability_button_pressed( action_lookup: ActionLookup) -> void:
+	if action_lookup.source == Enums.ActionSource.Ability:
+		var ability = get_node(player_name + "/Abilities").get_child(action_lookup.index)
+		process_ability_press(ability)
+	elif action_lookup.source == Enums.ActionSource.Inventory:
+		var item = get_node(player_name + "/Inventory").get_child(action_lookup.index)
+		process_ability_press(item.get_ability())
 
 
-func _on_ability_button_mouse_entered(button: TextureButton, ability: Ability) -> void:
-	$CanvasLayer/Tooltip.set_name(ability.name)
-	$CanvasLayer/Tooltip.set_range(100)
-	$CanvasLayer/Tooltip.set_cost(10)
-	$CanvasLayer/Tooltip.set_cast_time(ability.cast_time)
-	$CanvasLayer/Tooltip.set_description("Hello there")
-	
-	var channel_cost = -1
-	var tick_rate = -1
-	if "channel_cost" in ability && "tick_rate" in ability:
-		channel_cost = ability.channel_cost
-		tick_rate = ability.tick_rate
+func _on_ability_button_mouse_entered(button: TextureButton, action_lookup: ActionLookup) -> void:
+	if action_lookup.source == Enums.ActionSource.Ability:
+		var ability = get_node(player_name + "/Abilities").get_child(action_lookup.index)
 		
-	$CanvasLayer/Tooltip.set_channel(channel_cost, tick_rate)
-	$CanvasLayer/Tooltip.rect_size.y = 0 # Needed to force panel to resize after removing items from the HBoxContainer, hide/show should do this, don't know why it's not
-	$CanvasLayer/Tooltip.show() # Must be shown before calculating position to force size recalculation
-	$CanvasLayer/Tooltip.rect_position = button.get_global_rect().position - Vector2(0, $CanvasLayer/Tooltip.rect_size.y + 20)
+		$CanvasLayer/Tooltip.set_name(ability.name)
+		$CanvasLayer/Tooltip.set_range(100)
+		$CanvasLayer/Tooltip.set_cost(10)
+		$CanvasLayer/Tooltip.set_cast_time(ability.cast_time)
+		$CanvasLayer/Tooltip.set_description("Hello there")
+		
+		var channel_cost = -1
+		var tick_rate = -1
+		if "channel_cost" in ability && "tick_rate" in ability:
+			channel_cost = ability.channel_cost
+			tick_rate = ability.tick_rate
+			
+		$CanvasLayer/Tooltip.set_channel(channel_cost, tick_rate)
+		$CanvasLayer/Tooltip.rect_size.y = 0 # Needed to force panel to resize after removing items from the HBoxContainer, hide/show should do this, don't know why it's not
+		$CanvasLayer/Tooltip.show() # Must be shown before calculating position to force size recalculation
+		$CanvasLayer/Tooltip.rect_position = button.get_global_rect().position - Vector2(0, $CanvasLayer/Tooltip.rect_size.y + 20)
 
 
-func _on_ability_button_mouse_exited(ability: Ability) -> void:
+func _on_ability_button_mouse_exited( action_lookup: ActionLookup) -> void:
 	$CanvasLayer/Tooltip.hide()
 
 
@@ -261,9 +269,12 @@ func _process(_delta: float) -> void:
 	
 	# Test commands for testing whatever
 	if Input.is_action_just_pressed("test_right"):
-		player.mana_attr.push_modifier(mana_modifier)
+		$CanvasLayer/Inventory.remove_item(0)
 	if Input.is_action_just_pressed("test_left"):
-		player.mana_attr.remove_modifier(mana_modifier)
+		var item_ability = player.get_node("Inventory").get_child(0).get_ability()
+		var icon = item_ability.icon # This should probably be the icon from the item, not the ability
+		var action_lookup = ActionLookup.new(Enums.ActionSource.Inventory, item_ability.get_index())
+		$CanvasLayer/Inventory.add_item(icon).connect("pressed", self, "_on_ability_button_pressed", [action_lookup])
 	# End of test commands
 	
 	if Input.is_action_just_pressed("cancel"):
@@ -313,7 +324,7 @@ func _process(_delta: float) -> void:
 		var index = status.get_index()
 		if status.get_time_remaining() > 0:
 			$CanvasLayer/StatusEffectBar.update_duration(index, status.get_time_remaining())
-		
+			
 	if selected_unit:
 		for status in selected_unit.get_node("StatusEffects").get_children():
 			var status_index = status.get_index()
@@ -382,11 +393,13 @@ func _unhandled_input(event) -> void:
 remotesync func cast_ability_on_unit(ability_index: int, caster_name: String, target_name: String) -> void:
 	var caster = get_node(caster_name)
 	
+	var ability = caster.get_node("Ability").get_child(ability_index)
+	
 	if !has_node(target_name):
 		print("No target with name: " + target_name)
 		
 	var target = get_node(target_name)
-	caster.cast(ability_index, target)
+	caster.cast(ability, target)
 
 
 func setup(player_name: String, player_lookup: Dictionary) -> void:
@@ -451,9 +464,10 @@ func setup(player_name: String, player_lookup: Dictionary) -> void:
 			
 			for ability in unit.get_node("Abilities").get_children():
 				var ability_button = $CanvasLayer/ActionBar.add_ability(ability)
-				ability_button.connect("pressed", self, "_on_ability_button_pressed", [ability])
-				ability_button.connect("mouse_entered", self, "_on_ability_button_mouse_entered", [ability_button, ability])
-				ability_button.connect("mouse_exited", self, "_on_ability_button_mouse_exited", [ability])
+				var action_lookup = ActionLookup.new(Enums.ActionSource.Ability, ability.get_index())
+				ability_button.connect("pressed", self, "_on_ability_button_pressed", [action_lookup])
+				ability_button.connect("mouse_entered", self, "_on_ability_button_mouse_entered", [ability_button, action_lookup])
+				ability_button.connect("mouse_exited", self, "_on_ability_button_mouse_exited", [action_lookup])
 			
 			$CanvasLayer/ActionBar.set_max_health(unit.health_attr.value)
 			$CanvasLayer/ActionBar.set_max_mana(unit.mana_attr.value)
@@ -464,6 +478,11 @@ func setup(player_name: String, player_lookup: Dictionary) -> void:
 			$CanvasLayer/CharacterPanel.set_attack_power_attr(unit.attack_power_attr.value)
 			$CanvasLayer/CharacterPanel.set_spell_power_attr(unit.spell_power_attr.value)
 			$CanvasLayer/CharacterPanel.set_movement_speed_attr(unit.movement_speed_attr.value)
+			
+#			var item_ability = unit.get_node("Inventory").get_child(0).get_ability()
+#			var icon = item_ability.icon # This should probably be the icon from the item, not the ability
+#			var action_lookup = ActionLookup.new(Enums.ActionSource.Inventory, item_ability.get_index())
+#			$CanvasLayer/Inventory.add_item(icon).connect("pressed", self, "_on_ability_button_pressed", [action_lookup])
 			
 			# PATHING TEST #
 #			$Enemy.rset("focus", unit)
