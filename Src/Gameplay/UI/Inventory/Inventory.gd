@@ -1,17 +1,17 @@
 extends Panel
 
-var ability_button_scene = load("res://Gameplay/UI/AbilityButton/AbilityButton.tscn")
+var action_button_scene = load("res://Gameplay/UI/ActionButton/ActionButton.tscn")
 
 
 func add_item(icon: Texture) -> Node:
-	var ability_button = ability_button_scene.instance()
-	ability_button.set_icon(icon)
+	var action_button = action_button_scene.instance()
+	action_button.set_icon(icon)
 	
 	for slot in $GridContainer.get_children():
 		if slot.get_children().empty():
-			slot.add_child(ability_button)
+			slot.add_child(action_button)
 			
-			return ability_button
+			return action_button
 	
 	print("Inventory is full")
 	return null

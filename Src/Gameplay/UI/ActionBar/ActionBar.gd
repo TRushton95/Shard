@@ -1,25 +1,20 @@
 extends TextureRect
 
-var ability_button_scene = load("res://Gameplay/UI/AbilityButton/AbilityButton.tscn")
+var action_button_scene = load("res://Gameplay/UI/ActionButton/ActionButton.tscn")
 
 
-func setup_abilities(abilities: Array) -> void:
-	for ability in abilities:
-		add_ability(ability)
-
-
-func add_ability(ability) -> Button:
-	var ability_button = ability_button_scene.instance()
-	ability_button.ability_name = ability.name
-	$MarginContainer/HBoxContainer.add_child(ability_button)
-	ability_button.set_icon(ability.icon)
+func add_action_button(action_name: String, action_icon: Texture) -> Button:
+	var action_button = action_button_scene.instance()
+	action_button.action_name = action_name
+	$MarginContainer/HBoxContainer.add_child(action_button)
+	action_button.set_icon(action_icon)
 	
-	return ability_button
+	return action_button
 
 
-func remove_ability(index: int) -> void:
-	var ability_button = $MarginContainer/HBoxContainer.get_child(index)
-	ability_button.queue_free()
+func remove_action(index: int) -> void:
+	var action_button = $MarginContainer/HBoxContainer.get_child(index)
+	action_button.queue_free()
 
 
 func get_buttons() -> Array:

@@ -175,8 +175,8 @@ func _on_unit_mana_changed(value: int, unit: Unit) -> void:
 		$CanvasLayer/ActionBar.set_current_mana(unit.current_mana)
 			
 		for ability in unit.get_node("Abilities").get_children():
-			for ability_button in _get_ability_buttons_by_ability_name(ability.name):
-				ability_button.set_unaffordable_filter_visibility(unit.current_mana < ability.cost)
+			for action_button in _get_action_buttons_by_action_name(ability.name):
+				action_button.set_unaffordable_filter_visibility(unit.current_mana < ability.cost)
 
 
 func _on_unit_casting_started(ability_name: String, duration: float, unit: Unit) -> void:
@@ -184,8 +184,8 @@ func _on_unit_casting_started(ability_name: String, duration: float, unit: Unit)
 		$CanvasLayer/CastBar.initialise(ability_name, duration)
 		$CanvasLayer/CastBar.show()
 		
-		for ability_button in _get_ability_buttons_by_ability_name(ability_name):
-			ability_button.set_active(true)
+		for action_button in _get_action_buttons_by_action_name(ability_name):
+			action_button.set_active(true)
 
 
 func _on_unit_casting_progressed(time_elapsed: float, unit: Unit) -> void:
@@ -197,8 +197,8 @@ func _on_unit_casting_stopped(ability_name: String, unit: Unit) -> void:
 	if unit == get_node(player_name):
 		$CanvasLayer/CastBar.hide()
 		
-	for ability_button in _get_ability_buttons_by_ability_name(ability_name):
-		ability_button.set_active(false)
+	for action_button in _get_action_buttons_by_action_name(ability_name):
+		action_button.set_active(false)
 
 
 func _on_unit_channelling_started(ability_name: String, channel_duration: float, unit: Unit) -> void:
@@ -206,8 +206,8 @@ func _on_unit_channelling_started(ability_name: String, channel_duration: float,
 		$CanvasLayer/CastBar.initialise(ability_name, channel_duration)
 		$CanvasLayer/CastBar.show()
 		
-		for ability_button in _get_ability_buttons_by_ability_name(ability_name):
-			ability_button.set_active(true)
+		for action_button in _get_action_buttons_by_action_name(ability_name):
+			action_button.set_active(true)
 
 
 func _on_unit_channelling_progressed(time_remaining: float, unit: Unit) -> void:
@@ -219,8 +219,8 @@ func _on_unit_channelling_stopped(ability_name: String, unit: Unit) -> void:
 	if unit == get_node(player_name):
 		$CanvasLayer/CastBar.hide()
 		
-		for ability_button in _get_ability_buttons_by_ability_name(ability_name):
-			ability_button.set_active(false)
+		for action_button in _get_action_buttons_by_action_name(ability_name):
+			action_button.set_active(false)
 
 
 func _on_auto_attack_cooldown_started(duration: float) -> void:
@@ -237,20 +237,20 @@ func _on_auto_attack_cooldown_ended() -> void:
 
 
 func _on_ability_cooldown_started(ability: Ability, duration: int) -> void:
-	for ability_button in _get_ability_buttons_by_ability_name(ability.name):
-		ability_button.set_max_cooldown(duration)
-		ability_button.set_cooldown(duration)
-		ability_button.show_cooldown()
+	for action_button in _get_action_buttons_by_action_name(ability.name):
+		action_button.set_max_cooldown(duration)
+		action_button.set_cooldown(duration)
+		action_button.show_cooldown()
 
 
 func _on_ability_cooldown_progressed(ability: Ability) -> void:
-	for ability_button in _get_ability_buttons_by_ability_name(ability.name):
-		ability_button.set_cooldown(ability.get_remaining_cooldown())
+	for action_button in _get_action_buttons_by_action_name(ability.name):
+		action_button.set_cooldown(ability.get_remaining_cooldown())
 
 
 func _on_ability_cooldown_ended(ability: Ability) -> void:
-	for ability_button in _get_ability_buttons_by_ability_name(ability.name):
-		ability_button.hide_cooldown()
+	for action_button in _get_action_buttons_by_action_name(ability.name):
+		action_button.hide_cooldown()
 
 
 func _on_unit_team_changed(unit: Unit) -> void:
@@ -463,7 +463,7 @@ func setup(player_name: String, player_lookup: Dictionary) -> void:
 			unit.connect("ability_cooldown_progressed", self, "_on_ability_cooldown_progressed")
 			
 			for ability in unit.get_node("Abilities").get_children():
-				var ability_button = $CanvasLayer/ActionBar.add_ability(ability)
+				var ability_button = $CanvasLayer/ActionBar.add_action_button(ability.name, ability.icon)
 				var action_lookup = ActionLookup.new(Enums.ActionSource.Ability, ability.get_index())
 				ability_button.connect("pressed", self, "_on_ability_button_pressed", [action_lookup])
 				ability_button.connect("mouse_entered", self, "_on_ability_button_mouse_entered", [ability_button, action_lookup])
@@ -518,8 +518,8 @@ func select_unit(unit: Unit) -> void:
 func select_ability(ability: Ability) -> void:
 	# Deselect any currently selected ability buttons
 	if selected_ability:
-		for ability_button in _get_ability_buttons_by_ability_name(selected_ability.name):
-			ability_button.darken()
+		for action_button in _get_action_buttons_by_action_name(selected_ability.name):
+			action_button.darken()
 				
 	if !ability:
 		selected_ability = null
@@ -535,8 +535,8 @@ func select_ability(ability: Ability) -> void:
 		return
 	
 	selected_ability = ability
-	for ability_button in _get_ability_buttons_by_ability_name(selected_ability.name):
-		ability_button.lighten()
+	for action_button in _get_action_buttons_by_action_name(selected_ability.name):
+		action_button.lighten()
 		
 	Input.set_custom_mouse_cursor(rainbow_cursor)
 
@@ -569,12 +569,12 @@ func _pursue_target(target_name: String) -> void:
 		player.rset("auto_attack_enabled", true)
 
 
-func _get_ability_buttons_by_ability_name(ability_name: String) -> Array:
+func _get_action_buttons_by_action_name(ability_name: String) -> Array:
 	var result = []
 	
-	for ability_button in get_tree().get_nodes_in_group("ability_buttons"):
-		if ability_button.ability_name == ability_name:
-			result.push_back(ability_button)
+	for action_button in get_tree().get_nodes_in_group("action_buttons"):
+		if action_button.action_name == ability_name:
+			result.push_back(action_button)
 				
 	return result
 

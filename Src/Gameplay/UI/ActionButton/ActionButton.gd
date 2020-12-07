@@ -1,23 +1,23 @@
 extends TextureButton
 
-var ability_name: String
+var action_name: String
 var _active := false
 var _is_hovered := false
 
 
-func _on_AbilityButton_mouse_entered() -> void:
+func _on_ActionButton_mouse_entered() -> void:
 	_is_hovered = true
 	$ActiveTexture.show()
 
 
-func _on_AbilityButton_mouse_exited() -> void:
+func _on_ActionButton_mouse_exited() -> void:
 	_is_hovered = false
 	if !_active:
 		$ActiveTexture.hide()
 
 
 func _ready() -> void:
-	add_to_group("ability_buttons")
+	add_to_group("action_buttons")
 
 
 func set_icon(icon: Texture) -> void:
