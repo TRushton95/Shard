@@ -9,7 +9,7 @@
 [ext_resource path="res://Gameplay/UI/SmallHealthBar/SmallHealthBar.tscn" type="PackedScene" id=7]
 [ext_resource path="res://Gameplay/AbilitySystem/Abilities/AstralGuidance/AstralGuidance.tscn" type="PackedScene" id=8]
 [ext_resource path="res://Gameplay/UI/SmallHealthBar/small_white_health_bar.png" type="Texture" id=9]
-[ext_resource path="res://Gameplay/Entities/Items/FireballScroll.tscn" type="PackedScene" id=10]
+[ext_resource path="res://Gameplay/Entities/Inventory/Inventory.tscn" type="PackedScene" id=10]
 
 [sub_resource type="CircleShape2D" id=1]
 radius = 32.0
@@ -31,9 +31,7 @@ shape = SubResource( 1 )
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Clickbox"]
 shape = SubResource( 2 )
 
-[node name="Inventory" type="Node" parent="."]
-
-[node name="FireballScroll" parent="Inventory" instance=ExtResource( 10 )]
+[node name="Inventory" parent="." instance=ExtResource( 10 )]
 
 [node name="Abilities" type="Node" parent="."]
 

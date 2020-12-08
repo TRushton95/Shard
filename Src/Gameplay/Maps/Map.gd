@@ -15,7 +15,7 @@ func _on_ability_button_pressed( action_lookup: ActionLookup) -> void:
 		var ability = get_node(player_name + "/Abilities").get_child(action_lookup.index)
 		process_ability_press(ability)
 	elif action_lookup.source == Enums.ActionSource.Inventory:
-		var item = get_node(player_name + "/Inventory").get_child(action_lookup.index)
+		var item = get_node(player_name + "/Inventory").get_item(action_lookup.index)
 		process_ability_press(item.get_ability())
 
 
@@ -271,7 +271,7 @@ func _process(_delta: float) -> void:
 	if Input.is_action_just_pressed("test_right"):
 		$CanvasLayer/Inventory.remove_item(0)
 	if Input.is_action_just_pressed("test_left"):
-		var item_ability = player.get_node("Inventory").get_child(0).get_ability()
+		var item_ability = player.get_node("Inventory").get_item(0).get_ability()
 		var icon = item_ability.icon # This should probably be the icon from the item, not the ability
 		var action_lookup = ActionLookup.new(Enums.ActionSource.Inventory, item_ability.get_index())
 		$CanvasLayer/Inventory.add_item(icon).connect("pressed", self, "_on_ability_button_pressed", [action_lookup])
@@ -461,6 +461,10 @@ func setup(player_name: String, player_lookup: Dictionary) -> void:
 			unit.connect("ability_cooldown_started", self, "_on_ability_cooldown_started")
 			unit.connect("ability_cooldown_ended", self, "_on_ability_cooldown_ended")
 			unit.connect("ability_cooldown_progressed", self, "_on_ability_cooldown_progressed")
+			
+			var fireball_scroll_scene = load("res://Gameplay/Entities/Items/FireballScroll.tscn")
+			var fireball_scroll = fireball_scroll_scene.instance()
+			unit.get_node("Inventory").push_item(fireball_scroll)
 			
 			for ability in unit.get_node("Abilities").get_children():
 				var ability_button = $CanvasLayer/ActionBar.add_action_button(ability.name, ability.icon)
