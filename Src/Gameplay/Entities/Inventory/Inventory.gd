@@ -1,7 +1,7 @@
 # TODO: Add static typing to this file once Item is implemented
 extends Node
 
-export var size := 20
+export var size := 4
 
 
 func _ready() -> void:
@@ -11,14 +11,16 @@ func _ready() -> void:
 		add_child(slot)
 
 
-func push_item(item: Node) -> void:
+func push_item(item: Node) -> bool:
 	var slot = _get_free_slot()
 	
 	if !slot:
 		print("Inventory is full")
-		return
+		return false
 		
+	
 	slot.add_child(item)
+	return true
 
 
 func get_item(index: int):

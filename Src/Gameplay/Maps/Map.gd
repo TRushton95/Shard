@@ -272,16 +272,16 @@ func _process(_delta: float) -> void:
 		player.get_node("Inventory").pop_item(0)
 		$CanvasLayer/Inventory.remove_item(0)
 	if Input.is_action_just_pressed("test_left"):
-		###
 		var fireball_scroll_scene = load("res://Gameplay/Entities/Items/FireballScroll.tscn")
 		var fireball_scroll = fireball_scroll_scene.instance()
-		player.get_node("Inventory").push_item(fireball_scroll)
+		var success = player.get_node("Inventory").push_item(fireball_scroll)
 		
-		var item_ability = player.get_node("Inventory").get_item(0).get_ability()
-		var icon = item_ability.icon # This should probably be the icon from the item, not the ability
-		var action_lookup = ActionLookup.new(Enums.ActionSource.Inventory, item_ability.get_index())
-		
-		$CanvasLayer/Inventory.add_item(icon).connect("pressed", self, "_on_ability_button_pressed", [action_lookup])
+		if success:
+			var item_ability = player.get_node("Inventory").get_item(0).get_ability()
+			var icon = item_ability.icon # This should probably be the icon from the item, not the ability
+			var action_lookup = ActionLookup.new(Enums.ActionSource.Inventory, item_ability.get_index())
+			
+			$CanvasLayer/Inventory.add_item(icon).connect("pressed", self, "_on_ability_button_pressed", [action_lookup])
 	# End of test commands
 	
 	if Input.is_action_just_pressed("cancel"):
