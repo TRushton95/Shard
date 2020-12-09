@@ -475,6 +475,8 @@ func setup(player_name: String, player_lookup: Dictionary) -> void:
 				ability_button.connect("pressed", self, "_on_ability_button_pressed", [action_lookup])
 				ability_button.connect("mouse_entered", self, "_on_ability_button_mouse_entered", [ability_button, action_lookup])
 				ability_button.connect("mouse_exited", self, "_on_ability_button_mouse_exited", [action_lookup])
+				
+				$CanvasLayer/Spellbook.add_item(ability.icon).connect("pressed", self, "_on_ability_button_pressed", [action_lookup])
 			
 			$CanvasLayer/ActionBar.set_max_health(unit.health_attr.value)
 			$CanvasLayer/ActionBar.set_max_mana(unit.mana_attr.value)
