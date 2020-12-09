@@ -294,6 +294,10 @@ func _process(_delta: float) -> void:
 	
 	if Input.is_action_just_pressed("toggle_character_panel"):
 		$CanvasLayer/CharacterPanel.visible = !$CanvasLayer/CharacterPanel.visible
+	if Input.is_action_just_pressed("toggle_spellbook"):
+		$CanvasLayer/Spellbook.visible = !$CanvasLayer/Spellbook.visible
+	if Input.is_action_just_pressed("toggle_bag"):
+		$CanvasLayer/Bag.visible = !$CanvasLayer/Bag.visible
 	
 	if Input.is_action_just_pressed("cast_1"):
 		ability_index = 0
