@@ -3,45 +3,48 @@ extends Node
 
 export var size := 20
 
-var _slots := []
 
 func _ready() -> void:
-	for i in range(20):
-		_slots.resize(size)
+	for i in size:
+		var slot = Node.new()
+		slot.name = "Slot" + str(i)
+		add_child(slot)
 
 
-func push_item(item) -> void:
-	var slot_index = _get_free_slot_index()
+func push_item(item: Node) -> void:
+	var slot = _get_free_slot()
 	
-	if slot_index == -1:
+	if !slot:
 		print("Inventory is full")
 		return
 		
-	_slots[slot_index] = item
+	slot.add_child(item)
 
 
 func get_item(index: int):
 	var result
 	
-	if index < _slots.size():
-		var item = _slots[index]
-		result = item
+	var slot = get_child(index)
+	if slot.get_child_count() > 0:
+		result = slot.get_child(0)
 		
 	return result
 
 
 func pop_item(index: int):
-	var result = get_item(index)
+	var result
 	
-	if result:
-		_slots.remove(index)
+	var slot = get_child(index)
+	if slot.get_child_count() > 0:
+		result = slot.get_child(0)
+		slot.remove_child(result)
 		
 	return result
 
 
-func _get_free_slot_index() -> int:
-	for i in range(_slots.size()):
-		if !_slots[i]:
-			return i
+func _get_free_slot():
+	for slot in get_children():
+		if slot.get_child_count() == 0:
+			return slot
 			
-	return -1
+	return null
