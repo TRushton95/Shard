@@ -404,7 +404,7 @@ func _unhandled_input(event) -> void:
 remotesync func cast_ability_on_unit(ability_index: int, caster_name: String, target_name: String) -> void:
 	var caster = get_node(caster_name)
 	
-	var ability = caster.get_node("Ability").get_child(ability_index)
+	var ability = caster.get_node("Abilities").get_child(ability_index)
 	
 	if !has_node(target_name):
 		print("No target with name: " + target_name)
