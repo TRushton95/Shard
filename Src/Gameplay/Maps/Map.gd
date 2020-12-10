@@ -42,8 +42,16 @@ func _on_ability_button_mouse_entered(button: TextureButton, action_lookup: Acti
 		$CanvasLayer/Tooltip.rect_position = button.get_global_rect().position - Vector2(0, $CanvasLayer/Tooltip.rect_size.y + 20)
 
 
-func _on_ability_button_mouse_exited( action_lookup: ActionLookup) -> void:
+func _on_ability_button_mouse_exited(action_lookup: ActionLookup) -> void:
 	$CanvasLayer/Tooltip.hide()
+
+
+func _on_ability_button_held(action_lookup: ActionLookup) -> void:
+	$CanvasLayer/Tooltip.hide()
+
+
+func _on_ability_button_unheld(button: TextureButton, action_lookup: ActionLookup) -> void:
+	button.reset_position()
 
 
 func _on_unit_left_clicked(unit: Unit) -> void:
@@ -578,6 +586,8 @@ func _create_action_button(name: String, icon: Texture, action_source: int, acti
 	action_button.connect("clicked", self, "_on_ability_button_clicked", [action_lookup])
 	action_button.connect("mouse_entered", self, "_on_ability_button_mouse_entered", [action_button, action_lookup])
 	action_button.connect("mouse_exited", self, "_on_ability_button_mouse_exited", [action_lookup])
+	action_button.connect("held", self, "_on_ability_button_held", [action_lookup])
+	action_button.connect("unheld", self, "_on_ability_button_unheld", [action_button, action_lookup])
 	
 	return action_button
 

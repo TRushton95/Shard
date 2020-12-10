@@ -2,6 +2,7 @@ extends TextureButton
 class_name ActionButton
 
 var action_name: String
+var _original_position : Vector2
 var _active := false
 var _is_hovered := false
 var _mouse_down := false
@@ -48,6 +49,7 @@ func _input(event) -> void:
 		if _mouse_down && !_is_held:
 			_mouse_offset = event.position - rect_global_position
 			_is_held = true
+			_original_position = rect_position
 			emit_signal("held")
 			
 		if _is_held:
@@ -75,6 +77,10 @@ func hide_cooldown() -> void:
 func set_cooldown(value: float) -> void:
 	$CooldownTexture.value = value
 	$CooldownLabel.text = str(ceil(value))
+
+
+func reset_position() -> void:
+	rect_position = _original_position
 
 
 func set_unaffordable_filter_visibility(show: bool) -> void:
