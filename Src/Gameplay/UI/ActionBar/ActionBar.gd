@@ -2,12 +2,16 @@ extends TextureRect
 
 
 func add_action_button(action_button: ActionButton) -> void:
-	$MarginContainer/HBoxContainer.add_child(action_button)
+	for slot in $MarginContainer/HBoxContainer.get_children():
+		if slot.is_free():
+			slot.add_button(action_button)
+			return
 
 
 func remove_action_button(index: int) -> void:
-	var action_button = $MarginContainer/HBoxContainer.get_child(index)
-	action_button.queue_free()
+	var slot = $MarginContainer/HBoxContainer.get_child(index)
+	var button = slot.pop_button()
+	button.queue_free()
 
 
 func get_buttons() -> Array:

@@ -1,0 +1,17 @@
+[gd_scene load_steps=2 format=2]
+
+[ext_resource path="res://Gameplay/UI/ButtonSlot/ButtonSlot.gd" type="Script" id=1]
+
+[node name="ButtonSlot" type="ColorRect"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_right = -1980.0
+margin_bottom = -1080.0
+rect_min_size = Vector2( 64, 64 )
+color = Color( 1, 1, 1, 0 )
+script = ExtResource( 1 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+[connection signal="mouse_entered" from="." to="." method="_on_ButtonSlot_mouse_entered"]
+[connection signal="mouse_exited" from="." to="." method="_on_ButtonSlot_mouse_exited"]
