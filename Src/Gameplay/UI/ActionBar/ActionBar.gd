@@ -1,18 +1,11 @@
 extends TextureRect
 
-var action_button_scene = load("res://Gameplay/UI/ActionButton/ActionButton.tscn")
 
-
-func add_action_button(action_name: String, action_icon: Texture) -> Button:
-	var action_button = action_button_scene.instance()
-	action_button.action_name = action_name
+func add_action_button(action_button: ActionButton) -> void:
 	$MarginContainer/HBoxContainer.add_child(action_button)
-	action_button.set_icon(action_icon)
-	
-	return action_button
 
 
-func remove_action(index: int) -> void:
+func remove_action_button(index: int) -> void:
 	var action_button = $MarginContainer/HBoxContainer.get_child(index)
 	action_button.queue_free()
 

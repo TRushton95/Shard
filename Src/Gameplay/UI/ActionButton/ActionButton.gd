@@ -1,8 +1,16 @@
 extends TextureButton
+class_name ActionButton
 
 var action_name: String
 var _active := false
 var _is_hovered := false
+var _mouse_down := false
+var _is_held := false
+var _mouse_offset
+
+signal clicked
+signal held
+signal unheld
 
 
 func _on_ActionButton_mouse_entered() -> void:
@@ -16,8 +24,34 @@ func _on_ActionButton_mouse_exited() -> void:
 		$ActiveTexture.hide()
 
 
+func _on_ActionButton_button_down() -> void:
+	_mouse_down = true
+
+
+func _on_ActionButton_button_up() -> void:
+	if !_is_held:
+		emit_signal("clicked")
+	
+	_mouse_down = false
+	
+	if _is_held:
+		_is_held = false
+		emit_signal("unheld")
+
+
 func _ready() -> void:
 	add_to_group("action_buttons")
+
+
+func _input(event) -> void:
+	if event is InputEventMouseMotion:
+		if _mouse_down && !_is_held:
+			_mouse_offset = event.position - rect_global_position
+			_is_held = true
+			emit_signal("held")
+			
+		if _is_held:
+			rect_global_position = event.position - _mouse_offset
 
 
 func set_icon(icon: Texture) -> void:

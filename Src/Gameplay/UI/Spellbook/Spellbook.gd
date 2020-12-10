@@ -18,15 +18,11 @@ func _input(event) -> void:
 		rect_position += event.relative
 
 
-func add_item(icon: Texture) -> Node:
-	var action_button = action_button_scene.instance()
-	action_button.set_icon(icon)
-	
+func add_action_button(action_button: ActionButton) -> void:
 	$VBoxContainer/GridContainer.add_child(action_button)
-	return action_button
 
 
-func remove_item(index: int) -> void:
+func remove_action_button(index: int) -> void:
 	var slot = $VBoxContainer/GridContainer.get_child(index)
 	
 	for child in slot.get_children():

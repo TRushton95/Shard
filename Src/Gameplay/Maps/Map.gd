@@ -3,14 +3,15 @@ extends Node2D
 var rainbow_cursor = load("res://pointer.png")
 var unit_scene = load("res://Gameplay/Entities/Unit/Unit.tscn")
 var floating_text_scene = load("res://Gameplay/UI/FloatingText/FloatingText.tscn")
+var action_button_scene = load("res://Gameplay/UI/ActionButton/ActionButton.tscn")
 
 var player_name : String
 var selected_unit : Unit
 var selected_ability
 
 
-#This should hook into whatever mechanism determines when an ability key is pressed
-func _on_ability_button_pressed( action_lookup: ActionLookup) -> void:
+#This should hook into whatever mechanism determines when an ability key is clicked
+func _on_ability_button_clicked(action_lookup: ActionLookup) -> void:
 	if action_lookup.source == Enums.ActionSource.Ability:
 		var ability = get_node(player_name + "/Abilities").get_child(action_lookup.index)
 		process_ability_press(ability)
@@ -270,7 +271,7 @@ func _process(_delta: float) -> void:
 	# Test commands for testing whatever
 	if Input.is_action_just_pressed("test_right"):
 		player.get_node("Inventory").pop_item(0)
-		$CanvasLayer/Bag.remove_item(0)
+		$CanvasLayer/Bag.remove_action_button(0)
 	if Input.is_action_just_pressed("test_left"):
 		var fireball_scroll_scene = load("res://Gameplay/Entities/Items/FireballScroll.tscn")
 		var fireball_scroll = fireball_scroll_scene.instance()
@@ -279,9 +280,9 @@ func _process(_delta: float) -> void:
 		if success:
 			var item_ability = player.get_node("Inventory").get_item(0).get_ability()
 			var icon = item_ability.icon # This should probably be the icon from the item, not the ability
-			var action_lookup = ActionLookup.new(Enums.ActionSource.Inventory, item_ability.get_index())
 			
-			$CanvasLayer/Bag.add_item(icon).connect("pressed", self, "_on_ability_button_pressed", [action_lookup])
+			var item_button = _create_action_button(item_ability.name, icon, Enums.ActionSource.Inventory, item_ability.get_index())
+			$CanvasLayer/Bag.add_action_button(item_button)
 	# End of test commands
 	
 	if Input.is_action_just_pressed("cancel"):
@@ -474,13 +475,11 @@ func setup(player_name: String, player_lookup: Dictionary) -> void:
 			unit.connect("ability_cooldown_progressed", self, "_on_ability_cooldown_progressed")
 			
 			for ability in unit.get_node("Abilities").get_children():
-				var ability_button = $CanvasLayer/ActionBar.add_action_button(ability.name, ability.icon)
-				var action_lookup = ActionLookup.new(Enums.ActionSource.Ability, ability.get_index())
-				ability_button.connect("pressed", self, "_on_ability_button_pressed", [action_lookup])
-				ability_button.connect("mouse_entered", self, "_on_ability_button_mouse_entered", [ability_button, action_lookup])
-				ability_button.connect("mouse_exited", self, "_on_ability_button_mouse_exited", [action_lookup])
+				var action_bar_button = _create_action_button(ability.name, ability.icon, Enums.ActionSource.Ability, ability.get_index())
+				$CanvasLayer/ActionBar.add_action_button(action_bar_button)
 				
-				$CanvasLayer/Spellbook.add_item(ability.icon).connect("pressed", self, "_on_ability_button_pressed", [action_lookup])
+				var spellbook_button = _create_action_button(ability.name, ability.icon, Enums.ActionSource.Ability, ability.get_index())
+				$CanvasLayer/Spellbook.add_action_button(spellbook_button)
 			
 			$CanvasLayer/ActionBar.set_max_health(unit.health_attr.value)
 			$CanvasLayer/ActionBar.set_max_mana(unit.mana_attr.value)
@@ -495,7 +494,7 @@ func setup(player_name: String, player_lookup: Dictionary) -> void:
 #			var item_ability = unit.get_node("Inventory").get_child(0).get_ability()
 #			var icon = item_ability.icon # This should probably be the icon from the item, not the ability
 #			var action_lookup = ActionLookup.new(Enums.ActionSource.Inventory, item_ability.get_index())
-#			$CanvasLayer/Inventory.add_item(icon).connect("pressed", self, "_on_ability_button_pressed", [action_lookup])
+#			$CanvasLayer/Inventory.add_item(icon).connect("clicked", self, "_on_ability_button_clicked", [action_lookup])
 			
 			# PATHING TEST #
 #			$Enemy.rset("focus", unit)
@@ -567,6 +566,20 @@ remotesync func _set_unit_queued_ability_data(unit_name: String, target, ability
 	else:
 		var adjusted_target = get_node(target) if target is String else target
 		get_node(unit_name).queued_ability_data = [ ability_index, adjusted_target ]
+
+
+# TODO: Does this actually need a name?
+func _create_action_button(name: String, icon: Texture, action_source: int, action_index: int) -> ActionButton:
+	var action_button = action_button_scene.instance()
+	action_button.action_name = name
+	action_button.set_icon(icon)
+	
+	var action_lookup = ActionLookup.new(action_source, action_index)
+	action_button.connect("clicked", self, "_on_ability_button_clicked", [action_lookup])
+	action_button.connect("mouse_entered", self, "_on_ability_button_mouse_entered", [action_button, action_lookup])
+	action_button.connect("mouse_exited", self, "_on_ability_button_mouse_exited", [action_lookup])
+	
+	return action_button
 
 
 func _pursue_target(target_name: String) -> void:

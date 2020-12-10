@@ -103,9 +103,6 @@ margin_top = 313.0
 margin_right = 142.0
 margin_bottom = 363.0
 
-[node name="Tooltip" parent="CanvasLayer" instance=ExtResource( 7 )]
-visible = false
-
 [node name="Bag" parent="CanvasLayer" instance=ExtResource( 9 )]
 anchor_left = 1.0
 anchor_top = 1.0
@@ -122,3 +119,6 @@ margin_left = 160.319
 margin_top = -42.9695
 margin_right = 236.319
 margin_bottom = -10.9695
+
+[node name="Tooltip" parent="CanvasLayer" instance=ExtResource( 7 )]
+visible = false
