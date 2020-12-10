@@ -1,6 +1,6 @@
-extends PanelContainer
+# TODO: This seems like it could share a script with bag, should it?
 
-var action_button_scene = load("res://Gameplay/UI/ActionButton/ActionButton.tscn")
+extends PanelContainer
 
 var _held := false
 
@@ -19,11 +19,17 @@ func _input(event) -> void:
 
 
 func add_action_button(action_button: ActionButton) -> void:
-	$VBoxContainer/GridContainer.add_child(action_button)
+	for slot in $VBoxContainer/GridContainer.get_children():
+		if slot.is_free():
+			slot.add_button(action_button)
+			return
+	
+	print("Spellbook is full")
 
 
 func remove_action_button(index: int) -> void:
 	var slot = $VBoxContainer/GridContainer.get_child(index)
 	
-	for child in slot.get_children():
-		child.queue_free()
+	if !slot.is_empty():
+		var button = slot.pop_button()
+		button.queue_free()

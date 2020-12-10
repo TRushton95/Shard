@@ -20,8 +20,8 @@ func _input(event) -> void:
 
 func add_action_button(action_button: ActionButton) -> void:
 	for slot in $VBoxContainer/GridContainer.get_children():
-		if slot.get_children().empty():
-			slot.add_child(action_button)
+		if slot.is_free():
+			slot.add_button(action_button)
 			return
 	
 	print("Inventory is full")
@@ -30,5 +30,6 @@ func add_action_button(action_button: ActionButton) -> void:
 func remove_action_button(index: int) -> void:
 	var slot = $VBoxContainer/GridContainer.get_child(index)
 	
-	for child in slot.get_children():
-		child.queue_free()
+	if !slot.is_empty():
+		var button = slot.pop_button()
+		button.queue_free()

@@ -1,6 +1,7 @@
-[gd_scene load_steps=2 format=2]
+[gd_scene load_steps=3 format=2]
 
 [ext_resource path="res://Gameplay/UI/Bag/Bag.gd" type="Script" id=1]
+[ext_resource path="res://Gameplay/UI/ButtonSlot/ButtonSlot.tscn" type="PackedScene" id=2]
 
 [node name="Bag" type="PanelContainer"]
 anchor_right = 1.0
@@ -36,44 +37,32 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="Slot1" type="Panel" parent="VBoxContainer/GridContainer"]
-self_modulate = Color( 0.176471, 0.176471, 0.176471, 1 )
+[node name="ButtonSlot" parent="VBoxContainer/GridContainer" instance=ExtResource( 2 )]
+anchor_right = 0.0
+anchor_bottom = 0.0
 margin_right = 64.0
 margin_bottom = 64.0
-rect_min_size = Vector2( 64, 64 )
-__meta__ = {
-"_edit_use_anchors_": false
-}
 
-[node name="Slot2" type="Panel" parent="VBoxContainer/GridContainer"]
-self_modulate = Color( 0.176471, 0.176471, 0.176471, 1 )
+[node name="ButtonSlot2" parent="VBoxContainer/GridContainer" instance=ExtResource( 2 )]
+anchor_right = 0.0
+anchor_bottom = 0.0
 margin_left = 68.0
 margin_right = 132.0
 margin_bottom = 64.0
-rect_min_size = Vector2( 64, 64 )
-__meta__ = {
-"_edit_use_anchors_": false
-}
 
-[node name="Slot3" type="Panel" parent="VBoxContainer/GridContainer"]
-self_modulate = Color( 0.176471, 0.176471, 0.176471, 1 )
+[node name="ButtonSlot3" parent="VBoxContainer/GridContainer" instance=ExtResource( 2 )]
+anchor_right = 0.0
+anchor_bottom = 0.0
 margin_top = 68.0
 margin_right = 64.0
 margin_bottom = 132.0
-rect_min_size = Vector2( 64, 64 )
-__meta__ = {
-"_edit_use_anchors_": false
-}
 
-[node name="Slot4" type="Panel" parent="VBoxContainer/GridContainer"]
-self_modulate = Color( 0.176471, 0.176471, 0.176471, 1 )
+[node name="ButtonSlot4" parent="VBoxContainer/GridContainer" instance=ExtResource( 2 )]
+anchor_right = 0.0
+anchor_bottom = 0.0
 margin_left = 68.0
 margin_top = 68.0
 margin_right = 132.0
 margin_bottom = 132.0
-rect_min_size = Vector2( 64, 64 )
-__meta__ = {
-"_edit_use_anchors_": false
-}
 [connection signal="button_down" from="VBoxContainer/GrabBox" to="." method="_on_GrabBox_button_down"]
 [connection signal="button_up" from="VBoxContainer/GrabBox" to="." method="_on_GrabBox_button_up"]
