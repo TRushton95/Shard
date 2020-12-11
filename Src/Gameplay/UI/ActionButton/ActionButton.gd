@@ -2,16 +2,16 @@ extends TextureButton
 class_name ActionButton
 
 var action_name: String
-var _original_position : Vector2
 var _active := false
 var _is_hovered := false
-var _mouse_down := false
-var _is_held := false
-var _mouse_offset
+var _mouse_just_pressed := false
 
+var _grab_position := Vector2(-1, -1)
+var _grab_threshold := 15
+var _grabbed := false
+
+signal grabbed
 signal clicked
-signal held
-signal unheld
 
 
 func _on_ActionButton_mouse_entered() -> void:
@@ -26,34 +26,23 @@ func _on_ActionButton_mouse_exited() -> void:
 
 
 func _on_ActionButton_button_down() -> void:
-	_mouse_down = true
+	_mouse_just_pressed = true
+	_grab_position = get_global_mouse_position()
 
 
-func _on_ActionButton_button_up() -> void:
-	if !_is_held:
+func _on_ActionButton_button_up():
+	if !_grabbed:
 		emit_signal("clicked")
-	
-	_mouse_down = false
-	
-	if _is_held:
-		_is_held = false
-		emit_signal("unheld")
-
-
-func _ready() -> void:
-	add_to_group("action_buttons")
+		
+	_grabbed = false
+	_grab_position = Vector2(-1, -1)
 
 
 func _input(event) -> void:
-	if event is InputEventMouseMotion:
-		if _mouse_down && !_is_held:
-			_mouse_offset = event.position - rect_global_position
-			_is_held = true
-			_original_position = rect_position
-			emit_signal("held")
-			
-		if _is_held:
-			rect_global_position = event.position - _mouse_offset
+	if event is InputEventMouseMotion && _mouse_just_pressed && _grab_position != Vector2(-1, -1) && event.position.distance_to(_grab_position) > _grab_threshold:
+		_mouse_just_pressed = false
+		_grabbed = true
+		emit_signal("grabbed")
 
 
 func set_icon(icon: Texture) -> void:
@@ -79,10 +68,6 @@ func set_cooldown(value: float) -> void:
 	$CooldownLabel.text = str(ceil(value))
 
 
-func reset_position() -> void:
-	rect_position = _original_position
-
-
 func set_unaffordable_filter_visibility(show: bool) -> void:
 	if show:
 		$UnaffordableTexture.show()
@@ -105,3 +90,7 @@ func lighten() -> void:
 
 func darken() -> void:
 	material.set_shader_param("brightness_modifier", 0)
+
+
+func get_grab_offset() -> Vector2:
+	return _grab_position - rect_position if _grabbed else Vector2.ZERO

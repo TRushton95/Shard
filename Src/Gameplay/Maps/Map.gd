@@ -8,6 +8,8 @@ var action_button_scene = load("res://Gameplay/UI/ActionButton/ActionButton.tscn
 var player_name : String
 var selected_unit : Unit
 var selected_ability
+var grabbed_action_button : ActionButton
+var grab_offset : Vector2
 
 
 #This should hook into whatever mechanism determines when an ability key is clicked
@@ -20,7 +22,7 @@ func _on_ability_button_clicked(action_lookup: ActionLookup) -> void:
 		process_ability_press(item.get_ability())
 
 
-func _on_ability_button_mouse_entered(button: TextureButton, action_lookup: ActionLookup) -> void:
+func _on_ability_button_mouse_entered(button: ActionButton, action_lookup: ActionLookup) -> void:
 	if action_lookup.source == Enums.ActionSource.Ability:
 		var ability = get_node(player_name + "/Abilities").get_child(action_lookup.index)
 		
@@ -46,12 +48,10 @@ func _on_ability_button_mouse_exited(action_lookup: ActionLookup) -> void:
 	$CanvasLayer/Tooltip.hide()
 
 
-func _on_ability_button_held(action_lookup: ActionLookup) -> void:
+func _on_ability_button_grabbed(button: ActionButton, action_lookup: ActionLookup) -> void:
+	grabbed_action_button = button
+	grab_offset = button.get_grab_offset()
 	$CanvasLayer/Tooltip.hide()
-
-
-func _on_ability_button_unheld(button: TextureButton, action_lookup: ActionLookup) -> void:
-	button.reset_position()
 
 
 func _on_unit_left_clicked(unit: Unit) -> void:
@@ -379,6 +379,17 @@ func process_ability_press(ability: Ability):
 			print("Invalid target type on ability press")
 
 
+func _input(event) -> void:
+	if event is InputEventMouseMotion:
+		if grabbed_action_button:
+			grabbed_action_button.rect_position = get_viewport().get_mouse_position() - grab_offset
+			
+	if event is InputEventMouseButton && event.button_index == BUTTON_LEFT && !event.pressed:
+		if grabbed_action_button:
+			grabbed_action_button.rect_position = Vector2.ZERO
+			grabbed_action_button = null
+
+
 func _unhandled_input(event) -> void:
 	if event is InputEventMouseButton && event.pressed:
 		var player = get_node(player_name)
@@ -581,13 +592,13 @@ func _create_action_button(name: String, icon: Texture, action_source: int, acti
 	var action_button = action_button_scene.instance()
 	action_button.action_name = name
 	action_button.set_icon(icon)
+	action_button.add_to_group("action_buttons")
 	
 	var action_lookup = ActionLookup.new(action_source, action_index)
-	action_button.connect("clicked", self, "_on_ability_button_clicked", [action_lookup])
 	action_button.connect("mouse_entered", self, "_on_ability_button_mouse_entered", [action_button, action_lookup])
 	action_button.connect("mouse_exited", self, "_on_ability_button_mouse_exited", [action_lookup])
-	action_button.connect("held", self, "_on_ability_button_held", [action_lookup])
-	action_button.connect("unheld", self, "_on_ability_button_unheld", [action_button, action_lookup])
+	action_button.connect("grabbed", self, "_on_ability_button_grabbed", [action_button, action_lookup])
+	action_button.connect("clicked", self, "_on_ability_button_clicked", [action_lookup])
 	
 	return action_button
 
