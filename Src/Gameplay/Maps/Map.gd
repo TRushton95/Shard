@@ -13,18 +13,18 @@ var grab_offset : Vector2
 
 
 #This should hook into whatever mechanism determines when an ability key is clicked
-func _on_ability_button_clicked(action_lookup: ActionLookup) -> void:
-	if action_lookup.source == Enums.ActionSource.Ability:
-		var ability = get_node(player_name + "/Abilities").get_child(action_lookup.index)
+func _on_ability_button_clicked(button: ActionButton) -> void:
+	if button.action_lookup.source == Enums.ActionSource.Ability:
+		var ability = get_node(player_name + "/Abilities").get_child(button.action_lookup.index)
 		process_ability_press(ability)
-	elif action_lookup.source == Enums.ActionSource.Inventory:
-		var item = get_node(player_name + "/Inventory").get_item(action_lookup.index)
+	elif button.action_lookup.source == Enums.ActionSource.Inventory:
+		var item = get_node(player_name + "/Inventory").get_item(button.action_lookup.index)
 		process_ability_press(item.get_ability())
 
 
-func _on_ability_button_mouse_entered(button: ActionButton, action_lookup: ActionLookup) -> void:
-	if action_lookup.source == Enums.ActionSource.Ability:
-		var ability = get_node(player_name + "/Abilities").get_child(action_lookup.index)
+func _on_ability_button_mouse_entered(button: ActionButton) -> void:
+	if button.action_lookup.source == Enums.ActionSource.Ability:
+		var ability = get_node(player_name + "/Abilities").get_child(button.action_lookup.index)
 		
 		$CanvasLayer/Tooltip.set_name(ability.name)
 		$CanvasLayer/Tooltip.set_range(100)
@@ -44,11 +44,11 @@ func _on_ability_button_mouse_entered(button: ActionButton, action_lookup: Actio
 		$CanvasLayer/Tooltip.rect_position = button.get_global_rect().position - Vector2(0, $CanvasLayer/Tooltip.rect_size.y + 20)
 
 
-func _on_ability_button_mouse_exited(action_lookup: ActionLookup) -> void:
+func _on_ability_button_mouse_exited(button: ActionButton) -> void:
 	$CanvasLayer/Tooltip.hide()
 
 
-func _on_ability_button_grabbed(button: ActionButton, action_lookup: ActionLookup) -> void:
+func _on_ability_button_grabbed(button: ActionButton) -> void:
 	grabbed_action_button = button
 	grab_offset = button.get_grab_offset()
 	$CanvasLayer/Tooltip.hide()
@@ -592,13 +592,13 @@ func _create_action_button(name: String, icon: Texture, action_source: int, acti
 	var action_button = action_button_scene.instance()
 	action_button.action_name = name
 	action_button.set_icon(icon)
+	action_button.action_lookup = ActionLookup.new(action_source, action_index)
 	action_button.add_to_group("action_buttons")
 	
-	var action_lookup = ActionLookup.new(action_source, action_index)
-	action_button.connect("mouse_entered", self, "_on_ability_button_mouse_entered", [action_button, action_lookup])
-	action_button.connect("mouse_exited", self, "_on_ability_button_mouse_exited", [action_lookup])
-	action_button.connect("grabbed", self, "_on_ability_button_grabbed", [action_button, action_lookup])
-	action_button.connect("clicked", self, "_on_ability_button_clicked", [action_lookup])
+	action_button.connect("mouse_entered", self, "_on_ability_button_mouse_entered", [action_button])
+	action_button.connect("mouse_exited", self, "_on_ability_button_mouse_exited", [action_button])
+	action_button.connect("grabbed", self, "_on_ability_button_grabbed", [action_button])
+	action_button.connect("clicked", self, "_on_ability_button_clicked", [action_button])
 	
 	return action_button
 

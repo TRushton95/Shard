@@ -2,6 +2,8 @@ extends TextureButton
 class_name ActionButton
 
 var action_name: String
+var action_lookup: ActionLookup
+
 var _active := false
 var _is_hovered := false
 var _mouse_just_pressed := false
