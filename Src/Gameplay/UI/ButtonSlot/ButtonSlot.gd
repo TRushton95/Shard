@@ -1,4 +1,7 @@
 extends ColorRect
+class_name ButtonSlot
+
+signal button_dropped(button)
 
 
 func _on_ButtonSlot_mouse_entered():
@@ -20,6 +23,9 @@ func add_button(button: ActionButton) -> void:
 func pop_button() -> ActionButton:
 	var result
 	
+	if get_child_count() == 0:
+		return result
+		
 	var child = get_child(0)
 	if child:
 		result = child
@@ -30,3 +36,17 @@ func pop_button() -> ActionButton:
 
 func is_free() -> bool:
 	return get_child_count() == 0
+
+
+func can_drop_data(position: Vector2, data) -> bool:
+	var result
+	
+	if data.get_type() == "ActionButton":
+		result = true
+		
+	return result
+
+
+func drop_data(position: Vector2, data):
+	if data.get_type() == "ActionButton":
+		emit_signal("button_dropped", data)

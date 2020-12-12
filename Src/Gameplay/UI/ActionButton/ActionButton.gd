@@ -3,17 +3,12 @@ class_name ActionButton
 
 var action_name: String
 var action_lookup: ActionLookup
+var source := -1
 
 var _active := false
 var _is_hovered := false
-var _mouse_just_pressed := false
 
-var _grab_position := Vector2(-1, -1)
-var _grab_threshold := 15
-var _grabbed := false
-
-signal grabbed
-signal clicked
+signal dragged
 
 
 func _on_ActionButton_mouse_entered() -> void:
@@ -27,24 +22,9 @@ func _on_ActionButton_mouse_exited() -> void:
 		$ActiveTexture.hide()
 
 
-func _on_ActionButton_button_down() -> void:
-	_mouse_just_pressed = true
-	_grab_position = get_global_mouse_position()
-
-
-func _on_ActionButton_button_up():
-	if !_grabbed:
-		emit_signal("clicked")
-		
-	_grabbed = false
-	_grab_position = Vector2(-1, -1)
-
-
-func _input(event) -> void:
-	if event is InputEventMouseMotion && _mouse_just_pressed && _grab_position != Vector2(-1, -1) && event.position.distance_to(_grab_position) > _grab_threshold:
-		_mouse_just_pressed = false
-		_grabbed = true
-		emit_signal("grabbed")
+# TODO: Replace this with a constant
+func get_type() -> String:
+	return "ActionButton"
 
 
 func set_icon(icon: Texture) -> void:
@@ -94,5 +74,8 @@ func darken() -> void:
 	material.set_shader_param("brightness_modifier", 0)
 
 
-func get_grab_offset() -> Vector2:
-	return _grab_position - rect_position if _grabbed else Vector2.ZERO
+func get_drag_data(position: Vector2):
+	var drag_clone = self.duplicate()
+	set_drag_preview(drag_clone)
+	emit_signal("dragged")
+	return self

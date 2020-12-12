@@ -383,6 +383,7 @@ func set_team(team: int) -> void:
 	emit_signal("team_changed")
 
 
+# TODO: Replace this with a constant
 func get_type() -> String:
 	return "Unit"
 

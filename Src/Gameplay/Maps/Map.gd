@@ -8,12 +8,11 @@ var action_button_scene = load("res://Gameplay/UI/ActionButton/ActionButton.tscn
 var player_name : String
 var selected_unit : Unit
 var selected_ability
-var grabbed_action_button : ActionButton
 var grab_offset : Vector2
 
 
 #This should hook into whatever mechanism determines when an ability key is clicked
-func _on_ability_button_clicked(button: ActionButton) -> void:
+func _on_ability_button_pressed(button: ActionButton) -> void:
 	if button.action_lookup.source == Enums.ActionSource.Ability:
 		var ability = get_node(player_name + "/Abilities").get_child(button.action_lookup.index)
 		process_ability_press(ability)
@@ -48,10 +47,17 @@ func _on_ability_button_mouse_exited(button: ActionButton) -> void:
 	$CanvasLayer/Tooltip.hide()
 
 
-func _on_ability_button_grabbed(button: ActionButton) -> void:
-	grabbed_action_button = button
-	grab_offset = button.get_grab_offset()
+func _on_ability_button_dragged() -> void:
 	$CanvasLayer/Tooltip.hide()
+
+
+func _on_Bag_button_dropped_in_slot(action_button: ActionButton, button_slot: ButtonSlot) -> void:
+	match action_button.action_lookup.source:
+		Enums.ActionSource.Inventory:
+			var from_index = action_button.action_lookup.index
+			var to_index = button_slot.get_index()
+			$CanvasLayer/Bag.move(from_index, to_index)
+			get_node(player_name + "/Inventory").move(from_index, to_index)
 
 
 func _on_unit_left_clicked(unit: Unit) -> void:
@@ -289,7 +295,7 @@ func _process(_delta: float) -> void:
 			var item_ability = player.get_node("Inventory").get_item(0).get_ability()
 			var icon = item_ability.icon # This should probably be the icon from the item, not the ability
 			
-			var item_button = _create_action_button(item_ability.name, icon, Enums.ActionSource.Inventory, item_ability.get_index())
+			var item_button = _create_action_button(item_ability.name, icon, Enums.ActionSource.Inventory, item_ability.get_index(), Enums.ButtonSource.Bag)
 			$CanvasLayer/Bag.add_action_button(item_button)
 	# End of test commands
 	
@@ -377,17 +383,6 @@ func process_ability_press(ability: Ability):
 			
 		_:
 			print("Invalid target type on ability press")
-
-
-func _input(event) -> void:
-	if event is InputEventMouseMotion:
-		if grabbed_action_button:
-			grabbed_action_button.rect_position = get_viewport().get_mouse_position() - grab_offset
-			
-	if event is InputEventMouseButton && event.button_index == BUTTON_LEFT && !event.pressed:
-		if grabbed_action_button:
-			grabbed_action_button.rect_position = Vector2.ZERO
-			grabbed_action_button = null
 
 
 func _unhandled_input(event) -> void:
@@ -494,10 +489,10 @@ func setup(player_name: String, player_lookup: Dictionary) -> void:
 			unit.connect("ability_cooldown_progressed", self, "_on_ability_cooldown_progressed")
 			
 			for ability in unit.get_node("Abilities").get_children():
-				var action_bar_button = _create_action_button(ability.name, ability.icon, Enums.ActionSource.Ability, ability.get_index())
+				var action_bar_button = _create_action_button(ability.name, ability.icon, Enums.ActionSource.Ability, ability.get_index(), Enums.ButtonSource.ActionBar)
 				$CanvasLayer/ActionBar.add_action_button(action_bar_button)
 				
-				var spellbook_button = _create_action_button(ability.name, ability.icon, Enums.ActionSource.Ability, ability.get_index())
+				var spellbook_button = _create_action_button(ability.name, ability.icon, Enums.ActionSource.Ability, ability.get_index(), Enums.ButtonSource.Spellbook)
 				$CanvasLayer/Spellbook.add_action_button(spellbook_button)
 			
 			$CanvasLayer/ActionBar.set_max_health(unit.health_attr.value)
@@ -509,6 +504,8 @@ func setup(player_name: String, player_lookup: Dictionary) -> void:
 			$CanvasLayer/CharacterPanel.set_attack_power_attr(unit.attack_power_attr.value)
 			$CanvasLayer/CharacterPanel.set_spell_power_attr(unit.spell_power_attr.value)
 			$CanvasLayer/CharacterPanel.set_movement_speed_attr(unit.movement_speed_attr.value)
+			
+			$CanvasLayer/Bag.connect("button_dropped_in_slot", self, "_on_Bag_button_dropped_in_slot")
 			
 #			var item_ability = unit.get_node("Inventory").get_child(0).get_ability()
 #			var icon = item_ability.icon # This should probably be the icon from the item, not the ability
@@ -588,17 +585,18 @@ remotesync func _set_unit_queued_ability_data(unit_name: String, target, ability
 
 
 # TODO: Does this actually need a name?
-func _create_action_button(name: String, icon: Texture, action_source: int, action_index: int) -> ActionButton:
+func _create_action_button(name: String, icon: Texture, action_source: int, action_index: int, button_source: int) -> ActionButton:
 	var action_button = action_button_scene.instance()
 	action_button.action_name = name
 	action_button.set_icon(icon)
 	action_button.action_lookup = ActionLookup.new(action_source, action_index)
+	action_button.source = button_source
 	action_button.add_to_group("action_buttons")
 	
 	action_button.connect("mouse_entered", self, "_on_ability_button_mouse_entered", [action_button])
 	action_button.connect("mouse_exited", self, "_on_ability_button_mouse_exited", [action_button])
-	action_button.connect("grabbed", self, "_on_ability_button_grabbed", [action_button])
-	action_button.connect("clicked", self, "_on_ability_button_clicked", [action_button])
+	action_button.connect("pressed", self, "_on_ability_button_pressed", [action_button])
+	action_button.connect("dragged", self, "_on_ability_button_dragged")
 	
 	return action_button
 
