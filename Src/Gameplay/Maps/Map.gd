@@ -54,8 +54,17 @@ func _on_ability_button_dragged() -> void:
 func _on_Bag_button_dropped_in_slot(action_button: ActionButton, button_slot: ButtonSlot) -> void:
 	match action_button.action_lookup.source:
 		Enums.ActionSource.Inventory:
-			var from_index = action_button.action_lookup.index
+			var from_index = $CanvasLayer/Bag.get_button_index(action_button)
 			var to_index = button_slot.get_index()
+			$CanvasLayer/Bag.move(from_index, to_index)
+			get_node(player_name + "/Inventory").move(from_index, to_index)
+
+
+func _on_Bag_button_dropped_on_button(dropped_button: ActionButton, target_button: ActionButton) -> void:
+	match dropped_button.action_lookup.source:
+		Enums.ActionSource.Inventory:
+			var from_index = $CanvasLayer/Bag.get_button_index(dropped_button)
+			var to_index = $CanvasLayer/Bag.get_button_index(target_button)
 			$CanvasLayer/Bag.move(from_index, to_index)
 			get_node(player_name + "/Inventory").move(from_index, to_index)
 
@@ -296,6 +305,10 @@ func _process(_delta: float) -> void:
 			var icon = item_ability.icon # This should probably be the icon from the item, not the ability
 			
 			var item_button = _create_action_button(item_ability.name, icon, Enums.ActionSource.Inventory, item_ability.get_index(), Enums.ButtonSource.Bag)
+			
+			if player.get_node("Inventory").get_item(1):
+				item_button.modulate = Color(0, 1, 1)
+			
 			$CanvasLayer/Bag.add_action_button(item_button)
 	# End of test commands
 	
@@ -506,6 +519,7 @@ func setup(player_name: String, player_lookup: Dictionary) -> void:
 			$CanvasLayer/CharacterPanel.set_movement_speed_attr(unit.movement_speed_attr.value)
 			
 			$CanvasLayer/Bag.connect("button_dropped_in_slot", self, "_on_Bag_button_dropped_in_slot")
+			$CanvasLayer/Bag.connect("button_dropped_on_button", self, "_on_Bag_button_dropped_on_button")
 			
 #			var item_ability = unit.get_node("Inventory").get_child(0).get_ability()
 #			var icon = item_ability.icon # This should probably be the icon from the item, not the ability

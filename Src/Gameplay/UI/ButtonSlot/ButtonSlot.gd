@@ -12,6 +12,15 @@ func _on_ButtonSlot_mouse_exited():
 	color = Color.transparent
 
 
+func get_button() -> ActionButton:
+	var result
+	
+	if get_child_count() > 0:
+		result = get_child(0)
+		
+	return result
+
+
 func add_button(button: ActionButton) -> void:
 	if get_child_count() > 1:
 		print("Slot already occupied")

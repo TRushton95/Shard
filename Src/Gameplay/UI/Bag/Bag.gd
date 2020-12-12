@@ -3,6 +3,7 @@ extends PanelContainer
 var _held := false
 
 signal button_dropped_in_slot(action_button, slot)
+signal button_dropped_on_button(dropped_button, target_button)
 
 
 func _on_GrabBox_button_down() -> void:
@@ -17,6 +18,10 @@ func _on_ButtonSlot_button_dropped(action_button: ActionButton, slot: ButtonSlot
 	emit_signal("button_dropped_in_slot", action_button, slot)
 
 
+func _on_ActionButton_button_dropped_on_button(dropped_button: ActionButton, target_button: ActionButton) -> void:
+	emit_signal("button_dropped_on_button", dropped_button, target_button)
+
+
 func _ready() -> void:
 	for slot in $VBoxContainer/GridContainer.get_children():
 		slot.connect("button_dropped", self, "_on_ButtonSlot_button_dropped", [slot])
@@ -27,13 +32,32 @@ func _input(event) -> void:
 		rect_position += event.relative
 
 
+func get_button_index(action_button: ActionButton) -> int:
+	var result = -1
+	
+	for slot in $VBoxContainer/GridContainer.get_children():
+		if slot.get_button() == action_button:
+			result = slot.get_index()
+			
+	return result
+
+
 func add_action_button(action_button: ActionButton) -> void:
 	for slot in $VBoxContainer/GridContainer.get_children():
 		if slot.is_free():
 			slot.add_button(action_button)
+			action_button.connect("button_dropped", self, "_on_ActionButton_button_dropped_on_button", [action_button])
 			return
 	
 	print("Bag is full")
+
+
+func remove_action_button(index: int) -> void:
+	var slot = $VBoxContainer/GridContainer.get_child(index)
+	
+	if !slot.is_free():
+		var action_button = slot.pop_button()
+		action_button.queue_free()
 
 
 func move(from_index: int, to_index: int) -> void:
@@ -53,11 +77,3 @@ func move(from_index: int, to_index: int) -> void:
 		
 	to_slot.add_button(from_button)
 	from_button.action_lookup.index = to_index
-
-
-func remove_action_button(index: int) -> void:
-	var slot = $VBoxContainer/GridContainer.get_child(index)
-	
-	if !slot.is_free():
-		var button = slot.pop_button()
-		button.queue_free()

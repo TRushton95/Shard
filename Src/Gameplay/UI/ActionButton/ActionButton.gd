@@ -9,6 +9,7 @@ var _active := false
 var _is_hovered := false
 
 signal dragged
+signal button_dropped
 
 
 func _on_ActionButton_mouse_entered() -> void:
@@ -79,3 +80,17 @@ func get_drag_data(position: Vector2):
 	set_drag_preview(drag_clone)
 	emit_signal("dragged")
 	return self
+
+
+func can_drop_data(position: Vector2, data) -> bool:
+	var result
+	
+	if data.get_type() == "ActionButton":
+		result = true
+		
+	return result
+
+
+func drop_data(position: Vector2, data):
+	if data.get_type() == "ActionButton":
+		emit_signal("button_dropped", data)
