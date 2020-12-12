@@ -234,12 +234,10 @@ func auto_attack(target: Unit) -> void:
 		target.rpc("damage", attack_power_attr.value, name)
 
 
-func cast(index: int, target) -> void:
+func cast(ability: Ability, target) -> void:
 	if casting_index >= 0:
 		print("Already casting")
 		return
-		
-	var ability = $Abilities.get_child(index)
 	
 	if ability.is_on_cooldown():
 		print("Cannot cast ability while it is on cooldown")
@@ -385,6 +383,7 @@ func set_team(team: int) -> void:
 	emit_signal("team_changed")
 
 
+# TODO: Replace this with a constant
 func get_type() -> String:
 	return "Unit"
 
@@ -400,7 +399,7 @@ func _move_along_path(delta: float) -> void:
 			var ability = get_node("Abilities").get_child(queued_ability_data[0])
 			
 			if ability.target_type == Enums.TargetType.Unit && position.distance_to(queued_ability_data[1].position) <= ability.cast_range:
-				cast(ability.get_index(), queued_ability_data[1])
+				cast(ability, queued_ability_data[1])
 				if team == queued_ability_data[1].team:
 					set_movement_path([])
 					stop_pursuing()
@@ -410,7 +409,7 @@ func _move_along_path(delta: float) -> void:
 				return
 				
 			elif ability.target_type == Enums.TargetType.Position && position.distance_to(queued_ability_data[1]) <= ability.cast_range:
-				cast(ability.get_index(), queued_ability_data[1])
+				cast(ability, queued_ability_data[1])
 				queued_ability_data = []
 				set_movement_path([])
 				return

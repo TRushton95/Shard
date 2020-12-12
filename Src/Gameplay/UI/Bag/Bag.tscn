@@ -1,0 +1,68 @@
+[gd_scene load_steps=3 format=2]
+
+[ext_resource path="res://Gameplay/UI/Bag/Bag.gd" type="Script" id=1]
+[ext_resource path="res://Gameplay/UI/ButtonSlot/ButtonSlot.tscn" type="PackedScene" id=2]
+
+[node name="Bag" type="PanelContainer"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_right = -1840.0
+margin_bottom = -912.0
+rect_min_size = Vector2( 140, 140 )
+script = ExtResource( 1 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="VBoxContainer" type="VBoxContainer" parent="."]
+margin_left = 7.0
+margin_top = 7.0
+margin_right = 139.0
+margin_bottom = 163.0
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="GrabBox" type="Button" parent="VBoxContainer"]
+margin_right = 132.0
+margin_bottom = 20.0
+text = "Bag"
+
+[node name="GridContainer" type="GridContainer" parent="VBoxContainer"]
+margin_top = 24.0
+margin_right = 132.0
+margin_bottom = 156.0
+columns = 2
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="ButtonSlot" parent="VBoxContainer/GridContainer" instance=ExtResource( 2 )]
+anchor_right = 0.0
+anchor_bottom = 0.0
+margin_right = 64.0
+margin_bottom = 64.0
+
+[node name="ButtonSlot2" parent="VBoxContainer/GridContainer" instance=ExtResource( 2 )]
+anchor_right = 0.0
+anchor_bottom = 0.0
+margin_left = 68.0
+margin_right = 132.0
+margin_bottom = 64.0
+
+[node name="ButtonSlot3" parent="VBoxContainer/GridContainer" instance=ExtResource( 2 )]
+anchor_right = 0.0
+anchor_bottom = 0.0
+margin_top = 68.0
+margin_right = 64.0
+margin_bottom = 132.0
+
+[node name="ButtonSlot4" parent="VBoxContainer/GridContainer" instance=ExtResource( 2 )]
+anchor_right = 0.0
+anchor_bottom = 0.0
+margin_left = 68.0
+margin_top = 68.0
+margin_right = 132.0
+margin_bottom = 132.0
+[connection signal="button_down" from="VBoxContainer/GrabBox" to="." method="_on_GrabBox_button_down"]
+[connection signal="button_up" from="VBoxContainer/GrabBox" to="." method="_on_GrabBox_button_up"]

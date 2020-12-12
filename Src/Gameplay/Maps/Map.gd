@@ -3,38 +3,83 @@ extends Node2D
 var rainbow_cursor = load("res://pointer.png")
 var unit_scene = load("res://Gameplay/Entities/Unit/Unit.tscn")
 var floating_text_scene = load("res://Gameplay/UI/FloatingText/FloatingText.tscn")
+var action_button_scene = load("res://Gameplay/UI/ActionButton/ActionButton.tscn")
 
 var player_name : String
 var selected_unit : Unit
 var selected_ability
+var grab_offset : Vector2
 
 
-#This should hook into whatever mechanism determines when an ability key is pressed
-func _on_ability_button_pressed(ability: Ability) -> void:
+#This should hook into whatever mechanism determines when an ability key is clicked
+func _on_ability_button_pressed(button: ActionButton) -> void:
+	var ability = find_action(button.action_lookup)
 	process_ability_press(ability)
 
 
-func _on_ability_button_mouse_entered(button: TextureButton, ability: Ability) -> void:
-	$CanvasLayer/Tooltip.set_name(ability.name)
-	$CanvasLayer/Tooltip.set_range(100)
-	$CanvasLayer/Tooltip.set_cost(10)
-	$CanvasLayer/Tooltip.set_cast_time(ability.cast_time)
-	$CanvasLayer/Tooltip.set_description("Hello there")
-	
-	var channel_cost = -1
-	var tick_rate = -1
-	if "channel_cost" in ability && "tick_rate" in ability:
-		channel_cost = ability.channel_cost
-		tick_rate = ability.tick_rate
+func _on_ability_button_mouse_entered(button: ActionButton) -> void:
+	if button.action_lookup.source == Enums.ActionSource.Ability:
+		var ability = get_node(player_name + "/Abilities").get_child(button.action_lookup.index)
 		
-	$CanvasLayer/Tooltip.set_channel(channel_cost, tick_rate)
-	$CanvasLayer/Tooltip.rect_size.y = 0 # Needed to force panel to resize after removing items from the HBoxContainer, hide/show should do this, don't know why it's not
-	$CanvasLayer/Tooltip.show() # Must be shown before calculating position to force size recalculation
-	$CanvasLayer/Tooltip.rect_position = button.get_global_rect().position - Vector2(0, $CanvasLayer/Tooltip.rect_size.y + 20)
+		$CanvasLayer/Tooltip.set_name(ability.name)
+		$CanvasLayer/Tooltip.set_range(100)
+		$CanvasLayer/Tooltip.set_cost(10)
+		$CanvasLayer/Tooltip.set_cast_time(ability.cast_time)
+		$CanvasLayer/Tooltip.set_description("Hello there")
+		
+		var channel_cost = -1
+		var tick_rate = -1
+		if "channel_cost" in ability && "tick_rate" in ability:
+			channel_cost = ability.channel_cost
+			tick_rate = ability.tick_rate
+			
+		$CanvasLayer/Tooltip.set_channel(channel_cost, tick_rate)
+		$CanvasLayer/Tooltip.rect_size.y = 0 # Needed to force panel to resize after removing items from the HBoxContainer, hide/show should do this, don't know why it's not
+		$CanvasLayer/Tooltip.show() # Must be shown before calculating position to force size recalculation
+		$CanvasLayer/Tooltip.rect_position = button.get_global_rect().position - Vector2(0, $CanvasLayer/Tooltip.rect_size.y + 20)
 
 
-func _on_ability_button_mouse_exited(ability: Ability) -> void:
+func _on_ability_button_mouse_exited(button: ActionButton) -> void:
 	$CanvasLayer/Tooltip.hide()
+
+
+func _on_ability_button_dragged() -> void:
+	$CanvasLayer/Tooltip.hide()
+
+
+func _on_Bag_button_dropped_in_slot(action_button: ActionButton, button_slot: ButtonSlot) -> void:
+	match action_button.source:
+		Enums.ButtonSource.Bag:
+			var from_index = $CanvasLayer/Bag.get_button_index(action_button)
+			var to_index = button_slot.get_index()
+			$CanvasLayer/Bag.move(from_index, to_index)
+			get_node(player_name + "/Inventory").move(from_index, to_index)
+
+
+func _on_Bag_button_dropped_on_button(dropped_button: ActionButton, target_button: ActionButton) -> void:
+	match dropped_button.source:
+		Enums.ButtonSource.Bag:
+			var from_index = $CanvasLayer/Bag.get_button_index(dropped_button)
+			var to_index = $CanvasLayer/Bag.get_button_index(target_button)
+			$CanvasLayer/Bag.move(from_index, to_index)
+			get_node(player_name + "/Inventory").move(from_index, to_index)
+
+
+func _on_ActionBar_button_dropped_in_slot(button: ActionButton, button_slot: ButtonSlot) -> void:
+	match button.source:
+		Enums.ButtonSource.Bag:
+			var clone_button = _create_action_button(button.action_name, button.texture_normal, button.action_lookup.source, button.action_lookup.index, Enums.ButtonSource.ActionBar)
+			button_slot.add_button(clone_button)
+			
+		Enums.ButtonSource.ActionBar:
+			var from_index = $CanvasLayer/ActionBar.get_button_index(button)
+			var to_index = button_slot.get_index()
+			$CanvasLayer/ActionBar.move(from_index, to_index)
+
+
+func _on_ActionBar_button_dropped_on_button(dropped_button: ActionButton, target_button: ActionButton) -> void:
+	var clone_button = target_button.duplicate()
+	target_button.force_drag(target_button, clone_button)
 
 
 func _on_unit_left_clicked(unit: Unit) -> void:
@@ -167,8 +212,8 @@ func _on_unit_mana_changed(value: int, unit: Unit) -> void:
 		$CanvasLayer/ActionBar.set_current_mana(unit.current_mana)
 			
 		for ability in unit.get_node("Abilities").get_children():
-			for ability_button in _get_ability_buttons_by_ability_name(ability.name):
-				ability_button.set_unaffordable_filter_visibility(unit.current_mana < ability.cost)
+			for action_button in _get_action_buttons_by_action_name(ability.name):
+				action_button.set_unaffordable_filter_visibility(unit.current_mana < ability.cost)
 
 
 func _on_unit_casting_started(ability_name: String, duration: float, unit: Unit) -> void:
@@ -176,8 +221,8 @@ func _on_unit_casting_started(ability_name: String, duration: float, unit: Unit)
 		$CanvasLayer/CastBar.initialise(ability_name, duration)
 		$CanvasLayer/CastBar.show()
 		
-		for ability_button in _get_ability_buttons_by_ability_name(ability_name):
-			ability_button.set_active(true)
+		for action_button in _get_action_buttons_by_action_name(ability_name):
+			action_button.set_active(true)
 
 
 func _on_unit_casting_progressed(time_elapsed: float, unit: Unit) -> void:
@@ -189,8 +234,8 @@ func _on_unit_casting_stopped(ability_name: String, unit: Unit) -> void:
 	if unit == get_node(player_name):
 		$CanvasLayer/CastBar.hide()
 		
-	for ability_button in _get_ability_buttons_by_ability_name(ability_name):
-		ability_button.set_active(false)
+	for action_button in _get_action_buttons_by_action_name(ability_name):
+		action_button.set_active(false)
 
 
 func _on_unit_channelling_started(ability_name: String, channel_duration: float, unit: Unit) -> void:
@@ -198,8 +243,8 @@ func _on_unit_channelling_started(ability_name: String, channel_duration: float,
 		$CanvasLayer/CastBar.initialise(ability_name, channel_duration)
 		$CanvasLayer/CastBar.show()
 		
-		for ability_button in _get_ability_buttons_by_ability_name(ability_name):
-			ability_button.set_active(true)
+		for action_button in _get_action_buttons_by_action_name(ability_name):
+			action_button.set_active(true)
 
 
 func _on_unit_channelling_progressed(time_remaining: float, unit: Unit) -> void:
@@ -211,8 +256,8 @@ func _on_unit_channelling_stopped(ability_name: String, unit: Unit) -> void:
 	if unit == get_node(player_name):
 		$CanvasLayer/CastBar.hide()
 		
-		for ability_button in _get_ability_buttons_by_ability_name(ability_name):
-			ability_button.set_active(false)
+		for action_button in _get_action_buttons_by_action_name(ability_name):
+			action_button.set_active(false)
 
 
 func _on_auto_attack_cooldown_started(duration: float) -> void:
@@ -229,20 +274,20 @@ func _on_auto_attack_cooldown_ended() -> void:
 
 
 func _on_ability_cooldown_started(ability: Ability, duration: int) -> void:
-	for ability_button in _get_ability_buttons_by_ability_name(ability.name):
-		ability_button.set_max_cooldown(duration)
-		ability_button.set_cooldown(duration)
-		ability_button.show_cooldown()
+	for action_button in _get_action_buttons_by_action_name(ability.name):
+		action_button.set_max_cooldown(duration)
+		action_button.set_cooldown(duration)
+		action_button.show_cooldown()
 
 
 func _on_ability_cooldown_progressed(ability: Ability) -> void:
-	for ability_button in _get_ability_buttons_by_ability_name(ability.name):
-		ability_button.set_cooldown(ability.get_remaining_cooldown())
+	for action_button in _get_action_buttons_by_action_name(ability.name):
+		action_button.set_cooldown(ability.get_remaining_cooldown())
 
 
 func _on_ability_cooldown_ended(ability: Ability) -> void:
-	for ability_button in _get_ability_buttons_by_ability_name(ability.name):
-		ability_button.hide_cooldown()
+	for action_button in _get_action_buttons_by_action_name(ability.name):
+		action_button.hide_cooldown()
 
 
 func _on_unit_team_changed(unit: Unit) -> void:
@@ -257,13 +302,25 @@ var mana_modifier = Modifier.new(5, Enums.ModifierType.Additive)
 func _process(_delta: float) -> void:
 	var player = get_node(player_name)
 	
-	var ability_index = -1
-	
 	# Test commands for testing whatever
 	if Input.is_action_just_pressed("test_right"):
-		player.mana_attr.push_modifier(mana_modifier)
+		player.get_node("Inventory").pop_item(0)
+		$CanvasLayer/Bag.remove_action_button(0)
 	if Input.is_action_just_pressed("test_left"):
-		player.mana_attr.remove_modifier(mana_modifier)
+		var fireball_scroll_scene = load("res://Gameplay/Entities/Items/FireballScroll.tscn")
+		var fireball_scroll = fireball_scroll_scene.instance()
+		var success = player.get_node("Inventory").push_item(fireball_scroll)
+		
+		if success:
+			var item_ability = player.get_node("Inventory").get_item(0).get_ability()
+			var icon = item_ability.icon # This should probably be the icon from the item, not the ability
+			
+			var item_button = _create_action_button(item_ability.name, icon, Enums.ActionSource.Inventory, item_ability.get_index(), Enums.ButtonSource.Bag)
+			
+			if player.get_node("Inventory").get_item(1):
+				item_button.modulate = Color(0, 1, 1)
+			
+			$CanvasLayer/Bag.add_action_button(item_button)
 	# End of test commands
 	
 	if Input.is_action_just_pressed("cancel"):
@@ -276,15 +333,36 @@ func _process(_delta: float) -> void:
 	
 	if Input.is_action_just_pressed("toggle_character_panel"):
 		$CanvasLayer/CharacterPanel.visible = !$CanvasLayer/CharacterPanel.visible
+	if Input.is_action_just_pressed("toggle_spellbook"):
+		$CanvasLayer/Spellbook.visible = !$CanvasLayer/Spellbook.visible
+	if Input.is_action_just_pressed("toggle_bag"):
+		$CanvasLayer/Bag.visible = !$CanvasLayer/Bag.visible
 	
+	var button_index = -1
 	if Input.is_action_just_pressed("cast_1"):
-		ability_index = 0
+		button_index = 0
 	if Input.is_action_just_pressed("cast_2"):
-		ability_index = 1
+		button_index = 1
 	if Input.is_action_just_pressed("cast_3"):
-		ability_index = 2
+		button_index = 2
 	if Input.is_action_just_pressed("cast_4"):
-		ability_index = 3
+		button_index = 3
+	if Input.is_action_just_pressed("cast_5"):
+		button_index = 4
+	if Input.is_action_just_pressed("cast_6"):
+		button_index = 5
+	if Input.is_action_just_pressed("cast_7"):
+		button_index = 6
+	if Input.is_action_just_pressed("cast_8"):
+		button_index = 7
+	if Input.is_action_just_pressed("cast_9"):
+		button_index = 8
+	if Input.is_action_just_pressed("cast_10"):
+		button_index = 9
+	if Input.is_action_just_pressed("cast_11"):
+		button_index = 10
+	if Input.is_action_just_pressed("cast_12"):
+		button_index = 11
 	if Input.is_action_just_pressed("stop"):
 		if player.casting_index >= 0 || player.channelling_index >= 0:
 			player.rpc("interrupt")
@@ -298,27 +376,43 @@ func _process(_delta: float) -> void:
 	if Input.is_action_just_pressed("test_mana_refill"):
 		player.rset("current_mana", player.mana_attr.value)
 	
-	if ability_index >= 0:
-		var ability = player.get_node("Abilities").get_child(ability_index)
+	if button_index >= 0:
+		var pressed_button = $CanvasLayer/ActionBar.get_button(button_index)
 		
-		if ability.target_type == Enums.TargetType.Unset:
-			print("Target type not set on casted ability " + ability.name)
-			return
-			
-		# This method can be moved back here but needs to map key inputs properly and expose in a way
-		# that action bar button press can hook into as well
-		process_ability_press(ability)
+		if pressed_button:
+			var ability = find_action(pressed_button.action_lookup)
+		
+			if ability.target_type == Enums.TargetType.Unset:
+				print("Target type not set on casted ability " + ability.name)
+				return
+				
+			# This method can be moved back here but needs to map key inputs properly and expose in a way
+			# that action bar button press can hook into as well
+			process_ability_press(ability)
 		
 	for status in player.get_node("StatusEffects").get_children():
 		var index = status.get_index()
 		if status.get_time_remaining() > 0:
 			$CanvasLayer/StatusEffectBar.update_duration(index, status.get_time_remaining())
-		
+			
 	if selected_unit:
 		for status in selected_unit.get_node("StatusEffects").get_children():
 			var status_index = status.get_index()
 			if status.get_time_remaining() > 0:
 				$CanvasLayer/TargetFrame.update_status_effect_duration(status_index, status.get_time_remaining())
+
+
+func find_action(action_lookup: ActionLookup) -> Ability:
+	var result
+	
+	if action_lookup.source == Enums.ActionSource.Ability:
+		var ability = get_node(player_name + "/Abilities").get_child(action_lookup.index)
+		result = ability
+	elif action_lookup.source == Enums.ActionSource.Inventory:
+		var item = get_node(player_name + "/Inventory").get_item(action_lookup.index)
+		result = item.get_ability()
+		
+	return result
 
 
 func process_ability_press(ability: Ability):
@@ -382,11 +476,13 @@ func _unhandled_input(event) -> void:
 remotesync func cast_ability_on_unit(ability_index: int, caster_name: String, target_name: String) -> void:
 	var caster = get_node(caster_name)
 	
+	var ability = caster.get_node("Abilities").get_child(ability_index)
+	
 	if !has_node(target_name):
 		print("No target with name: " + target_name)
 		
 	var target = get_node(target_name)
-	caster.cast(ability_index, target)
+	caster.cast(ability, target)
 
 
 func setup(player_name: String, player_lookup: Dictionary) -> void:
@@ -450,10 +546,11 @@ func setup(player_name: String, player_lookup: Dictionary) -> void:
 			unit.connect("ability_cooldown_progressed", self, "_on_ability_cooldown_progressed")
 			
 			for ability in unit.get_node("Abilities").get_children():
-				var ability_button = $CanvasLayer/ActionBar.add_ability(ability)
-				ability_button.connect("pressed", self, "_on_ability_button_pressed", [ability])
-				ability_button.connect("mouse_entered", self, "_on_ability_button_mouse_entered", [ability_button, ability])
-				ability_button.connect("mouse_exited", self, "_on_ability_button_mouse_exited", [ability])
+				var action_bar_button = _create_action_button(ability.name, ability.icon, Enums.ActionSource.Ability, ability.get_index(), Enums.ButtonSource.ActionBar)
+				$CanvasLayer/ActionBar.add_action_button(action_bar_button)
+				
+				var spellbook_button = _create_action_button(ability.name, ability.icon, Enums.ActionSource.Ability, ability.get_index(), Enums.ButtonSource.Spellbook)
+				$CanvasLayer/Spellbook.add_action_button(spellbook_button)
 			
 			$CanvasLayer/ActionBar.set_max_health(unit.health_attr.value)
 			$CanvasLayer/ActionBar.set_max_mana(unit.mana_attr.value)
@@ -464,6 +561,17 @@ func setup(player_name: String, player_lookup: Dictionary) -> void:
 			$CanvasLayer/CharacterPanel.set_attack_power_attr(unit.attack_power_attr.value)
 			$CanvasLayer/CharacterPanel.set_spell_power_attr(unit.spell_power_attr.value)
 			$CanvasLayer/CharacterPanel.set_movement_speed_attr(unit.movement_speed_attr.value)
+			
+			$CanvasLayer/Bag.connect("button_dropped_in_slot", self, "_on_Bag_button_dropped_in_slot")
+			$CanvasLayer/Bag.connect("button_dropped_on_button", self, "_on_Bag_button_dropped_on_button")
+			
+			$CanvasLayer/ActionBar.connect("button_dropped_in_slot", self, "_on_ActionBar_button_dropped_in_slot")
+			$CanvasLayer/ActionBar.connect("button_dropped_on_button", self, "_on_ActionBar_button_dropped_on_button")
+			
+#			var item_ability = unit.get_node("Inventory").get_child(0).get_ability()
+#			var icon = item_ability.icon # This should probably be the icon from the item, not the ability
+#			var action_lookup = ActionLookup.new(Enums.ActionSource.Inventory, item_ability.get_index())
+#			$CanvasLayer/Inventory.add_item(icon).connect("clicked", self, "_on_ability_button_clicked", [action_lookup])
 			
 			# PATHING TEST #
 #			$Enemy.rset("focus", unit)
@@ -499,8 +607,8 @@ func select_unit(unit: Unit) -> void:
 func select_ability(ability: Ability) -> void:
 	# Deselect any currently selected ability buttons
 	if selected_ability:
-		for ability_button in _get_ability_buttons_by_ability_name(selected_ability.name):
-			ability_button.darken()
+		for action_button in _get_action_buttons_by_action_name(selected_ability.name):
+			action_button.darken()
 				
 	if !ability:
 		selected_ability = null
@@ -516,8 +624,8 @@ func select_ability(ability: Ability) -> void:
 		return
 	
 	selected_ability = ability
-	for ability_button in _get_ability_buttons_by_ability_name(selected_ability.name):
-		ability_button.lighten()
+	for action_button in _get_action_buttons_by_action_name(selected_ability.name):
+		action_button.lighten()
 		
 	Input.set_custom_mouse_cursor(rainbow_cursor)
 
@@ -537,6 +645,23 @@ remotesync func _set_unit_queued_ability_data(unit_name: String, target, ability
 		get_node(unit_name).queued_ability_data = [ ability_index, adjusted_target ]
 
 
+# TODO: Does this actually need a name?
+func _create_action_button(action_name: String, icon: Texture, action_source: int, action_index: int, button_source: int) -> ActionButton:
+	var action_button = action_button_scene.instance()
+	action_button.action_name = action_name
+	action_button.set_icon(icon)
+	action_button.action_lookup = ActionLookup.new(action_source, action_index)
+	action_button.source = button_source
+	action_button.add_to_group("action_buttons")
+	
+	action_button.connect("mouse_entered", self, "_on_ability_button_mouse_entered", [action_button])
+	action_button.connect("mouse_exited", self, "_on_ability_button_mouse_exited", [action_button])
+	action_button.connect("pressed", self, "_on_ability_button_pressed", [action_button])
+	action_button.connect("dragged", self, "_on_ability_button_dragged")
+	
+	return action_button
+
+
 func _pursue_target(target_name: String) -> void:
 	var player = get_node(player_name)
 	var movement_path = $Navigation2D.get_simple_path(player.position, get_node(target_name).position)
@@ -550,12 +675,12 @@ func _pursue_target(target_name: String) -> void:
 		player.rset("auto_attack_enabled", true)
 
 
-func _get_ability_buttons_by_ability_name(ability_name: String) -> Array:
+func _get_action_buttons_by_action_name(ability_name: String) -> Array:
 	var result = []
 	
-	for ability_button in get_tree().get_nodes_in_group("ability_buttons"):
-		if ability_button.ability_name == ability_name:
-			result.push_back(ability_button)
+	for action_button in get_tree().get_nodes_in_group("action_buttons"):
+		if action_button.action_name == ability_name:
+			result.push_back(action_button)
 				
 	return result
 

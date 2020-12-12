@@ -1,23 +1,31 @@
 extends TextureButton
+class_name ActionButton
 
-var ability_name: String
+var action_name: String
+var action_lookup: ActionLookup
+var source := -1
+
 var _active := false
 var _is_hovered := false
 
+signal dragged
+signal button_dropped
 
-func _on_AbilityButton_mouse_entered() -> void:
+
+func _on_ActionButton_mouse_entered() -> void:
 	_is_hovered = true
 	$ActiveTexture.show()
 
 
-func _on_AbilityButton_mouse_exited() -> void:
+func _on_ActionButton_mouse_exited() -> void:
 	_is_hovered = false
 	if !_active:
 		$ActiveTexture.hide()
 
 
-func _ready() -> void:
-	add_to_group("ability_buttons")
+# TODO: Replace this with a constant
+func get_type() -> String:
+	return "ActionButton"
 
 
 func set_icon(icon: Texture) -> void:
@@ -65,3 +73,24 @@ func lighten() -> void:
 
 func darken() -> void:
 	material.set_shader_param("brightness_modifier", 0)
+
+
+func get_drag_data(position: Vector2):
+	var drag_clone = self.duplicate()
+	set_drag_preview(drag_clone)
+	emit_signal("dragged")
+	return self
+
+
+func can_drop_data(position: Vector2, data) -> bool:
+	var result
+	
+	if data.get_type() == "ActionButton":
+		result = true
+		
+	return result
+
+
+func drop_data(position: Vector2, data):
+	if data.get_type() == "ActionButton":
+		emit_signal("button_dropped", data)
