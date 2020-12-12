@@ -13,12 +13,8 @@ var grab_offset : Vector2
 
 #This should hook into whatever mechanism determines when an ability key is clicked
 func _on_ability_button_pressed(button: ActionButton) -> void:
-	if button.action_lookup.source == Enums.ActionSource.Ability:
-		var ability = get_node(player_name + "/Abilities").get_child(button.action_lookup.index)
-		process_ability_press(ability)
-	elif button.action_lookup.source == Enums.ActionSource.Inventory:
-		var item = get_node(player_name + "/Inventory").get_item(button.action_lookup.index)
-		process_ability_press(item.get_ability())
+	var ability = find_action(button.action_lookup)
+	process_ability_press(ability)
 
 
 func _on_ability_button_mouse_entered(button: ActionButton) -> void:
@@ -52,8 +48,8 @@ func _on_ability_button_dragged() -> void:
 
 
 func _on_Bag_button_dropped_in_slot(action_button: ActionButton, button_slot: ButtonSlot) -> void:
-	match action_button.action_lookup.source:
-		Enums.ActionSource.Inventory:
+	match action_button.source:
+		Enums.ButtonSource.Bag:
 			var from_index = $CanvasLayer/Bag.get_button_index(action_button)
 			var to_index = button_slot.get_index()
 			$CanvasLayer/Bag.move(from_index, to_index)
@@ -61,12 +57,29 @@ func _on_Bag_button_dropped_in_slot(action_button: ActionButton, button_slot: Bu
 
 
 func _on_Bag_button_dropped_on_button(dropped_button: ActionButton, target_button: ActionButton) -> void:
-	match dropped_button.action_lookup.source:
-		Enums.ActionSource.Inventory:
+	match dropped_button.source:
+		Enums.ButtonSource.Bag:
 			var from_index = $CanvasLayer/Bag.get_button_index(dropped_button)
 			var to_index = $CanvasLayer/Bag.get_button_index(target_button)
 			$CanvasLayer/Bag.move(from_index, to_index)
 			get_node(player_name + "/Inventory").move(from_index, to_index)
+
+
+func _on_ActionBar_button_dropped_in_slot(button: ActionButton, button_slot: ButtonSlot) -> void:
+	match button.source:
+		Enums.ButtonSource.Bag:
+			var clone_button = _create_action_button(button.action_name, button.texture_normal, button.action_lookup.source, button.action_lookup.index, Enums.ButtonSource.ActionBar)
+			button_slot.add_button(clone_button)
+			
+		Enums.ButtonSource.ActionBar:
+			var from_index = $CanvasLayer/ActionBar.get_button_index(button)
+			var to_index = button_slot.get_index()
+			$CanvasLayer/ActionBar.move(from_index, to_index)
+
+
+func _on_ActionBar_button_dropped_on_button(dropped_button: ActionButton, target_button: ActionButton) -> void:
+	var clone_button = target_button.duplicate()
+	target_button.force_drag(target_button, clone_button)
 
 
 func _on_unit_left_clicked(unit: Unit) -> void:
@@ -289,8 +302,6 @@ var mana_modifier = Modifier.new(5, Enums.ModifierType.Additive)
 func _process(_delta: float) -> void:
 	var player = get_node(player_name)
 	
-	var ability_index = -1
-	
 	# Test commands for testing whatever
 	if Input.is_action_just_pressed("test_right"):
 		player.get_node("Inventory").pop_item(0)
@@ -327,14 +338,15 @@ func _process(_delta: float) -> void:
 	if Input.is_action_just_pressed("toggle_bag"):
 		$CanvasLayer/Bag.visible = !$CanvasLayer/Bag.visible
 	
+	var button_index = -1
 	if Input.is_action_just_pressed("cast_1"):
-		ability_index = 0
+		button_index = 0
 	if Input.is_action_just_pressed("cast_2"):
-		ability_index = 1
+		button_index = 1
 	if Input.is_action_just_pressed("cast_3"):
-		ability_index = 2
+		button_index = 2
 	if Input.is_action_just_pressed("cast_4"):
-		ability_index = 3
+		button_index = 3
 	if Input.is_action_just_pressed("stop"):
 		if player.casting_index >= 0 || player.channelling_index >= 0:
 			player.rpc("interrupt")
@@ -348,16 +360,19 @@ func _process(_delta: float) -> void:
 	if Input.is_action_just_pressed("test_mana_refill"):
 		player.rset("current_mana", player.mana_attr.value)
 	
-	if ability_index >= 0:
-		var ability = player.get_node("Abilities").get_child(ability_index)
+	if button_index >= 0:
+		var pressed_button = $CanvasLayer/ActionBar.get_button(button_index)
 		
-		if ability.target_type == Enums.TargetType.Unset:
-			print("Target type not set on casted ability " + ability.name)
-			return
-			
-		# This method can be moved back here but needs to map key inputs properly and expose in a way
-		# that action bar button press can hook into as well
-		process_ability_press(ability)
+		if pressed_button:
+			var ability = find_action(pressed_button.action_lookup)
+		
+			if ability.target_type == Enums.TargetType.Unset:
+				print("Target type not set on casted ability " + ability.name)
+				return
+				
+			# This method can be moved back here but needs to map key inputs properly and expose in a way
+			# that action bar button press can hook into as well
+			process_ability_press(ability)
 		
 	for status in player.get_node("StatusEffects").get_children():
 		var index = status.get_index()
@@ -369,6 +384,19 @@ func _process(_delta: float) -> void:
 			var status_index = status.get_index()
 			if status.get_time_remaining() > 0:
 				$CanvasLayer/TargetFrame.update_status_effect_duration(status_index, status.get_time_remaining())
+
+
+func find_action(action_lookup: ActionLookup) -> Ability:
+	var result
+	
+	if action_lookup.source == Enums.ActionSource.Ability:
+		var ability = get_node(player_name + "/Abilities").get_child(action_lookup.index)
+		result = ability
+	elif action_lookup.source == Enums.ActionSource.Inventory:
+		var item = get_node(player_name + "/Inventory").get_item(action_lookup.index)
+		result = item.get_ability()
+		
+	return result
 
 
 func process_ability_press(ability: Ability):
@@ -521,6 +549,9 @@ func setup(player_name: String, player_lookup: Dictionary) -> void:
 			$CanvasLayer/Bag.connect("button_dropped_in_slot", self, "_on_Bag_button_dropped_in_slot")
 			$CanvasLayer/Bag.connect("button_dropped_on_button", self, "_on_Bag_button_dropped_on_button")
 			
+			$CanvasLayer/ActionBar.connect("button_dropped_in_slot", self, "_on_ActionBar_button_dropped_in_slot")
+			$CanvasLayer/ActionBar.connect("button_dropped_on_button", self, "_on_ActionBar_button_dropped_on_button")
+			
 #			var item_ability = unit.get_node("Inventory").get_child(0).get_ability()
 #			var icon = item_ability.icon # This should probably be the icon from the item, not the ability
 #			var action_lookup = ActionLookup.new(Enums.ActionSource.Inventory, item_ability.get_index())
@@ -599,9 +630,9 @@ remotesync func _set_unit_queued_ability_data(unit_name: String, target, ability
 
 
 # TODO: Does this actually need a name?
-func _create_action_button(name: String, icon: Texture, action_source: int, action_index: int, button_source: int) -> ActionButton:
+func _create_action_button(action_name: String, icon: Texture, action_source: int, action_index: int, button_source: int) -> ActionButton:
 	var action_button = action_button_scene.instance()
-	action_button.action_name = name
+	action_button.action_name = action_name
 	action_button.set_icon(icon)
 	action_button.action_lookup = ActionLookup.new(action_source, action_index)
 	action_button.source = button_source

@@ -14,7 +14,7 @@ func _on_GrabBox_button_up() -> void:
 	_held = false
 
 
-func _on_ButtonSlot_button_dropped(action_button: ActionButton, slot: ButtonSlot) -> void:
+func _on_ButtonSlot_button_dropped_on_slot(action_button: ActionButton, slot: ButtonSlot) -> void:
 	emit_signal("button_dropped_in_slot", action_button, slot)
 
 
@@ -24,7 +24,7 @@ func _on_ActionButton_button_dropped_on_button(dropped_button: ActionButton, tar
 
 func _ready() -> void:
 	for slot in $VBoxContainer/GridContainer.get_children():
-		slot.connect("button_dropped", self, "_on_ButtonSlot_button_dropped", [slot])
+		slot.connect("button_dropped", self, "_on_ButtonSlot_button_dropped_on_slot", [slot])
 
 
 func _input(event) -> void:
