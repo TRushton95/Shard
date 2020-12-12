@@ -1,4 +1,3 @@
-# TODO: Add static typing to this file once Item is implemented
 extends Node
 
 export var size := 4
@@ -27,7 +26,7 @@ func push_item(item: Node, index := -1) -> bool:
 	return true
 
 
-func get_item(index: int):
+func get_item(index: int) -> Item:
 	var result
 	
 	var slot = get_child(index)
@@ -37,7 +36,7 @@ func get_item(index: int):
 	return result
 
 
-func pop_item(index: int):
+func pop_item(index: int) -> Item:
 	var result
 	
 	var slot = get_child(index)
@@ -66,7 +65,7 @@ func _is_slot_free(index: int) -> bool:
 	return get_child(index).get_child_count() == 0
 
 
-func _get_free_slot():
+func _get_free_slot() -> ButtonSlot:
 	for slot in get_children():
 		if slot.get_child_count() == 0:
 			return slot

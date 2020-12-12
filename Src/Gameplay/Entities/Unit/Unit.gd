@@ -383,9 +383,8 @@ func set_team(team: int) -> void:
 	emit_signal("team_changed")
 
 
-# TODO: Replace this with a constant
 func get_type() -> String:
-	return "Unit"
+	return Constants.ClassNames.UNIT
 
 
 func _move_along_path(delta: float) -> void:

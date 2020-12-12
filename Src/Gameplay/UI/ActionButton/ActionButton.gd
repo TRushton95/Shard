@@ -23,9 +23,8 @@ func _on_ActionButton_mouse_exited() -> void:
 		$ActiveTexture.hide()
 
 
-# TODO: Replace this with a constant
 func get_type() -> String:
-	return "ActionButton"
+	return Constants.ClassNames.ACTION_BUTTON
 
 
 func set_icon(icon: Texture) -> void:
