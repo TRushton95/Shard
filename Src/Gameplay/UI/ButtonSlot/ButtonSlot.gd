@@ -47,7 +47,7 @@ func is_free() -> bool:
 	return get_child_count() == 0
 
 
-func can_drop_data(position: Vector2, data) -> bool:
+func can_drop_data(_position: Vector2, data) -> bool:
 	var result
 	
 	if data.get_type() == "ActionButton":
@@ -56,6 +56,6 @@ func can_drop_data(position: Vector2, data) -> bool:
 	return result
 
 
-func drop_data(position: Vector2, data):
+func drop_data(_position: Vector2, data):
 	if data.get_type() == "ActionButton":
 		emit_signal("button_dropped", data)

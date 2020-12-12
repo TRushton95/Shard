@@ -8,7 +8,6 @@ var action_button_scene = load("res://Gameplay/UI/ActionButton/ActionButton.tscn
 var player_name : String
 var selected_unit : Unit
 var selected_ability
-var grab_offset : Vector2
 
 
 #This should hook into whatever mechanism determines when an ability key is clicked
@@ -78,14 +77,13 @@ func _on_ActionBar_button_dropped_in_slot(button: ActionButton, button_slot: But
 
 
 func _on_ActionBar_button_dropped_on_button(dropped_button: ActionButton, target_button: ActionButton) -> void:
+	# TODO: This needs to be swapped etc
 	var clone_button = target_button.duplicate()
 	target_button.force_drag(target_button, clone_button)
 
 
 func _on_unit_left_clicked(unit: Unit) -> void:
 	if selected_ability:
-		var player = get_node(player_name)
-		
 		if !_is_team_target_valid(selected_ability, unit):
 			print("Invalid target")
 		
@@ -204,7 +202,7 @@ func _on_unit_healing_received(value: int, unit: Unit) -> void:
 		$CanvasLayer/ActionBar.set_current_health(unit.current_health)
 
 
-func _on_unit_mana_changed(value: int, unit: Unit) -> void:
+func _on_unit_mana_changed(_value: int, unit: Unit) -> void:
 	if unit == selected_unit:
 		$CanvasLayer/TargetFrame.set_current_mana(unit.current_mana)
 	

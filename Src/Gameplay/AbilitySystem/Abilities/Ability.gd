@@ -33,7 +33,7 @@ func _ready() -> void:
 	_cooldown_timer.connect("timeout", self, "_on_cooldown_timer_timeout") # TODO Does this call on superclass or only on this class?
 
 
-func _process(delta: float) -> void:
+func _process(_delta: float) -> void:
 	if _cooldown_timer.time_left > 0:
 		emit_signal("cooldown_progressed")
 

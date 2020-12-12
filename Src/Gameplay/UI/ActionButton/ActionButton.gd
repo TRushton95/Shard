@@ -75,14 +75,14 @@ func darken() -> void:
 	material.set_shader_param("brightness_modifier", 0)
 
 
-func get_drag_data(position: Vector2):
+func get_drag_data(_position: Vector2):
 	var drag_clone = self.duplicate()
 	set_drag_preview(drag_clone)
 	emit_signal("dragged")
 	return self
 
 
-func can_drop_data(position: Vector2, data) -> bool:
+func can_drop_data(_position: Vector2, data) -> bool:
 	var result
 	
 	if data.get_type() == "ActionButton":
@@ -91,6 +91,6 @@ func can_drop_data(position: Vector2, data) -> bool:
 	return result
 
 
-func drop_data(position: Vector2, data):
+func drop_data(_position: Vector2, data):
 	if data.get_type() == "ActionButton":
 		emit_signal("button_dropped", data)
