@@ -347,6 +347,22 @@ func _process(_delta: float) -> void:
 		button_index = 2
 	if Input.is_action_just_pressed("cast_4"):
 		button_index = 3
+	if Input.is_action_just_pressed("cast_5"):
+		button_index = 4
+	if Input.is_action_just_pressed("cast_6"):
+		button_index = 5
+	if Input.is_action_just_pressed("cast_7"):
+		button_index = 6
+	if Input.is_action_just_pressed("cast_8"):
+		button_index = 7
+	if Input.is_action_just_pressed("cast_9"):
+		button_index = 8
+	if Input.is_action_just_pressed("cast_10"):
+		button_index = 9
+	if Input.is_action_just_pressed("cast_11"):
+		button_index = 10
+	if Input.is_action_just_pressed("cast_12"):
+		button_index = 11
 	if Input.is_action_just_pressed("stop"):
 		if player.casting_index >= 0 || player.channelling_index >= 0:
 			player.rpc("interrupt")
