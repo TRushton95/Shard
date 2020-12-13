@@ -553,6 +553,9 @@ func setup(player_name: String, player_lookup: Dictionary) -> void:
 			unit.connect("ability_cooldown_progressed", self, "_on_ability_cooldown_progressed")
 			
 			for ability in unit.get_node("Abilities").get_children():
+				if ability.get_index() == 0: # HACK: To leave out basic attack, should add an ability category
+					continue
+				
 				var action_bar_button = _create_action_button(ability.name, ability.icon, Enums.ActionSource.Ability, ability.get_index(), Enums.ButtonSource.ActionBar)
 				$CanvasLayer/ActionBar.add_action_button(action_bar_button)
 				
