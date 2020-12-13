@@ -27,7 +27,7 @@ _global_script_classes=[ {
 "base": "PanelContainer",
 "class": "ButtonContainer",
 "language": "GDScript",
-"path": "res://Gameplay/UI/ButtonContainer.gd"
+"path": "res://Gameplay/UI/ButtonContainers/ButtonContainer.gd"
 }, {
 "base": "ColorRect",
 "class": "ButtonSlot",

@@ -8,8 +8,9 @@
 [ext_resource path="res://Gameplay/UI/CharacterPanel/CharacterPanel.tscn" type="PackedScene" id=6]
 [ext_resource path="res://Gameplay/UI/Tooltip/Tooltip.tscn" type="PackedScene" id=7]
 [ext_resource path="res://Gameplay/UI/TargetFrame/TargetFrame.tscn" type="PackedScene" id=8]
-[ext_resource path="res://Gameplay/UI/Bag/Bag.tscn" type="PackedScene" id=9]
-[ext_resource path="res://Gameplay/UI/Spellbook/Spellbook.tscn" type="PackedScene" id=10]
+[ext_resource path="res://Gameplay/UI/ButtonContainers/Bag/Bag.tscn" type="PackedScene" id=9]
+[ext_resource path="res://Gameplay/UI/ButtonContainers/Spellbook/Spellbook.tscn" type="PackedScene" id=10]
+
 
 [sub_resource type="NavigationPolygon" id=1]
 vertices = PoolVector2Array( 1980, 0, 1980, 1080, 0, 1080, 0, 0 )
