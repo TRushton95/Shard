@@ -7,7 +7,9 @@ var action_button_scene = load("res://Gameplay/UI/ActionButton/ActionButton.tscn
 
 var player_name : String
 var selected_unit : Unit
-var selected_ability
+var selected_ability : Ability
+var force_dragged_button : ActionButton
+var force_dragged_button_clone
 
 
 #This should hook into whatever mechanism determines when an ability key is clicked
@@ -46,11 +48,11 @@ func _on_ability_button_dragged() -> void:
 	$CanvasLayer/Tooltip.hide()
 
 
-func _on_Bag_button_dropped_in_slot(action_button: ActionButton, button_slot: ButtonSlot) -> void:
-	match action_button.source:
+func _on_Bag_button_dropped_in_slot(button: ActionButton, slot: ButtonSlot) -> void:
+	match button.source:
 		Enums.ButtonSource.Bag:
-			var from_index = $CanvasLayer/Bag.get_button_index(action_button)
-			var to_index = button_slot.get_index()
+			var from_index = $CanvasLayer/Bag.get_button_index(button)
+			var to_index = slot.get_index()
 			$CanvasLayer/Bag.move(from_index, to_index)
 			get_node(player_name + "/Inventory").move(from_index, to_index)
 
@@ -64,22 +66,23 @@ func _on_Bag_button_dropped_on_button(dropped_button: ActionButton, target_butto
 			get_node(player_name + "/Inventory").move(from_index, to_index)
 
 
-func _on_ActionBar_button_dropped_in_slot(button: ActionButton, button_slot: ButtonSlot) -> void:
+func _on_ActionBar_button_dropped_in_slot(button: ActionButton, slot: ButtonSlot) -> void:
 	match button.source:
 		Enums.ButtonSource.Bag:
 			var clone_button = _create_action_button(button.action_name, button.texture_normal, button.action_lookup.source, button.action_lookup.index, Enums.ButtonSource.ActionBar)
-			button_slot.add_button(clone_button)
+			slot.add_button(clone_button)
 			
 		Enums.ButtonSource.ActionBar:
 			var from_index = $CanvasLayer/ActionBar.get_button_index(button)
-			var to_index = button_slot.get_index()
+			var to_index = slot.get_index()
 			$CanvasLayer/ActionBar.move(from_index, to_index)
 
 
 func _on_ActionBar_button_dropped_on_button(dropped_button: ActionButton, target_button: ActionButton) -> void:
-	# TODO: This needs to be swapped etc
-	var clone_button = target_button.duplicate()
-	target_button.force_drag(target_button, clone_button)
+	var from_index = $CanvasLayer/ActionBar.get_button_index(dropped_button)
+	var to_index = $CanvasLayer/ActionBar.get_button_index(target_button)
+	$CanvasLayer/ActionBar.move(from_index, to_index)
+	target_button.start_force_drag()
 
 
 func _on_unit_left_clicked(unit: Unit) -> void:

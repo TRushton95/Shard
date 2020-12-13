@@ -7,6 +7,8 @@ var source := -1
 
 var _active := false
 var _is_hovered := false
+var _drag_preview : ActionButton
+var _force_dragging := false
 
 signal dragged
 signal button_dropped
@@ -21,6 +23,17 @@ func _on_ActionButton_mouse_exited() -> void:
 	_is_hovered = false
 	if !_active:
 		$ActiveTexture.hide()
+
+
+func _process(delta: float) -> void:
+	if _force_dragging:
+		_drag_preview = self.duplicate() # HACK: It's screaming at me without reassigning this every frame
+		force_drag(self, _drag_preview)
+
+
+func _input(event) -> void:
+	if event is InputEventMouseButton && event.button_index == BUTTON_LEFT && event.pressed && _force_dragging:
+		_force_dragging = false
 
 
 func get_type() -> String:
@@ -64,6 +77,11 @@ func set_active(value: bool) -> void:
 		$ActiveTexture.show()
 	elif !_is_hovered:
 		$ActiveTexture.hide()
+
+
+func start_force_drag() -> void:
+	_force_dragging = true
+	_drag_preview = self.duplicate()
 
 
 func lighten() -> void:
