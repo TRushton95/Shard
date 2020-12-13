@@ -1,0 +1,10 @@
+[gd_scene load_steps=3 format=2]
+
+[ext_resource path="res://Gameplay/AbilitySystem/Abilities/AutoAttack/AutoAttack.gd" type="Script" id=1]
+[ext_resource path="res://Gameplay/AbilitySystem/Abilities/AutoAttack/sword.png" type="Texture" id=2]
+
+[node name="AutoAttack" type="Node"]
+script = ExtResource( 1 )
+off_global_cooldown = true
+icon = ExtResource( 2 )
+autocast_on_target = false

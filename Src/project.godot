@@ -102,6 +102,7 @@ AbilityHelper="*res://Gameplay/AbilitySystem/Helpers/AbilityHelper.gd"
 StatusHelper="*res://Gameplay/AbilitySystem/Helpers/StatusHelper.gd"
 Enums="*res://Gameplay/Global/Enums.gd"
 Constants="*res://Gameplay/Global/Constants.gd"
+NavigationHelper="*res://Gameplay/Global/NavigationHelper.gd"
 
 [debug]
 
@@ -229,5 +230,10 @@ toggle_spellbook={
 toggle_bag={
 "deadzone": 0.5,
 "events": [ Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":0,"alt":false,"shift":false,"control":false,"meta":false,"command":false,"pressed":false,"scancode":66,"unicode":0,"echo":false,"script":null)
+ ]
+}
+force_attack={
+"deadzone": 0.5,
+"events": [ Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":0,"alt":false,"shift":false,"control":false,"meta":false,"command":false,"pressed":false,"scancode":65,"unicode":0,"echo":false,"script":null)
  ]
 }

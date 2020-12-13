@@ -339,6 +339,10 @@ func _process(_delta: float) -> void:
 	if Input.is_action_just_pressed("toggle_bag"):
 		$CanvasLayer/Bag.visible = !$CanvasLayer/Bag.visible
 	
+	if Input.is_action_just_pressed("force_attack"):
+		var auto_attack_ability = get_node(player_name + "/Abilities/AutoAttack")
+		process_ability_press(auto_attack_ability)
+	
 	var button_index = -1
 	if Input.is_action_just_pressed("cast_1"):
 		button_index = 0
@@ -371,7 +375,7 @@ func _process(_delta: float) -> void:
 			player.rpc("set_movement_path", [])
 		if player.focus:
 			player.rpc("stop_pursuing")
-	
+			
 	if Input.is_action_just_pressed("test_interrupt"):
 		player.rpc("interrupt")
 	if Input.is_action_just_pressed("test_mana_refill"):
@@ -425,7 +429,7 @@ func process_ability_press(ability: Ability):
 		Enums.TargetType.Self:
 				rpc("cast_ability_on_unit", ability.get_index(), player_name, player_name)
 		Enums.TargetType.Unit:
-			if selected_unit:
+			if selected_unit && ability.autocast_on_target:
 				if !_is_team_target_valid(ability, selected_unit):
 					print("Invalid target")
 					return
@@ -487,6 +491,8 @@ remotesync func cast_ability_on_unit(ability_index: int, caster_name: String, ta
 
 
 func setup(player_name: String, player_lookup: Dictionary) -> void:
+	NavigationHelper.set_nav_instance($Navigation2D)
+	
 	self.player_name = player_name
 	
 	#TEST ENEMY

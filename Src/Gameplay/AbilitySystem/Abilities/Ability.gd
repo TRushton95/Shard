@@ -14,6 +14,7 @@ export var cast_time := 0.0
 export var cast_range := 0
 export var cost := 0
 export var icon : Texture
+export var autocast_on_target := true
 var target_type = Enums.TargetType.Unset # Must be set in code in each ability, not exported as it is not customisable
 var target_team = -1 # Only relevent for target_type unit
 var toggled := false
