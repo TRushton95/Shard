@@ -96,7 +96,6 @@ func get_drag_data(_position: Vector2):
 	var drag_clone = self.duplicate()
 	set_drag_preview(drag_clone)
 	emit_signal("dragged")
-	hide()
 	return self
 
 
