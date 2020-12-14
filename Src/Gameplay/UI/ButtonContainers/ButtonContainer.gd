@@ -1,4 +1,4 @@
-extends PanelContainer
+extends TextureRect
 class_name ButtonContainer
 
 signal button_dropped_in_slot(action_button, slot)

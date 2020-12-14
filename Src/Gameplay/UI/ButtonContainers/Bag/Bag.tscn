@@ -1,39 +1,63 @@
-[gd_scene load_steps=3 format=2]
+[gd_scene load_steps=5 format=2]
 
 [ext_resource path="res://Gameplay/UI/ButtonContainers/Bag/Bag.gd" type="Script" id=1]
 [ext_resource path="res://Gameplay/UI/ButtonSlot/ButtonSlot.tscn" type="PackedScene" id=2]
+[ext_resource path="res://Gameplay/UI/ButtonContainers/Bag/bag.png" type="Texture" id=3]
+[ext_resource path="res://Gameplay/UI/CloseButton/CloseButton.tscn" type="PackedScene" id=4]
 
-[node name="Bag" type="PanelContainer"]
+[node name="Bag" type="TextureRect"]
 anchor_right = 1.0
 anchor_bottom = 1.0
 margin_right = -1840.0
 margin_bottom = -912.0
 rect_min_size = Vector2( 140, 140 )
+texture = ExtResource( 3 )
 script = ExtResource( 1 )
 __meta__ = {
 "_edit_use_anchors_": false
 }
 enable_drag_and_drop = true
 
-[node name="VBoxContainer" type="VBoxContainer" parent="."]
-margin_left = 7.0
-margin_top = 7.0
-margin_right = 139.0
-margin_bottom = 163.0
+[node name="GrabBox" type="TextureButton" parent="."]
+margin_right = 284.0
+margin_bottom = 36.0
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="GrabBox" type="Button" parent="VBoxContainer"]
-margin_right = 132.0
-margin_bottom = 20.0
-text = "Bag"
+[node name="Label" type="Label" parent="."]
+anchor_left = 0.5
+anchor_right = 0.5
+margin_left = -69.0
+margin_top = 9.0
+margin_right = 69.0
+margin_bottom = 31.0
+text = "Backpack"
+align = 1
+valign = 1
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="CloseButton" parent="." instance=ExtResource( 4 )]
+margin_left = 254.0
+margin_top = 10.0
+margin_right = 274.0
+margin_bottom = 30.0
+
+[node name="VBoxContainer" type="VBoxContainer" parent="."]
+margin_left = 8.0
+margin_top = 36.0
+margin_right = 276.0
+margin_bottom = 236.0
+__meta__ = {
+"_edit_use_anchors_": false
+}
 
 [node name="GridContainer" type="GridContainer" parent="VBoxContainer"]
-margin_top = 24.0
-margin_right = 132.0
-margin_bottom = 156.0
-columns = 2
+margin_right = 268.0
+margin_bottom = 200.0
+columns = 4
 __meta__ = {
 "_edit_use_anchors_": false
 }
@@ -54,16 +78,78 @@ margin_bottom = 64.0
 [node name="ButtonSlot3" parent="VBoxContainer/GridContainer" instance=ExtResource( 2 )]
 anchor_right = 0.0
 anchor_bottom = 0.0
+margin_left = 136.0
+margin_right = 200.0
+margin_bottom = 64.0
+
+[node name="ButtonSlot4" parent="VBoxContainer/GridContainer" instance=ExtResource( 2 )]
+anchor_right = 0.0
+anchor_bottom = 0.0
+margin_left = 204.0
+margin_right = 268.0
+margin_bottom = 64.0
+
+[node name="ButtonSlot5" parent="VBoxContainer/GridContainer" instance=ExtResource( 2 )]
+anchor_right = 0.0
+anchor_bottom = 0.0
 margin_top = 68.0
 margin_right = 64.0
 margin_bottom = 132.0
 
-[node name="ButtonSlot4" parent="VBoxContainer/GridContainer" instance=ExtResource( 2 )]
+[node name="ButtonSlot6" parent="VBoxContainer/GridContainer" instance=ExtResource( 2 )]
 anchor_right = 0.0
 anchor_bottom = 0.0
 margin_left = 68.0
 margin_top = 68.0
 margin_right = 132.0
 margin_bottom = 132.0
-[connection signal="button_down" from="VBoxContainer/GrabBox" to="." method="_on_GrabBox_button_down"]
-[connection signal="button_up" from="VBoxContainer/GrabBox" to="." method="_on_GrabBox_button_up"]
+
+[node name="ButtonSlot7" parent="VBoxContainer/GridContainer" instance=ExtResource( 2 )]
+anchor_right = 0.0
+anchor_bottom = 0.0
+margin_left = 136.0
+margin_top = 68.0
+margin_right = 200.0
+margin_bottom = 132.0
+
+[node name="ButtonSlot8" parent="VBoxContainer/GridContainer" instance=ExtResource( 2 )]
+anchor_right = 0.0
+anchor_bottom = 0.0
+margin_left = 204.0
+margin_top = 68.0
+margin_right = 268.0
+margin_bottom = 132.0
+
+[node name="ButtonSlot9" parent="VBoxContainer/GridContainer" instance=ExtResource( 2 )]
+anchor_right = 0.0
+anchor_bottom = 0.0
+margin_top = 136.0
+margin_right = 64.0
+margin_bottom = 200.0
+
+[node name="ButtonSlot10" parent="VBoxContainer/GridContainer" instance=ExtResource( 2 )]
+anchor_right = 0.0
+anchor_bottom = 0.0
+margin_left = 68.0
+margin_top = 136.0
+margin_right = 132.0
+margin_bottom = 200.0
+
+[node name="ButtonSlot11" parent="VBoxContainer/GridContainer" instance=ExtResource( 2 )]
+anchor_right = 0.0
+anchor_bottom = 0.0
+margin_left = 136.0
+margin_top = 136.0
+margin_right = 200.0
+margin_bottom = 200.0
+
+[node name="ButtonSlot12" parent="VBoxContainer/GridContainer" instance=ExtResource( 2 )]
+anchor_right = 0.0
+anchor_bottom = 0.0
+margin_left = 204.0
+margin_top = 136.0
+margin_right = 268.0
+margin_bottom = 200.0
+[connection signal="button_down" from="GrabBox" to="." method="_on_GrabBox_button_down"]
+[connection signal="button_up" from="GrabBox" to="." method="_on_GrabBox_button_up"]
+[connection signal="pressed" from="CloseButton" to="." method="_on_CloseButton_pressed"]

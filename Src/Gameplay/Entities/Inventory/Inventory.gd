@@ -1,6 +1,6 @@
 extends Node
 
-export var size := 4
+export var size := 12
 
 
 func _ready() -> void:
