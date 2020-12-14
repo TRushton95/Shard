@@ -112,7 +112,7 @@ window/size/height=1080
 
 [editor_plugins]
 
-enabled=PoolStringArray( "CodeSnippetPopup", "Todo_Manager" )
+enabled=PoolStringArray( "Todo_Manager" )
 
 [input]
 
