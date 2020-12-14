@@ -22,7 +22,7 @@ func get_button() -> ActionButton:
 
 
 func add_button(button: ActionButton) -> void:
-	if get_child_count() > 1:
+	if get_child_count() > 0:
 		print("Slot already occupied")
 		return
 	
