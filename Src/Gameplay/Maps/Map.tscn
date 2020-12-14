@@ -8,8 +8,8 @@
 [ext_resource path="res://Gameplay/UI/CharacterPanel/CharacterPanel.tscn" type="PackedScene" id=6]
 [ext_resource path="res://Gameplay/UI/Tooltip/Tooltip.tscn" type="PackedScene" id=7]
 [ext_resource path="res://Gameplay/UI/TargetFrame/TargetFrame.tscn" type="PackedScene" id=8]
-[ext_resource path="res://Gameplay/UI/ButtonContainers/Bag/Bag.tscn" type="PackedScene" id=9]
-[ext_resource path="res://Gameplay/UI/ButtonContainers/Spellbook/Spellbook.tscn" type="PackedScene" id=10]
+[ext_resource path="res://Gameplay/UI/Bag/Bag.tscn" type="PackedScene" id=9]
+[ext_resource path="res://Gameplay/UI/Spellbook/Spellbook.tscn" type="PackedScene" id=10]
 
 [sub_resource type="NavigationPolygon" id=1]
 vertices = PoolVector2Array( 1980, 0, 1980, 1080, 0, 1080, 0, 0 )
@@ -117,10 +117,10 @@ visible = false
 anchor_top = 0.5
 anchor_right = 0.0
 anchor_bottom = 0.5
-margin_left = 149.831
-margin_top = -236.251
-margin_right = 225.831
-margin_bottom = -204.251
+margin_left = 146.834
+margin_top = -422.041
+margin_right = 654.834
+margin_bottom = 345.959
 
 [node name="Tooltip" parent="CanvasLayer" instance=ExtResource( 7 )]
 visible = false

@@ -24,11 +24,6 @@ _global_script_classes=[ {
 "language": "GDScript",
 "path": "res://Gameplay/DataStructures/ActionLookup.gd"
 }, {
-"base": "TextureRect",
-"class": "ButtonContainer",
-"language": "GDScript",
-"path": "res://Gameplay/UI/ButtonContainers/ButtonContainer.gd"
-}, {
 "base": "ColorRect",
 "class": "ButtonSlot",
 "language": "GDScript",
@@ -78,7 +73,6 @@ _global_script_class_icons={
 "Ability": "",
 "ActionButton": "",
 "ActionLookup": "",
-"ButtonContainer": "",
 "ButtonSlot": "",
 "Item": "",
 "ModifiableAttribute": "",

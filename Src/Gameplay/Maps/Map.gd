@@ -72,6 +72,10 @@ func _on_ActionBar_button_dropped_in_slot(button: ActionButton, slot: ButtonSlot
 			var clone_button = _create_action_button(button.action_name, button.texture_normal, button.action_lookup.source, button.action_lookup.index, Enums.ButtonSource.ActionBar)
 			slot.add_button(clone_button)
 			
+		Enums.ButtonSource.Spellbook:
+			var clone_button = _create_action_button(button.action_name, button.texture_normal, button.action_lookup.source, button.action_lookup.index, Enums.ButtonSource.Spellbook)
+			slot.add_button(clone_button)
+			
 		Enums.ButtonSource.ActionBar:
 			var from_index = $CanvasLayer/ActionBar.get_button_index(button)
 			var to_index = slot.get_index()
@@ -560,7 +564,7 @@ func setup(player_name: String, player_lookup: Dictionary) -> void:
 				$CanvasLayer/ActionBar.add_action_button(action_bar_button)
 				
 				var spellbook_button = _create_action_button(ability.name, ability.icon, Enums.ActionSource.Ability, ability.get_index(), Enums.ButtonSource.Spellbook)
-				$CanvasLayer/Spellbook.add_action_button(spellbook_button)
+				$CanvasLayer/Spellbook.add_entry(ability.name, spellbook_button)
 			
 			$CanvasLayer/ActionBar.set_max_health(unit.health_attr.value)
 			$CanvasLayer/ActionBar.set_max_mana(unit.mana_attr.value)
