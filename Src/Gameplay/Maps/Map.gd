@@ -93,6 +93,7 @@ func _on_unit_left_clicked(unit: Unit) -> void:
 	if selected_ability:
 		if !_is_team_target_valid(selected_ability, unit):
 			print("Invalid target")
+			return
 		
 		rpc("_set_unit_queued_ability_data", player_name, unit.name, selected_ability.get_index())
 		_pursue_target(unit.name)
