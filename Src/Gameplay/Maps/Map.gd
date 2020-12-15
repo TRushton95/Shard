@@ -439,7 +439,7 @@ func process_ability_press(ability: Ability):
 					return
 				
 				_pursue_target(selected_unit.name)
-				rpc("_set_unit_queued_ability_data", player_name, selected_unit.name, ability.get_index())
+				rpc("_set_unit_queued_ability_data", player_name, selected_unit.name, ability.get_index()) # FIXME: For items, this is getting the index of the ability on the item, not the player - so player is using incorrect ability
 				select_ability(null)
 			else:
 				select_ability(ability)

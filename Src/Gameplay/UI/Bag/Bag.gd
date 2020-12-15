@@ -19,13 +19,11 @@ func _on_CloseButton_pressed():
 
 
 func _on_ButtonSlot_button_dropped_on_slot(action_button: ActionButton, slot: ButtonSlot) -> void:
-	if $VBoxContainer/GridContainer:
-		emit_signal("button_dropped_in_slot", action_button, slot)
+	emit_signal("button_dropped_in_slot", action_button, slot)
 
 
 func _on_ActionButton_button_dropped_on_button(dropped_button: ActionButton, target_button: ActionButton) -> void:
-	if $VBoxContainer/GridContainer:
-		emit_signal("button_dropped_on_button", dropped_button, target_button)
+	emit_signal("button_dropped_on_button", dropped_button, target_button)
 
 
 func _input(event) -> void:
@@ -33,7 +31,7 @@ func _input(event) -> void:
 		rect_position += event.relative
 
 
-func setup(name: String, slots_container: Node) -> void:
+func _ready() -> void:
 	for slot in $VBoxContainer/GridContainer.get_children():
 		slot.connect("button_dropped", self, "_on_ButtonSlot_button_dropped_on_slot", [slot])
 
