@@ -473,11 +473,11 @@ func _unhandled_input(event) -> void:
 			
 		elif event.button_index == BUTTON_LEFT:
 			if selected_ability && selected_ability.target_type == Enums.TargetType.Position:
-				var movement_path = $Navigation2D.get_simple_path(player.position, event.position)
+				var movement_path = $Navigation2D.get_simple_path(player.position, get_global_mouse_position())
 				$PathDebug.points = movement_path
 				$PathDebug.show()
 				player.rpc("set_movement_path", movement_path)
-				rpc("_set_unit_queued_ability_data", player_name, event.position, selected_ability.get_index())
+				rpc("_set_unit_queued_ability_data", player_name, get_global_mouse_position(), selected_ability.get_index())
 				select_ability(null)
 			else:
 				select_unit(null)
