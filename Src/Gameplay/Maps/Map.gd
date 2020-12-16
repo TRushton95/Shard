@@ -462,7 +462,7 @@ func _unhandled_input(event) -> void:
 				
 			player.rpc("interrupt")
 			
-			var movement_path = $Navigation2D.get_simple_path(player.position, event.position)
+			var movement_path = $Navigation2D.get_simple_path(player.position, get_global_mouse_position())
 			$PathDebug.points = movement_path
 			$PathDebug.show()
 			player.get_node("FollowPathingTimer").stop()
@@ -556,6 +556,10 @@ func setup(player_name: String, player_lookup: Dictionary) -> void:
 			unit.connect("ability_cooldown_started", self, "_on_ability_cooldown_started")
 			unit.connect("ability_cooldown_ended", self, "_on_ability_cooldown_ended")
 			unit.connect("ability_cooldown_progressed", self, "_on_ability_cooldown_progressed")
+			
+			var camera = Camera2D.new()
+			camera.current = true
+			unit.add_child(camera)
 			
 			for ability in unit.get_node("Abilities").get_children():
 				if ability.get_index() == 0: # HACK: To leave out basic attack, should add an ability category
