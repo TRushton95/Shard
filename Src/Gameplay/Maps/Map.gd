@@ -123,11 +123,7 @@ func _on_unit_follow_path_outdated(unit: Unit) -> void:
 		var distance = player.position.distance_to(player.focus.position)
 		var invalidate_time = (M * distance) + PATH_INVALIDATE_TIME_MINIMUM # Time until path is next invalidated
 		
-		var movement_path = $Navigation2D.get_simple_path(player.position, player.focus.position)
-		$PathDebug.points = movement_path
-		$PathDebug.show()
-		movement_path.remove(0) # First point is starting point
-		player.rpc("set_movement_path", movement_path)
+		_set_player_movement_path(player.focus.position)
 		player.get_node("FollowPathingTimer").start(invalidate_time)
 
 
@@ -463,22 +459,15 @@ func _unhandled_input(event) -> void:
 				
 			player.rpc("interrupt")
 			
-			var movement_path = $Navigation2D.get_simple_path(player.position, get_global_mouse_position())
-			$PathDebug.show()
-			$PathDebug.points = movement_path
-			movement_path.remove(0) # First point is starting point
-			player.rpc("set_movement_path", movement_path)
+			_set_player_movement_path(get_global_mouse_position())
+			player.get_node("FollowPathingTimer").stop()
 			rpc("_set_unit_focus", player_name, "")
 			player.rset("auto_attack_enabled", false)
 			rpc("_set_unit_queued_ability_data", player_name, null, -1)
 			
 		elif event.button_index == BUTTON_LEFT:
 			if selected_ability && selected_ability.target_type == Enums.TargetType.Position:
-				var movement_path = $Navigation2D.get_simple_path(player.position, get_global_mouse_position())
-				$PathDebug.points = movement_path
-				$PathDebug.show()
-				movement_path.remove(0) # First point is starting point
-				player.rpc("set_movement_path", movement_path)
+				_set_player_movement_path(get_global_mouse_position())
 				rpc("_set_unit_queued_ability_data", player_name, get_global_mouse_position(), selected_ability.get_index())
 				select_ability(null)
 			else:
@@ -684,13 +673,9 @@ func _create_action_button(action_name: String, icon: Texture, action_source: in
 
 
 func _pursue_target(target_name: String) -> void:
-	var player = get_node(player_name)
-	var movement_path = $Navigation2D.get_simple_path(player.position, get_node(target_name).position)
-	$PathDebug.points = movement_path
-	$PathDebug.show()
+	_set_player_movement_path(get_node(target_name).position)
 	rpc("_set_unit_focus", player_name, target_name)
-	movement_path.remove(0) # First point is starting point
-	player.rpc("set_movement_path", movement_path)
+	var player = get_node(player_name)
 	player.get_node("FollowPathingTimer").start(1.0)
 	
 	if get_node(target_name).team != player.team:
@@ -705,6 +690,16 @@ func _get_action_buttons_by_action_name(ability_name: String) -> Array:
 			result.push_back(action_button)
 				
 	return result
+
+
+func _set_player_movement_path(target_position: Vector2) -> void:
+	var player = get_node(player_name)
+	
+	var movement_path = $Navigation2D.get_simple_path(player.position, target_position)
+	$PathDebug.points = movement_path
+	$PathDebug.show()
+	movement_path.remove(0) # First point is starting point
+	player.rpc("set_movement_path", movement_path)
 
 
 func _is_team_target_valid(ability: Ability, target) -> bool:
