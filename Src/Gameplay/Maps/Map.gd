@@ -126,6 +126,7 @@ func _on_unit_follow_path_outdated(unit: Unit) -> void:
 		var movement_path = $Navigation2D.get_simple_path(player.position, player.focus.position)
 		$PathDebug.points = movement_path
 		$PathDebug.show()
+		movement_path.remove(0) # First point is starting point
 		player.rpc("set_movement_path", movement_path)
 		player.get_node("FollowPathingTimer").start(invalidate_time)
 
@@ -463,9 +464,9 @@ func _unhandled_input(event) -> void:
 			player.rpc("interrupt")
 			
 			var movement_path = $Navigation2D.get_simple_path(player.position, get_global_mouse_position())
-			$PathDebug.points = movement_path
 			$PathDebug.show()
-			player.get_node("FollowPathingTimer").stop()
+			$PathDebug.points = movement_path
+			movement_path.remove(0) # First point is starting point
 			player.rpc("set_movement_path", movement_path)
 			rpc("_set_unit_focus", player_name, "")
 			player.rset("auto_attack_enabled", false)
@@ -476,6 +477,7 @@ func _unhandled_input(event) -> void:
 				var movement_path = $Navigation2D.get_simple_path(player.position, get_global_mouse_position())
 				$PathDebug.points = movement_path
 				$PathDebug.show()
+				movement_path.remove(0) # First point is starting point
 				player.rpc("set_movement_path", movement_path)
 				rpc("_set_unit_queued_ability_data", player_name, get_global_mouse_position(), selected_ability.get_index())
 				select_ability(null)
@@ -687,6 +689,7 @@ func _pursue_target(target_name: String) -> void:
 	$PathDebug.points = movement_path
 	$PathDebug.show()
 	rpc("_set_unit_focus", player_name, target_name)
+	movement_path.remove(0) # First point is starting point
 	player.rpc("set_movement_path", movement_path)
 	player.get_node("FollowPathingTimer").start(1.0)
 	

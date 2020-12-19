@@ -14,8 +14,10 @@ var queued_ability_data : Array
 var team := -1
 var direction := 0
 var icon = load("res://Gameplay/Entities/Unit/elementalist_icon.png")
+var moving := false
 
 enum Direction { DOWN, LEFT, RIGHT, UP }
+enum AnimationType { IDLE, WALKING }
 
 var base_movement_speed := 250
 var base_health := 50
@@ -136,6 +138,10 @@ func _on_ability_cooldown_progressed(ability: Ability) -> void:
 func _on_ability_cooldown_ended(ability: Ability) -> void:
 	emit_signal("ability_cooldown_ended", ability)
 
+
+func _on_Unit_path_finished():
+	_play_animation(AnimationType.IDLE, _get_direction())
+
 # End of Stat change handlers
 
 
@@ -170,26 +176,16 @@ func _ready() -> void:
 	$FollowPathingTimer.one_shot = true
 	$AutoAttackTimer.one_shot = true
 	
-	$AnimationPlayer.play("walking_down")
+	$AnimationPlayer.play("idle_down")
 
 
 func _process(delta: float) -> void:
-#	if casting_index == -1 && channelling_index == -1:
 	_move_along_path(delta)
 	
 	var new_direction = _get_direction()
 	if new_direction > -1 && new_direction != direction:
 		direction = new_direction
-		
-		match direction:
-			Direction.UP:
-				$AnimationPlayer.play("walking_up")
-			Direction.LEFT:
-				$AnimationPlayer.play("walking_left")
-			Direction.DOWN:
-				$AnimationPlayer.play("walking_down")
-			Direction.RIGHT:
-				$AnimationPlayer.play("walking_right")
+		_play_animation(AnimationType.WALKING, direction)
 		
 	if casting_index >= 0:
 		emit_signal("casting_progressed", $CastTimer.wait_time - $CastTimer.time_left)
@@ -203,6 +199,8 @@ remotesync func set_movement_path(movement_path: PoolVector2Array) -> void:
 	_movement_path = movement_path
 	if !is_moving():
 		emit_signal("path_finished")
+	else:
+		_play_animation(AnimationType.WALKING, _get_direction())
 
 
 func is_moving() -> bool:
@@ -459,7 +457,8 @@ func _get_direction() -> int:
 	
 	if _movement_path.size() > 0:
 		var segment = _movement_path[0]
-		var angle_rads = position.angle_to_point(segment)
+		var pos = position
+		var angle_rads = pos.angle_to_point(segment)
 		var angle = rad2deg(angle_rads)
 		
 		if angle > 45 && angle <= 135:
@@ -470,8 +469,38 @@ func _get_direction() -> int:
 			result = Direction.DOWN
 		elif angle > -45 && angle <= 45:
 			result = Direction.LEFT
+	else:
+		result = direction
 			
 	return result
+
+
+func _play_animation(animation_type: int, current_direction: int) -> void:
+	var direction_suffix = ""
+	match current_direction:
+		Direction.UP:
+			direction_suffix = "_up"
+		Direction.LEFT:
+			direction_suffix = "_left"
+		Direction.DOWN:
+			direction_suffix = "_down"
+		Direction.RIGHT:
+			direction_suffix = "_right"
+	
+	var animation_name = ""
+	match animation_type:
+		AnimationType.IDLE:
+			animation_name = "idle"
+		AnimationType.WALKING:
+			animation_name = "walking"
+			
+	var full_animation_name = animation_name + direction_suffix
+	var has_animation = $AnimationPlayer.has_animation(full_animation_name)
+	
+	if has_animation:
+		$AnimationPlayer.play(full_animation_name)
+	else:
+		print("Cannot find animation:" + full_animation_name)
 
 
 func _set_current_health(value: int) -> void:
