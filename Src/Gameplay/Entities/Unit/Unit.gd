@@ -12,6 +12,10 @@ var basic_attack_range := 200
 var auto_attack_speed := 1.0
 var queued_ability_data : Array
 var team := -1
+var direction := 0
+var icon = load("res://Gameplay/Entities/Unit/elementalist_icon.png")
+
+enum Direction { DOWN, LEFT, RIGHT, UP }
 
 var base_movement_speed := 250
 var base_health := 50
@@ -165,11 +169,27 @@ func _ready() -> void:
 	$CastTimer.one_shot = false
 	$FollowPathingTimer.one_shot = true
 	$AutoAttackTimer.one_shot = true
+	
+	$AnimationPlayer.play("walking_down")
 
 
 func _process(delta: float) -> void:
 #	if casting_index == -1 && channelling_index == -1:
 	_move_along_path(delta)
+	
+	var new_direction = _get_direction()
+	if new_direction > -1 && new_direction != direction:
+		direction = new_direction
+		
+		match direction:
+			Direction.UP:
+				$AnimationPlayer.play("walking_up")
+			Direction.LEFT:
+				$AnimationPlayer.play("walking_left")
+			Direction.DOWN:
+				$AnimationPlayer.play("walking_down")
+			Direction.RIGHT:
+				$AnimationPlayer.play("walking_right")
 		
 	if casting_index >= 0:
 		emit_signal("casting_progressed", $CastTimer.wait_time - $CastTimer.time_left)
@@ -432,6 +452,26 @@ func _move_along_path(delta: float) -> void:
 		
 		if _movement_path.size() == 0:
 			emit_signal("path_finished")
+
+
+func _get_direction() -> int:
+	var result = -1
+	
+	if _movement_path.size() > 0:
+		var segment = _movement_path[0]
+		var angle_rads = position.angle_to_point(segment)
+		var angle = rad2deg(angle_rads)
+		
+		if angle > 45 && angle <= 135:
+			result = Direction.UP
+		elif angle > 135 || angle <= -135:
+			result = Direction.RIGHT
+		elif angle > -135 && angle <= -45:
+			result = Direction.DOWN
+		elif angle > -45 && angle <= 45:
+			result = Direction.LEFT
+			
+	return result
 
 
 func _set_current_health(value: int) -> void:
