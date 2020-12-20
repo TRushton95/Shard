@@ -381,6 +381,13 @@ remotesync func remove_status_effect(status_effect_name: String) -> void:
 	status_effect.queue_free()
 
 
+func queue_ability(ability_index, target) -> void:
+	if ability_index == -1 || !target:
+		queued_ability_data = []
+	else:
+		queued_ability_data = [ ability_index, target ]
+
+
 # TODO: Debug method
 func set_sprite_color(color: Color) -> void:
 	$Sprite.modulate = color

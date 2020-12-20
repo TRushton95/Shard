@@ -224,7 +224,7 @@ func _on_unit_casting_started(ability_name: String, duration: float, unit: Unit)
 	
 	if unit == player:
 		if player.is_moving():
-			_remove_player_movement_path()
+			_remove_player_movement_path(false)
 		if player.focus:
 			player.rpc("stop_pursuing")
 		
@@ -660,11 +660,10 @@ remotesync func _set_unit_focus(unit_name: String, focus_name: String) -> void:
 
 
 remotesync func _set_unit_queued_ability_data(unit_name: String, target, ability_index: int) -> void:
-	if !target || ability_index == -1:
-		get_node(unit_name).queued_ability_data = []
-	else:
-		var adjusted_target = get_node(target) if target is String else target
-		get_node(unit_name).queued_ability_data = [ ability_index, adjusted_target ]
+	var unit = get_node(unit_name)
+	var adjusted_target = get_node(target) if target is String else target
+	
+	unit.queue_ability(ability_index, adjusted_target)
 
 
 # TODO: Does this actually need a name?
@@ -704,10 +703,14 @@ func _get_action_buttons_by_action_name(ability_name: String) -> Array:
 	return result
 
 
-func _remove_player_movement_path() -> void:
+func _remove_player_movement_path(remote_call := true) -> void:
 	$PathDebug.points = []
 	$PathDebug.hide()
-	get_node(player_name).rpc("set_movement_path", [])
+	
+	if remote_call:
+		get_node(player_name).rpc("set_movement_path", [])
+	else:
+		get_node(player_name).set_movement_path([])
 
 
 func _set_player_movement_path(target_position: Vector2) -> void:
