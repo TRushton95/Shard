@@ -17,7 +17,7 @@ var icon = load("res://Gameplay/Entities/Unit/elementalist_icon.png")
 var moving := false
 
 enum Direction { DOWN, LEFT, RIGHT, UP }
-enum AnimationType { IDLE, WALKING }
+enum AnimationType { IDLE, WALKING, CASTING }
 
 var base_movement_speed := 250
 var base_health := 50
@@ -139,8 +139,13 @@ func _on_ability_cooldown_ended(ability: Ability) -> void:
 	emit_signal("ability_cooldown_ended", ability)
 
 
-func _on_Unit_path_finished():
+func _on_Unit_path_finished() -> void:
 	_play_animation(AnimationType.IDLE, _get_direction())
+
+
+func _on_Unit_casting_started(ability_name, duration) -> void:
+	_play_animation(AnimationType.CASTING, _get_direction())
+
 
 # End of Stat change handlers
 
@@ -181,11 +186,6 @@ func _ready() -> void:
 
 func _process(delta: float) -> void:
 	_move_along_path(delta)
-	
-	var new_direction = _get_direction()
-	if new_direction > -1 && new_direction != direction:
-		direction = new_direction
-		_play_animation(AnimationType.WALKING, direction)
 		
 	if casting_index >= 0:
 		emit_signal("casting_progressed", $CastTimer.wait_time - $CastTimer.time_left)
@@ -448,6 +448,11 @@ func _move_along_path(delta: float) -> void:
 			
 		distance_to_walk -= distance_to_next_point
 		
+		var new_direction = _get_direction()
+		if new_direction > -1 && new_direction != direction:
+			direction = new_direction
+			_play_animation(AnimationType.WALKING, direction)
+		
 		if _movement_path.size() == 0:
 			emit_signal("path_finished")
 
@@ -493,6 +498,8 @@ func _play_animation(animation_type: int, current_direction: int) -> void:
 			animation_name = "idle"
 		AnimationType.WALKING:
 			animation_name = "walking"
+		AnimationType.CASTING:
+			animation_name = "casting"
 			
 	var full_animation_name = animation_name + direction_suffix
 	var has_animation = $AnimationPlayer.has_animation(full_animation_name)
