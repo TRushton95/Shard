@@ -220,7 +220,14 @@ func _on_unit_mana_changed(_value: int, unit: Unit) -> void:
 
 
 func _on_unit_casting_started(ability_name: String, duration: float, unit: Unit) -> void:
-	if unit == get_node(player_name):
+	var player = get_node(player_name)
+	
+	if unit == player:
+		if player.is_moving():
+			_remove_player_movement_path()
+		if player.focus:
+			player.rpc("stop_pursuing")
+		
 		$CanvasLayer/CastBar.initialise(ability_name, duration)
 		$CanvasLayer/CastBar.show()
 		
@@ -234,7 +241,12 @@ func _on_unit_casting_progressed(time_elapsed: float, unit: Unit) -> void:
 
 
 func _on_unit_casting_stopped(ability_name: String, unit: Unit) -> void:
-	if unit == get_node(player_name):
+	var player = get_node(player_name)
+	
+	if unit == player && unit.focus && unit.team != unit.focus.team:
+		_pursue_target(unit.focus.name)
+	
+	if unit == player:
 		$CanvasLayer/CastBar.hide()
 		
 	for action_button in _get_action_buttons_by_action_name(ability_name):
@@ -648,7 +660,7 @@ remotesync func _set_unit_focus(unit_name: String, focus_name: String) -> void:
 
 
 remotesync func _set_unit_queued_ability_data(unit_name: String, target, ability_index: int) -> void:
-	if ability_index == -1:
+	if !target || ability_index == -1:
 		get_node(unit_name).queued_ability_data = []
 	else:
 		var adjusted_target = get_node(target) if target is String else target
@@ -690,6 +702,12 @@ func _get_action_buttons_by_action_name(ability_name: String) -> Array:
 			result.push_back(action_button)
 				
 	return result
+
+
+func _remove_player_movement_path() -> void:
+	$PathDebug.points = []
+	$PathDebug.hide()
+	get_node(player_name).rpc("set_movement_path", [])
 
 
 func _set_player_movement_path(target_position: Vector2) -> void:

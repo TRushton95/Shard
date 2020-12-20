@@ -242,7 +242,6 @@ remotesync func interrupt() -> void:
 
 
 remotesync func stop_pursuing() -> void:
-	queued_ability_data = []
 	auto_attack_enabled = false
 	$FollowPathingTimer.stop()
 
