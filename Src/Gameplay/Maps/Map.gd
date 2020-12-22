@@ -21,7 +21,7 @@ func _on_ability_button_pressed(button: ActionButton) -> void:
 
 func _on_ability_button_mouse_entered(button: ActionButton) -> void:
 	if button.action_lookup.source == Enums.ActionSource.Ability:
-		var ability = get_node(player_name + "/Abilities").get_child(button.action_lookup.index)
+		var ability = player.get_node("Abilities").get_child(button.action_lookup.index)
 		
 		$CanvasLayer/Tooltip.set_name(ability.name)
 		$CanvasLayer/Tooltip.set_range(100)
@@ -55,7 +55,7 @@ func _on_Bag_button_dropped_in_slot(button: ActionButton, slot: ButtonSlot) -> v
 			var from_index = $CanvasLayer/Bag.get_button_index(button)
 			var to_index = slot.get_index()
 			$CanvasLayer/Bag.move(from_index, to_index)
-			get_node(player_name + "/Inventory").move(from_index, to_index)
+			player.get_node("Inventory").move(from_index, to_index)
 
 
 func _on_Bag_button_dropped_on_button(dropped_button: ActionButton, target_button: ActionButton) -> void:
@@ -64,7 +64,7 @@ func _on_Bag_button_dropped_on_button(dropped_button: ActionButton, target_butto
 			var from_index = $CanvasLayer/Bag.get_button_index(dropped_button)
 			var to_index = $CanvasLayer/Bag.get_button_index(target_button)
 			$CanvasLayer/Bag.move(from_index, to_index)
-			get_node(player_name + "/Inventory").move(from_index, to_index)
+			player.get_node("Inventory").move(from_index, to_index)
 
 
 func _on_ActionBar_button_dropped_in_slot(button: ActionButton, slot: ButtonSlot) -> void:
@@ -130,7 +130,7 @@ func _on_enemy_follow_path_outdated(unit: Unit) -> void:
 
 
 func _on_unit_status_effect_applied(status_effect: Status, unit: Unit) -> void:
-	if unit == get_node(player_name):
+	if unit == player:
 		$CanvasLayer/StatusEffectBar.add_status_effect(status_effect)
 	
 	if unit == selected_unit:
@@ -138,7 +138,7 @@ func _on_unit_status_effect_applied(status_effect: Status, unit: Unit) -> void:
 
 
 func _on_unit_status_effect_removed(_status_effect: Status, index: int, unit: Unit) -> void:
-	if unit == get_node(player_name):
+	if unit == player:
 		$CanvasLayer/StatusEffectBar.remove_status_effect(index)
 	
 	if unit == selected_unit:
@@ -149,7 +149,7 @@ func _on_player_health_attr_changed(value: int) -> void:
 	$CanvasLayer/CharacterPanel.set_health_attr(value)
 	$CanvasLayer/ActionBar.set_max_health(value)
 	
-	if selected_unit == get_node(player_name):
+	if selected_unit == player:
 		$CanvasLayer/TargetFrame.set_max_health(value)
 
 
@@ -157,7 +157,7 @@ func _on_player_mana_attr_changed(value: int) -> void:
 	$CanvasLayer/CharacterPanel.set_mana_attr(value)
 	$CanvasLayer/ActionBar.set_max_mana(value)
 	
-	if selected_unit == get_node(player_name):
+	if selected_unit == player:
 		$CanvasLayer/TargetFrame.set_max_mana(value)
 
 
@@ -181,7 +181,7 @@ func _on_unit_damage_received(value: int, unit: Unit) -> void:
 	if unit == selected_unit:
 		$CanvasLayer/TargetFrame.set_current_health(unit.current_health)
 		
-	if unit == get_node(player_name):
+	if unit == player:
 		$CanvasLayer/ActionBar.set_current_health(unit.current_health)
 
 
@@ -193,7 +193,7 @@ func _on_unit_healing_received(value: int, unit: Unit) -> void:
 	if unit == selected_unit:
 		$CanvasLayer/TargetFrame.set_current_health(unit.current_health)
 		
-	if unit == get_node(player_name):
+	if unit == player:
 		$CanvasLayer/ActionBar.set_current_health(unit.current_health)
 
 
@@ -201,7 +201,7 @@ func _on_unit_mana_changed(_value: int, unit: Unit) -> void:
 	if unit == selected_unit:
 		$CanvasLayer/TargetFrame.set_current_mana(unit.current_mana)
 	
-	if unit == get_node(player_name):
+	if unit == player:
 		$CanvasLayer/ActionBar.set_current_mana(unit.current_mana)
 			
 		for ability in unit.get_node("Abilities").get_children():
@@ -210,8 +210,6 @@ func _on_unit_mana_changed(_value: int, unit: Unit) -> void:
 
 
 func _on_unit_casting_started(ability_name: String, duration: float, unit: Unit) -> void:
-	var player = get_node(player_name)
-	
 	if unit == player:
 		$CanvasLayer/CastBar.initialise(ability_name, duration)
 		$CanvasLayer/CastBar.show()
@@ -221,13 +219,11 @@ func _on_unit_casting_started(ability_name: String, duration: float, unit: Unit)
 
 
 func _on_unit_casting_progressed(time_elapsed: float, unit: Unit) -> void:
-	if unit == get_node(player_name):
+	if unit == player:
 		$CanvasLayer/CastBar.set_value(time_elapsed)
 
 
 func _on_unit_casting_stopped(ability_name: String, unit: Unit) -> void:
-	var player = get_node(player_name)
-	
 	if unit == player:
 		$CanvasLayer/CastBar.hide()
 		
@@ -236,7 +232,7 @@ func _on_unit_casting_stopped(ability_name: String, unit: Unit) -> void:
 
 
 func _on_unit_channelling_started(ability_name: String, channel_duration: float, unit: Unit) -> void:
-	if unit == get_node(player_name):
+	if unit == player:
 		$CanvasLayer/CastBar.initialise(ability_name, channel_duration)
 		$CanvasLayer/CastBar.show()
 		
@@ -245,12 +241,12 @@ func _on_unit_channelling_started(ability_name: String, channel_duration: float,
 
 
 func _on_unit_channelling_progressed(time_remaining: float, unit: Unit) -> void:
-	if unit == get_node(player_name):
+	if unit == player:
 		$CanvasLayer/CastBar.set_value(time_remaining)
 
 
 func _on_unit_channelling_stopped(ability_name: String, unit: Unit) -> void:
-	if unit == get_node(player_name):
+	if unit == player:
 		$CanvasLayer/CastBar.hide()
 		
 		for action_button in _get_action_buttons_by_action_name(ability_name):
@@ -288,15 +284,13 @@ func _on_ability_cooldown_ended(ability: Ability) -> void:
 
 
 func _on_unit_team_changed(unit: Unit) -> void:
-	if unit.team == get_node(player_name).team:
+	if unit.team == player.team:
 		unit.set_health_bar_color(Color.green)
 	else:
 		unit.set_health_bar_color(Color.red)
 
 
 func _process(_delta: float) -> void:
-	var player = get_node(player_name)
-	
 	# Test commands for testing whatever
 	if Input.is_action_just_pressed("test_right"):
 		player.get_node("Inventory").pop_item(0)
@@ -334,7 +328,7 @@ func _process(_delta: float) -> void:
 		$CanvasLayer/Bag.visible = !$CanvasLayer/Bag.visible
 	
 	if Input.is_action_just_pressed("force_attack"):
-		var auto_attack_ability = get_node(player_name + "/Abilities/AutoAttack")
+		var auto_attack_ability = player.get_node("Abilities/AutoAttack")
 		process_ability_press(auto_attack_ability)
 	
 	var button_index = -1
@@ -401,10 +395,10 @@ func find_action(action_lookup: ActionLookup) -> Ability:
 	var result
 	
 	if action_lookup.source == Enums.ActionSource.Ability:
-		var ability = get_node(player_name + "/Abilities").get_child(action_lookup.index)
+		var ability = player.get_node("Abilities").get_child(action_lookup.index)
 		result = ability
 	elif action_lookup.source == Enums.ActionSource.Inventory:
-		var item = get_node(player_name + "/Inventory").get_item(action_lookup.index)
+		var item = player.get_node("Inventory").get_item(action_lookup.index)
 		result = item.get_ability()
 		
 	return result
@@ -438,8 +432,6 @@ func process_ability_press(ability: Ability):
 
 func _unhandled_input(event) -> void:
 	if event is InputEventMouseButton && event.pressed:
-		var player = get_node(player_name)
-		
 		if event.button_index == BUTTON_RIGHT:
 			rpc("_unit_move_to_point", player_name, get_global_mouse_position())
 			if selected_ability:
@@ -594,7 +586,7 @@ func select_ability(ability: Ability) -> void:
 		Input.set_custom_mouse_cursor(null)
 		return
 		
-	if get_node(player_name).current_mana < ability.cost:
+	if player.current_mana < ability.cost:
 		print("Insufficient mana")
 		return
 		
