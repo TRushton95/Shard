@@ -12,7 +12,7 @@
 [ext_resource path="res://Gameplay/Entities/Inventory/Inventory.tscn" type="PackedScene" id=10]
 [ext_resource path="res://Gameplay/AbilitySystem/Abilities/AutoAttack/AutoAttack.tscn" type="PackedScene" id=11]
 
-[sub_resource type="Animation" id=11]
+[sub_resource type="Animation" id=1]
 resource_name = "casting_down"
 loop = true
 tracks/0/type = "value"
@@ -28,7 +28,7 @@ tracks/0/keys = {
 "values": [ 3 ]
 }
 
-[sub_resource type="Animation" id=12]
+[sub_resource type="Animation" id=2]
 resource_name = "casting_left"
 loop = true
 tracks/0/type = "value"
@@ -44,7 +44,7 @@ tracks/0/keys = {
 "values": [ 7 ]
 }
 
-[sub_resource type="Animation" id=13]
+[sub_resource type="Animation" id=3]
 resource_name = "casting_right"
 loop = true
 tracks/0/type = "value"
@@ -60,7 +60,7 @@ tracks/0/keys = {
 "values": [ 11 ]
 }
 
-[sub_resource type="Animation" id=14]
+[sub_resource type="Animation" id=4]
 resource_name = "casting_up"
 loop = true
 tracks/0/type = "value"
@@ -76,7 +76,7 @@ tracks/0/keys = {
 "values": [ 15 ]
 }
 
-[sub_resource type="Animation" id=7]
+[sub_resource type="Animation" id=5]
 resource_name = "idle_down"
 tracks/0/type = "value"
 tracks/0/path = NodePath("Sprite:frame")
@@ -91,7 +91,7 @@ tracks/0/keys = {
 "values": [ 0 ]
 }
 
-[sub_resource type="Animation" id=8]
+[sub_resource type="Animation" id=6]
 resource_name = "idle_left"
 tracks/0/type = "value"
 tracks/0/path = NodePath("Sprite:frame")
@@ -106,7 +106,7 @@ tracks/0/keys = {
 "values": [ 4 ]
 }
 
-[sub_resource type="Animation" id=9]
+[sub_resource type="Animation" id=7]
 resource_name = "idle_right"
 tracks/0/type = "value"
 tracks/0/path = NodePath("Sprite:frame")
@@ -121,7 +121,7 @@ tracks/0/keys = {
 "values": [ 8 ]
 }
 
-[sub_resource type="Animation" id=10]
+[sub_resource type="Animation" id=8]
 resource_name = "idle_up"
 tracks/0/type = "value"
 tracks/0/path = NodePath("Sprite:frame")
@@ -136,8 +136,7 @@ tracks/0/keys = {
 "values": [ 12 ]
 }
 
-[sub_resource type="Animation" id=1]
-resource_name = "walking_down"
+[sub_resource type="Animation" id=9]
 length = 0.8
 loop = true
 step = 0.05
@@ -154,8 +153,7 @@ tracks/0/keys = {
 "values": [ 1, 0, 2, 0 ]
 }
 
-[sub_resource type="Animation" id=2]
-resource_name = "walking_left"
+[sub_resource type="Animation" id=10]
 length = 0.8
 loop = true
 step = 0.05
@@ -172,8 +170,7 @@ tracks/0/keys = {
 "values": [ 5, 4, 6, 4 ]
 }
 
-[sub_resource type="Animation" id=3]
-resource_name = "walking_right"
+[sub_resource type="Animation" id=11]
 length = 0.8
 loop = true
 step = 0.05
@@ -190,8 +187,7 @@ tracks/0/keys = {
 "values": [ 9, 8, 10, 8 ]
 }
 
-[sub_resource type="Animation" id=4]
-resource_name = "walking_up"
+[sub_resource type="Animation" id=12]
 length = 0.8
 loop = true
 step = 0.05
@@ -208,10 +204,10 @@ tracks/0/keys = {
 "values": [ 13, 12, 14, 12 ]
 }
 
-[sub_resource type="CircleShape2D" id=5]
+[sub_resource type="CircleShape2D" id=13]
 radius = 32.0
 
-[sub_resource type="RectangleShape2D" id=6]
+[sub_resource type="RectangleShape2D" id=14]
 extents = Vector2( 32, 64 )
 
 [node name="Unit" type="KinematicBody2D"]
@@ -224,27 +220,27 @@ hframes = 4
 frame = 3
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="."]
-anims/casting_down = SubResource( 11 )
-anims/casting_left = SubResource( 12 )
-anims/casting_right = SubResource( 13 )
-anims/casting_up = SubResource( 14 )
-anims/idle_down = SubResource( 7 )
-anims/idle_left = SubResource( 8 )
-anims/idle_right = SubResource( 9 )
-anims/idle_up = SubResource( 10 )
-anims/walking_down = SubResource( 1 )
-anims/walking_left = SubResource( 2 )
-anims/walking_right = SubResource( 3 )
-anims/walking_up = SubResource( 4 )
+anims/casting_down = SubResource( 1 )
+anims/casting_left = SubResource( 2 )
+anims/casting_right = SubResource( 3 )
+anims/casting_up = SubResource( 4 )
+anims/idle_down = SubResource( 5 )
+anims/idle_left = SubResource( 6 )
+anims/idle_right = SubResource( 7 )
+anims/idle_up = SubResource( 8 )
+anims/walking_down = SubResource( 9 )
+anims/walking_left = SubResource( 10 )
+anims/walking_right = SubResource( 11 )
+anims/walking_up = SubResource( 12 )
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 position = Vector2( 0, 32 )
-shape = SubResource( 5 )
+shape = SubResource( 13 )
 
 [node name="Clickbox" type="Area2D" parent="."]
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Clickbox"]
-shape = SubResource( 6 )
+shape = SubResource( 14 )
 
 [node name="Inventory" parent="." instance=ExtResource( 10 )]
 

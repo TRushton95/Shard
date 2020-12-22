@@ -39,7 +39,7 @@ signal right_clicked
 signal path_finished
 signal follow_path_outdated
 signal path_set(path)
-signal casting_started(ability_name, duration)
+signal casting_started(ability_name, duration, target)
 signal casting_progressed(time_elapsed)
 signal casting_stopped(ability_name)
 signal channelling_started(ability_name, duration)
@@ -145,11 +145,13 @@ func _on_ability_cooldown_ended(ability: Ability) -> void:
 
 
 func _on_Unit_path_finished() -> void:
-	_play_animation(AnimationType.IDLE, _get_direction())
+	_play_animation(AnimationType.IDLE, direction)
 
 
-func _on_Unit_casting_started(ability_name, duration) -> void:
-	_play_animation(AnimationType.CASTING, _get_direction())
+func _on_Unit_casting_started(ability_name: String, duration: float) -> void:
+	pass
+#	var target_position = target if target is Vector2 else target.position
+#	_play_animation(AnimationType.CASTING, _get_direction_to_point(target_position))
 
 
 # End of Stat change handlers
@@ -196,6 +198,7 @@ func _process(delta: float) -> void:
 		if new_state:
 			switch_state(new_state)
 		
+		
 	if casting_index >= 0:
 		emit_signal("casting_progressed", $CastTimer.wait_time - $CastTimer.time_left)
 	elif channelling_index >= 0:
@@ -210,7 +213,7 @@ func set_movement_path(movement_path: PoolVector2Array) -> void:
 	if !is_moving():
 		emit_signal("path_finished")
 	else:
-		_play_animation(AnimationType.WALKING, _get_direction())
+		_play_animation(AnimationType.WALKING, direction)
 		
 	emit_signal("path_set", _movement_path)
 
@@ -349,25 +352,20 @@ func get_type() -> String:
 	return Constants.ClassNames.UNIT
 
 
-func _get_direction() -> int:
+func _get_direction_to_point(point: Vector2) -> int:
 	var result = -1
 	
-	if _movement_path.size() > 0:
-		var segment = _movement_path[0]
-		var pos = position
-		var angle_rads = pos.angle_to_point(segment)
-		var angle = rad2deg(angle_rads)
-		
-		if angle > 45 && angle <= 135:
-			result = Direction.UP
-		elif angle > 135 || angle <= -135:
-			result = Direction.RIGHT
-		elif angle > -135 && angle <= -45:
-			result = Direction.DOWN
-		elif angle > -45 && angle <= 45:
-			result = Direction.LEFT
-	else:
-		result = direction
+	var angle_rads = position.angle_to_point(point)
+	var angle = rad2deg(angle_rads)
+	
+	if angle > 45 && angle <= 135:
+		result = Direction.UP
+	elif angle > 135 || angle <= -135:
+		result = Direction.RIGHT
+	elif angle > -135 && angle <= -45:
+		result = Direction.DOWN
+	elif angle > -45 && angle <= 45:
+		result = Direction.LEFT
 			
 	return result
 
@@ -493,7 +491,7 @@ func _start_cast(ability: Ability, target) -> void:
 		$CastTimer.connect("timeout", self, "_on_CastTimer_timeout", [ability, target])
 		$CastTimer.start(ability.cast_time)
 		casting_index = ability.get_index()
-		emit_signal("casting_started", ability.name, ability.cast_time)
+		emit_signal("casting_started", ability.name, ability.cast_time) # FIXME: Weird stupid fucking error here about incorrect parameter count when target is added as param
 		
 		if !ability.off_global_cooldown:
 			for a in get_node("Abilities").get_children():
@@ -527,13 +525,13 @@ func switch_state(new_state) -> void:
 		_state.on_enter(self)
 
 
-func _traverse_path(delta: float) -> void:
-	if casting_index > -1 || channelling_index > -1:
-		return
-	
-	var distance_to_walk = delta * movement_speed_attr.value
-	while distance_to_walk > 0 && _movement_path.size() > 0:
-		distance_to_walk = _step_through_path(distance_to_walk)
+#func _traverse_path(delta: float) -> void:
+#	if casting_index > -1 || channelling_index > -1:
+#		return
+#
+#	var distance_to_walk = delta * movement_speed_attr.value
+#	while distance_to_walk > 0 && _movement_path.size() > 0:
+#		distance_to_walk = _step_through_path(distance_to_walk)
 
 
 func _step_through_path(distance_to_walk: int) -> int:
@@ -546,10 +544,11 @@ func _step_through_path(distance_to_walk: int) -> int:
 		
 	distance_to_walk -= distance_to_next_point
 	
-	var new_direction = _get_direction()
-	if new_direction > -1 && new_direction != direction:
-		direction = new_direction
-		_play_animation(AnimationType.WALKING, direction)
+	if _movement_path.size() > 0:
+		var new_direction = _get_direction_to_point(_movement_path[0])
+		if new_direction > -1 && new_direction != direction:
+			direction = new_direction
+			_play_animation(AnimationType.WALKING, direction)
 	
 	if _movement_path.size() == 0:
 		emit_signal("path_finished")

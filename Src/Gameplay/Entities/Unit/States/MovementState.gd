@@ -25,8 +25,12 @@ func on_leave(unit) -> void:
 
 
 func update(unit, delta: float):
+	if unit.casting_index > -1 || unit.channelling_index > -1:
+		return
+	
 	var distance_to_walk = delta * unit.movement_speed_attr.value
-	unit._step_through_path(distance_to_walk) # FIXME: Don't like making unit move this way
+	while distance_to_walk > 0 && unit._movement_path.size() > 0:
+		distance_to_walk = unit._step_through_path(distance_to_walk) # FIXME: Don't like making unit move this way
 	
 	if _path_finished:
 		return IdleState.new()
