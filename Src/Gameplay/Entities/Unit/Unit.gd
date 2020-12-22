@@ -10,12 +10,15 @@ var focus : Unit
 remotesync var auto_attack_enabled := false # Requires focus to be set to do anything
 var basic_attack_range := 200
 var auto_attack_speed := 1.0
+var _is_basic_attack_ready := true
 var queued_ability_data : Array
 var team := -1
 var direction := 0
 var icon = load("res://Gameplay/Entities/Unit/elementalist_icon.png")
 var moving := false
+var _state = IdleState.new()
 
+enum State { IDLE, MOVING, PURSUING }
 enum Direction { DOWN, LEFT, RIGHT, UP }
 enum AnimationType { IDLE, WALKING, CASTING }
 
@@ -35,6 +38,7 @@ signal left_clicked
 signal right_clicked
 signal path_finished
 signal follow_path_outdated
+signal path_set(path)
 signal casting_started(ability_name, duration)
 signal casting_progressed(time_elapsed)
 signal casting_stopped(ability_name)
@@ -70,7 +74,7 @@ func _on_Clickbox_input_event(_viewport, event, _shape_idx):
 
 
 func _on_CastTimer_timeout(ability: Ability, target) -> void:
-	stop_casting()
+	stop_cast()
 	execute_ability(ability, target)
 	
 	if ability.cooldown > 0:
@@ -102,6 +106,7 @@ func _on_ChannelStopwatch_timeout() -> void:
 
 
 func _on_AutoAttackTimer_timeout():
+	_is_basic_attack_ready = true
 	emit_signal("auto_attack_cooldown_ended")
 
 
@@ -185,7 +190,11 @@ func _ready() -> void:
 
 
 func _process(delta: float) -> void:
-	_move_along_path(delta)
+	if _state.has_method("update"):
+		var new_state = _state.update(self, delta)
+		
+		if new_state:
+			switch_state(new_state)
 		
 	if casting_index >= 0:
 		emit_signal("casting_progressed", $CastTimer.wait_time - $CastTimer.time_left)
@@ -195,12 +204,15 @@ func _process(delta: float) -> void:
 	if $AutoAttackTimer.time_left > 0:
 		emit_signal("auto_attack_cooldown_progressed", $AutoAttackTimer.time_left)
 
+
 remotesync func set_movement_path(movement_path: PoolVector2Array) -> void:
 	_movement_path = movement_path
 	if !is_moving():
 		emit_signal("path_finished")
 	else:
 		_play_animation(AnimationType.WALKING, _get_direction())
+		
+	emit_signal("path_set", _movement_path)
 
 
 func is_moving() -> bool:
@@ -234,7 +246,7 @@ remotesync func heal(value: int, source_name: String) -> void:
 remotesync func interrupt() -> void:
 	if casting_index >= 0:
 		print("Interrupted cast")
-		stop_casting()
+		stop_cast()
 		
 	if channelling_index >= 0:
 		print("Interrupted channel")
@@ -251,64 +263,7 @@ func auto_attack(target: Unit) -> void:
 		target.rpc("damage", attack_power_attr.value, name)
 
 
-func cast(ability: Ability, target) -> void:
-	if casting_index >= 0:
-		print("Already casting")
-		return
-	
-	if ability.is_on_cooldown():
-		print("Cannot cast ability while it is on cooldown")
-		return
-	
-	if "toggled" in ability && ability.toggled && ability.active:
-		ability.deactivate()
-		return
-	
-	if "cost" in ability && current_mana < ability.cost:
-		print("Insufficient mana to cast")
-		return
-		
-	if channelling_index >= 0:
-		stop_channelling()
-		
-	if "cast_time" in ability && ability.cast_time > 0:
-		$CastTimer.connect("timeout", self, "_on_CastTimer_timeout", [ability, target])
-		$CastTimer.start(ability.cast_time)
-		casting_index = ability.get_index()
-		emit_signal("casting_started", ability.name, ability.cast_time)
-		
-		if !ability.off_global_cooldown:
-			for a in get_node("Abilities").get_children():
-				if !a.off_global_cooldown:
-					a.try_start_cooldown(Constants.GLOBAL_COOLDOWN)
-	else:
-		execute_ability(ability, target)
-		
-		if !ability.off_global_cooldown:
-			for a in get_node("Abilities").get_children():
-				if a == ability:
-					var cooldown = a.cooldown if a.cooldown > Constants.GLOBAL_COOLDOWN else Constants.GLOBAL_COOLDOWN
-					a.try_start_cooldown(cooldown)
-				else:
-					if !a.off_global_cooldown:
-						a.try_start_cooldown(Constants.GLOBAL_COOLDOWN)
-
-
-func stop_casting() -> void:
-	if casting_index == -1:
-		print("Unit is not casting")
-		return
-		
-	var ability = get_node("Abilities").get_child(casting_index)
-	
-	print("Stopping cast")
-	casting_index = -1
-	$CastTimer.stop()
-	$CastTimer.disconnect("timeout", self, "_on_CastTimer_timeout")
-	emit_signal("casting_stopped", ability.name)
-
-
-func channel(ability: Ability) -> void:
+func _channel(ability: Ability) -> void:
 	if casting_index >= 0 || channelling_index >= 0:
 		print("Already casting")
 		
@@ -349,7 +304,7 @@ func execute_ability(ability: Ability, target) -> void:
 		_set_current_mana(current_mana - ability.cost)
 	
 	if "channel_duration" in ability:
-		channel(ability)
+		_channel(ability)
 
 
 remotesync func push_status_effect(status_effect_data: Dictionary) -> void:
@@ -409,58 +364,6 @@ func set_team(team: int) -> void:
 
 func get_type() -> String:
 	return Constants.ClassNames.UNIT
-
-
-func _move_along_path(delta: float) -> void:
-	if casting_index > -1 || channelling_index > -1:
-		return
-	
-	var distance_to_walk = delta * movement_speed_attr.value
-	
-	while distance_to_walk > 0 && _movement_path.size() > 0:
-		if queued_ability_data.size() == 2:
-			var ability = get_node("Abilities").get_child(queued_ability_data[0])
-			
-			if ability.target_type == Enums.TargetType.Unit && position.distance_to(queued_ability_data[1].position) <= ability.cast_range:
-				cast(ability, queued_ability_data[1])
-				if team == queued_ability_data[1].team:
-					set_movement_path([])
-					stop_pursuing()
-					
-				queued_ability_data = []
-								
-				return
-				
-			elif ability.target_type == Enums.TargetType.Position && position.distance_to(queued_ability_data[1]) <= ability.cast_range:
-				cast(ability, queued_ability_data[1])
-				queued_ability_data = []
-				set_movement_path([])
-				return
-				
-		if focus && auto_attack_enabled && position.distance_to(focus.position) <= basic_attack_range:
-			if $AutoAttackTimer.time_left == 0:
-				print("auto attack timer at 0")
-				auto_attack(focus)
-				$AutoAttackTimer.start(auto_attack_speed)
-				emit_signal("auto_attack_cooldown_started", auto_attack_speed)
-			return
-		
-		var distance_to_next_point = position.distance_to(_movement_path[0])
-		if distance_to_walk <= distance_to_next_point:
-			position += position.direction_to(_movement_path[0]) * distance_to_walk
-		else:
-			position = _movement_path[0]
-			_movement_path.remove(0)
-			
-		distance_to_walk -= distance_to_next_point
-		
-		var new_direction = _get_direction()
-		if new_direction > -1 && new_direction != direction:
-			direction = new_direction
-			_play_animation(AnimationType.WALKING, direction)
-		
-		if _movement_path.size() == 0:
-			emit_signal("path_finished")
 
 
 func _get_direction() -> int:
@@ -535,3 +438,150 @@ func _set_current_mana(value: int) -> void:
 		current_mana = mana_attr.value
 	
 	emit_signal("mana_changed", current_mana)
+
+########################
+# NEW API METHODS HERE #
+########################
+
+func move_to_point(point: Vector2) -> void:
+	if casting_index >= 0:
+		print("Interrupted cast")
+		stop_cast()
+		
+	if channelling_index >= 0:
+		print("Interrupted channel")
+		stop_channelling()
+		
+	switch_state(MovementState.new(point))
+
+
+func stop_moving() -> void:
+	switch_state(IdleState.new())
+
+
+func attack_target(target: Unit) -> void:
+	switch_state(AutoAttackState.new(target))
+
+
+func cast(ability: Ability, target) -> void:
+	var target_position = target if target is Vector2 else target.position
+	
+	if position.distance_to(target_position) <= ability.cast_range:
+		_start_cast(ability, target)
+	else:
+		switch_state(AbilityPursueState.new(ability, target))
+
+
+func stop_cast() -> void:
+	if casting_index == -1:
+		print("Unit is not casting")
+		return
+		
+	var ability = get_node("Abilities").get_child(casting_index)
+	
+	print("Stopping cast")
+	casting_index = -1
+	$CastTimer.stop()
+	$CastTimer.disconnect("timeout", self, "_on_CastTimer_timeout")
+	emit_signal("casting_stopped", ability.name)
+
+
+func _start_cast(ability: Ability, target) -> void:
+	if casting_index >= 0:
+		print("Already casting")
+		return
+	
+	if ability.is_on_cooldown():
+		print("Cannot cast ability while it is on cooldown")
+		return
+	
+	if "toggled" in ability && ability.toggled && ability.active:
+		ability.deactivate()
+		return
+	
+	if "cost" in ability && current_mana < ability.cost:
+		print("Insufficient mana to cast")
+		return
+		
+	if channelling_index > -1:
+		stop_channelling()
+		
+	if "cast_time" in ability && ability.cast_time > 0:
+		$CastTimer.connect("timeout", self, "_on_CastTimer_timeout", [ability, target])
+		$CastTimer.start(ability.cast_time)
+		casting_index = ability.get_index()
+		emit_signal("casting_started", ability.name, ability.cast_time)
+		
+		if !ability.off_global_cooldown:
+			for a in get_node("Abilities").get_children():
+				if !a.off_global_cooldown:
+					a.try_start_cooldown(Constants.GLOBAL_COOLDOWN)
+	else:
+		execute_ability(ability, target)
+		
+		if !ability.off_global_cooldown:
+			for a in get_node("Abilities").get_children():
+				if a == ability:
+					var cooldown = a.cooldown if a.cooldown > Constants.GLOBAL_COOLDOWN else Constants.GLOBAL_COOLDOWN
+					a.try_start_cooldown(cooldown)
+				else:
+					if !a.off_global_cooldown:
+						a.try_start_cooldown(Constants.GLOBAL_COOLDOWN)
+
+
+func switch_state(new_state) -> void:
+	if !new_state:
+		print("No new state provided")
+		
+	print("State switch: " + _state.state_name + " -> " + new_state.state_name)
+		
+	if _state.has_method("on_leave"):
+		_state.on_leave(self)
+		
+	_state = new_state
+	
+	if _state.has_method("on_enter"):
+		_state.on_enter(self)
+
+
+func _traverse_path(delta: float) -> void:
+	if casting_index > -1 || channelling_index > -1:
+		return
+	
+	var distance_to_walk = delta * movement_speed_attr.value
+	while distance_to_walk > 0 && _movement_path.size() > 0:
+		distance_to_walk = _step_through_path(distance_to_walk)
+
+
+func _step_through_path(distance_to_walk: int) -> int:
+	var distance_to_next_point = position.distance_to(_movement_path[0])
+	if distance_to_walk <= distance_to_next_point:
+		position += position.direction_to(_movement_path[0]) * distance_to_walk
+	else:
+		position = _movement_path[0]
+		_movement_path.remove(0)
+		
+	distance_to_walk -= distance_to_next_point
+	
+	var new_direction = _get_direction()
+	if new_direction > -1 && new_direction != direction:
+		direction = new_direction
+		_play_animation(AnimationType.WALKING, direction)
+	
+	if _movement_path.size() == 0:
+		emit_signal("path_finished")
+		
+	return distance_to_walk
+
+
+func basic_attack(target: Unit) -> void:
+	if get_tree().is_network_server():
+		target.rpc("damage", attack_power_attr.value, name)
+		
+	_is_basic_attack_ready = false
+	$AutoAttackTimer.start(auto_attack_speed)
+	emit_signal("auto_attack_cooldown_started", auto_attack_speed)
+		
+
+func is_basic_attack_off_cooldown() -> bool:
+	return _is_basic_attack_ready
