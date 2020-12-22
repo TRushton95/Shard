@@ -205,7 +205,7 @@ func _process(delta: float) -> void:
 		emit_signal("auto_attack_cooldown_progressed", $AutoAttackTimer.time_left)
 
 
-remotesync func set_movement_path(movement_path: PoolVector2Array) -> void:
+func set_movement_path(movement_path: PoolVector2Array) -> void:
 	_movement_path = movement_path
 	if !is_moving():
 		emit_signal("path_finished")
@@ -251,16 +251,6 @@ remotesync func interrupt() -> void:
 	if channelling_index >= 0:
 		print("Interrupted channel")
 		stop_channelling()
-
-
-remotesync func stop_pursuing() -> void:
-	auto_attack_enabled = false
-	$FollowPathingTimer.stop()
-
-
-func auto_attack(target: Unit) -> void:
-	if get_tree().is_network_server():
-		target.rpc("damage", attack_power_attr.value, name)
 
 
 func _channel(ability: Ability) -> void:
@@ -334,13 +324,6 @@ remotesync func remove_status_effect(status_effect_name: String) -> void:
 	$StatusEffects.remove_child(status_effect)
 	emit_signal("status_effect_removed", status_effect, index)
 	status_effect.queue_free()
-
-
-func queue_ability(ability_index, target) -> void:
-	if ability_index == -1 || !target:
-		queued_ability_data = []
-	else:
-		queued_ability_data = [ ability_index, target ]
 
 
 # TODO: Debug method
