@@ -2,7 +2,7 @@ extends Node
 
 var _nav_instance
 
-func set_nav_instance(nav_instance: NavigationPolygonInstance) -> void:
+func set_nav_instance(nav_instance: Navigation2D) -> void:
 	_nav_instance = nav_instance
 
 

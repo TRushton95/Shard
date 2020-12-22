@@ -5,6 +5,7 @@ var unit_scene = load("res://Gameplay/Entities/Unit/Unit.tscn")
 var floating_text_scene = load("res://Gameplay/UI/FloatingText/FloatingText.tscn")
 var action_button_scene = load("res://Gameplay/UI/ActionButton/ActionButton.tscn")
 
+var player : Unit
 var player_name : String
 var selected_unit : Unit
 var selected_ability : Ability
@@ -20,7 +21,7 @@ func _on_ability_button_pressed(button: ActionButton) -> void:
 
 func _on_ability_button_mouse_entered(button: ActionButton) -> void:
 	if button.action_lookup.source == Enums.ActionSource.Ability:
-		var ability = get_node(player_name + "/Abilities").get_child(button.action_lookup.index)
+		var ability = player.get_node("Abilities").get_child(button.action_lookup.index)
 		
 		$CanvasLayer/Tooltip.set_name(ability.name)
 		$CanvasLayer/Tooltip.set_range(100)
@@ -54,7 +55,7 @@ func _on_Bag_button_dropped_in_slot(button: ActionButton, slot: ButtonSlot) -> v
 			var from_index = $CanvasLayer/Bag.get_button_index(button)
 			var to_index = slot.get_index()
 			$CanvasLayer/Bag.move(from_index, to_index)
-			get_node(player_name + "/Inventory").move(from_index, to_index)
+			player.get_node("Inventory").move(from_index, to_index)
 
 
 func _on_Bag_button_dropped_on_button(dropped_button: ActionButton, target_button: ActionButton) -> void:
@@ -63,7 +64,7 @@ func _on_Bag_button_dropped_on_button(dropped_button: ActionButton, target_butto
 			var from_index = $CanvasLayer/Bag.get_button_index(dropped_button)
 			var to_index = $CanvasLayer/Bag.get_button_index(target_button)
 			$CanvasLayer/Bag.move(from_index, to_index)
-			get_node(player_name + "/Inventory").move(from_index, to_index)
+			player.get_node("Inventory").move(from_index, to_index)
 
 
 func _on_ActionBar_button_dropped_in_slot(button: ActionButton, slot: ButtonSlot) -> void:
@@ -94,9 +95,8 @@ func _on_unit_left_clicked(unit: Unit) -> void:
 		if !_is_team_target_valid(selected_ability, unit):
 			print("Invalid target")
 			return
-		
-		rpc("_set_unit_queued_ability_data", player_name, unit.name, selected_ability.get_index())
-		_pursue_target(unit.name)
+			
+		rpc("_unit_cast", player_name, selected_ability.get_index(), unit.name)
 		select_unit(unit)
 		select_ability(null)
 	else:
@@ -104,27 +104,17 @@ func _on_unit_left_clicked(unit: Unit) -> void:
 
 
 func _on_unit_right_clicked(unit: Unit) -> void:
-	var player = get_node(player_name)
-	
 	if unit != player && unit.team != player.team:
-		_pursue_target(unit.name)
+		rpc("_unit_attack_target", player_name, unit.name)
+
+
+func _on_player_path_set(path: PoolVector2Array) -> void:
+	$PathDebug.points = path
+	$PathDebug.show()
 
 
 func _on_player_path_finished() -> void:
 	$PathDebug.hide()
-
-
-func _on_unit_follow_path_outdated(unit: Unit) -> void:
-	var player = get_node(player_name) # TODO: Should maybe be using is_networking_master() for this?
-	
-	if unit == player:
-		var M := 0.0004 # M in a linear equation to calculate the follow path invalidation time based on distance, may need fine tuning as gameplay emerges
-		var PATH_INVALIDATE_TIME_MINIMUM := 0.2 # C in the linear equation
-		var distance = player.position.distance_to(player.focus.position)
-		var invalidate_time = (M * distance) + PATH_INVALIDATE_TIME_MINIMUM # Time until path is next invalidated
-		
-		_set_player_movement_path(player.focus.position)
-		player.get_node("FollowPathingTimer").start(invalidate_time)
 
 
 #DEBUG FOLLOW PATHING PURPOSES ONLY
@@ -140,7 +130,7 @@ func _on_enemy_follow_path_outdated(unit: Unit) -> void:
 
 
 func _on_unit_status_effect_applied(status_effect: Status, unit: Unit) -> void:
-	if unit == get_node(player_name):
+	if unit == player:
 		$CanvasLayer/StatusEffectBar.add_status_effect(status_effect)
 	
 	if unit == selected_unit:
@@ -148,7 +138,7 @@ func _on_unit_status_effect_applied(status_effect: Status, unit: Unit) -> void:
 
 
 func _on_unit_status_effect_removed(_status_effect: Status, index: int, unit: Unit) -> void:
-	if unit == get_node(player_name):
+	if unit == player:
 		$CanvasLayer/StatusEffectBar.remove_status_effect(index)
 	
 	if unit == selected_unit:
@@ -159,7 +149,7 @@ func _on_player_health_attr_changed(value: int) -> void:
 	$CanvasLayer/CharacterPanel.set_health_attr(value)
 	$CanvasLayer/ActionBar.set_max_health(value)
 	
-	if selected_unit == get_node(player_name):
+	if selected_unit == player:
 		$CanvasLayer/TargetFrame.set_max_health(value)
 
 
@@ -167,7 +157,7 @@ func _on_player_mana_attr_changed(value: int) -> void:
 	$CanvasLayer/CharacterPanel.set_mana_attr(value)
 	$CanvasLayer/ActionBar.set_max_mana(value)
 	
-	if selected_unit == get_node(player_name):
+	if selected_unit == player:
 		$CanvasLayer/TargetFrame.set_max_mana(value)
 
 
@@ -191,7 +181,7 @@ func _on_unit_damage_received(value: int, unit: Unit) -> void:
 	if unit == selected_unit:
 		$CanvasLayer/TargetFrame.set_current_health(unit.current_health)
 		
-	if unit == get_node(player_name):
+	if unit == player:
 		$CanvasLayer/ActionBar.set_current_health(unit.current_health)
 
 
@@ -203,7 +193,7 @@ func _on_unit_healing_received(value: int, unit: Unit) -> void:
 	if unit == selected_unit:
 		$CanvasLayer/TargetFrame.set_current_health(unit.current_health)
 		
-	if unit == get_node(player_name):
+	if unit == player:
 		$CanvasLayer/ActionBar.set_current_health(unit.current_health)
 
 
@@ -211,7 +201,7 @@ func _on_unit_mana_changed(_value: int, unit: Unit) -> void:
 	if unit == selected_unit:
 		$CanvasLayer/TargetFrame.set_current_mana(unit.current_mana)
 	
-	if unit == get_node(player_name):
+	if unit == player:
 		$CanvasLayer/ActionBar.set_current_mana(unit.current_mana)
 			
 		for ability in unit.get_node("Abilities").get_children():
@@ -220,14 +210,7 @@ func _on_unit_mana_changed(_value: int, unit: Unit) -> void:
 
 
 func _on_unit_casting_started(ability_name: String, duration: float, unit: Unit) -> void:
-	var player = get_node(player_name)
-	
 	if unit == player:
-		if player.is_moving():
-			_remove_player_movement_path(false)
-		if player.focus:
-			player.rpc("stop_pursuing")
-		
 		$CanvasLayer/CastBar.initialise(ability_name, duration)
 		$CanvasLayer/CastBar.show()
 		
@@ -236,16 +219,11 @@ func _on_unit_casting_started(ability_name: String, duration: float, unit: Unit)
 
 
 func _on_unit_casting_progressed(time_elapsed: float, unit: Unit) -> void:
-	if unit == get_node(player_name):
+	if unit == player:
 		$CanvasLayer/CastBar.set_value(time_elapsed)
 
 
 func _on_unit_casting_stopped(ability_name: String, unit: Unit) -> void:
-	var player = get_node(player_name)
-	
-	if unit == player && unit.focus && unit.team != unit.focus.team:
-		_pursue_target(unit.focus.name)
-	
 	if unit == player:
 		$CanvasLayer/CastBar.hide()
 		
@@ -254,7 +232,7 @@ func _on_unit_casting_stopped(ability_name: String, unit: Unit) -> void:
 
 
 func _on_unit_channelling_started(ability_name: String, channel_duration: float, unit: Unit) -> void:
-	if unit == get_node(player_name):
+	if unit == player:
 		$CanvasLayer/CastBar.initialise(ability_name, channel_duration)
 		$CanvasLayer/CastBar.show()
 		
@@ -263,12 +241,12 @@ func _on_unit_channelling_started(ability_name: String, channel_duration: float,
 
 
 func _on_unit_channelling_progressed(time_remaining: float, unit: Unit) -> void:
-	if unit == get_node(player_name):
+	if unit == player:
 		$CanvasLayer/CastBar.set_value(time_remaining)
 
 
 func _on_unit_channelling_stopped(ability_name: String, unit: Unit) -> void:
-	if unit == get_node(player_name):
+	if unit == player:
 		$CanvasLayer/CastBar.hide()
 		
 		for action_button in _get_action_buttons_by_action_name(ability_name):
@@ -306,17 +284,13 @@ func _on_ability_cooldown_ended(ability: Ability) -> void:
 
 
 func _on_unit_team_changed(unit: Unit) -> void:
-	if unit.team == get_node(player_name).team:
+	if unit.team == player.team:
 		unit.set_health_bar_color(Color.green)
 	else:
 		unit.set_health_bar_color(Color.red)
 
 
-var mana_modifier = Modifier.new(5, Enums.ModifierType.Additive)
-
 func _process(_delta: float) -> void:
-	var player = get_node(player_name)
-	
 	# Test commands for testing whatever
 	if Input.is_action_just_pressed("test_right"):
 		player.get_node("Inventory").pop_item(0)
@@ -354,7 +328,7 @@ func _process(_delta: float) -> void:
 		$CanvasLayer/Bag.visible = !$CanvasLayer/Bag.visible
 	
 	if Input.is_action_just_pressed("force_attack"):
-		var auto_attack_ability = get_node(player_name + "/Abilities/AutoAttack")
+		var auto_attack_ability = player.get_node("Abilities/AutoAttack")
 		process_ability_press(auto_attack_ability)
 	
 	var button_index = -1
@@ -385,10 +359,8 @@ func _process(_delta: float) -> void:
 	if Input.is_action_just_pressed("stop"):
 		if player.casting_index >= 0 || player.channelling_index >= 0:
 			player.rpc("interrupt")
-		if player.is_moving():
-			player.rpc("set_movement_path", [])
-		if player.focus:
-			player.rpc("stop_pursuing")
+		rpc("_unit_stop_cast", player_name)
+		rpc("_unit_stop_moving", player_name)
 			
 	if Input.is_action_just_pressed("test_interrupt"):
 		player.rpc("interrupt")
@@ -405,8 +377,6 @@ func _process(_delta: float) -> void:
 				print("Target type not set on casted ability " + ability.name)
 				return
 				
-			# This method can be moved back here but needs to map key inputs properly and expose in a way
-			# that action bar button press can hook into as well
 			process_ability_press(ability)
 		
 	for status in player.get_node("StatusEffects").get_children():
@@ -425,10 +395,10 @@ func find_action(action_lookup: ActionLookup) -> Ability:
 	var result
 	
 	if action_lookup.source == Enums.ActionSource.Ability:
-		var ability = get_node(player_name + "/Abilities").get_child(action_lookup.index)
+		var ability = player.get_node("Abilities").get_child(action_lookup.index)
 		result = ability
 	elif action_lookup.source == Enums.ActionSource.Inventory:
-		var item = get_node(player_name + "/Inventory").get_item(action_lookup.index)
+		var item = player.get_node("Inventory").get_item(action_lookup.index)
 		result = item.get_ability()
 		
 	return result
@@ -441,15 +411,14 @@ func process_ability_press(ability: Ability):
 	
 	match ability.target_type:
 		Enums.TargetType.Self:
-				rpc("cast_ability_on_unit", ability.get_index(), player_name, player_name)
+				rpc("_unit_cast", player_name, ability.get_index(), player_name)
 		Enums.TargetType.Unit:
 			if selected_unit && ability.autocast_on_target:
 				if !_is_team_target_valid(ability, selected_unit):
 					print("Invalid target")
 					return
 				
-				_pursue_target(selected_unit.name)
-				rpc("_set_unit_queued_ability_data", player_name, selected_unit.name, ability.get_index()) # FIXME: For items, this is getting the index of the ability on the item, not the player - so player is using incorrect ability
+				rpc("_unit_cast", player_name, ability.get_index(), selected_unit.name)
 				select_ability(null)
 			else:
 				select_ability(ability)
@@ -463,39 +432,17 @@ func process_ability_press(ability: Ability):
 
 func _unhandled_input(event) -> void:
 	if event is InputEventMouseButton && event.pressed:
-		var player = get_node(player_name)
-		
 		if event.button_index == BUTTON_RIGHT:
+			rpc("_unit_move_to_point", player_name, get_global_mouse_position())
 			if selected_ability:
 				select_ability(null)
-				
-			player.rpc("interrupt")
-			
-			_set_player_movement_path(get_global_mouse_position())
-			player.get_node("FollowPathingTimer").stop()
-			rpc("_set_unit_focus", player_name, "")
-			player.rset("auto_attack_enabled", false)
-			rpc("_set_unit_queued_ability_data", player_name, null, -1)
 			
 		elif event.button_index == BUTTON_LEFT:
 			if selected_ability && selected_ability.target_type == Enums.TargetType.Position:
-				_set_player_movement_path(get_global_mouse_position())
-				rpc("_set_unit_queued_ability_data", player_name, get_global_mouse_position(), selected_ability.get_index())
+				rpc("_unit_cast", player_name, selected_ability.get_index(), get_global_mouse_position())
 				select_ability(null)
 			else:
 				select_unit(null)
-
-
-remotesync func cast_ability_on_unit(ability_index: int, caster_name: String, target_name: String) -> void:
-	var caster = get_node(caster_name)
-	
-	var ability = caster.get_node("Abilities").get_child(ability_index)
-	
-	if !has_node(target_name):
-		print("No target with name: " + target_name)
-		
-	var target = get_node(target_name)
-	caster.cast(ability, target)
 
 
 func setup(player_name: String, player_lookup: Dictionary) -> void:
@@ -523,16 +470,15 @@ func setup(player_name: String, player_lookup: Dictionary) -> void:
 	player_list.sort()
 	
 	var spawn_index = 0
-	for player in player_list:
+	for player_list_entry in player_list:
 		var unit = unit_scene.instance()
-		unit.set_name(player)
+		unit.set_name(player_list_entry)
 		unit.position = $PlayerSpawnPoints.get_node(str(spawn_index)).position
 		add_child(unit)
 		unit.team = Enums.Team.Ally
 		unit.set_health_bar_color(Color.green)
 		unit.connect("left_clicked", self, "_on_unit_left_clicked", [unit])
 		unit.connect("right_clicked", self, "_on_unit_right_clicked", [unit])
-		unit.connect("follow_path_outdated", self, "_on_unit_follow_path_outdated", [unit])
 		unit.connect("damage_received", self, "_on_unit_damage_received", [unit])
 		unit.connect("healing_received", self, "_on_unit_healing_received", [unit])
 		unit.connect("mana_changed", self, "_on_unit_mana_changed", [unit])
@@ -546,7 +492,7 @@ func setup(player_name: String, player_lookup: Dictionary) -> void:
 		unit.connect("status_effect_removed", self, "_on_unit_status_effect_removed", [unit])
 		unit.connect("team_changed", self, "_on_unit_team_changed", [unit])
 		
-		if player == player_name:
+		if player_list_entry == player_name:
 			unit.connect("path_finished", self, "_on_player_path_finished")
 			unit.connect("health_attr_changed", self, "_on_player_health_attr_changed")
 			unit.connect("mana_attr_changed", self, "_on_player_mana_attr_changed")
@@ -559,6 +505,9 @@ func setup(player_name: String, player_lookup: Dictionary) -> void:
 			unit.connect("ability_cooldown_started", self, "_on_ability_cooldown_started")
 			unit.connect("ability_cooldown_ended", self, "_on_ability_cooldown_ended")
 			unit.connect("ability_cooldown_progressed", self, "_on_ability_cooldown_progressed")
+			unit.connect("path_set", self, "_on_player_path_set")
+			
+			player = unit
 			
 			var camera = Camera2D.new()
 			camera.current = true
@@ -637,7 +586,7 @@ func select_ability(ability: Ability) -> void:
 		Input.set_custom_mouse_cursor(null)
 		return
 		
-	if get_node(player_name).current_mana < ability.cost:
+	if player.current_mana < ability.cost:
 		print("Insufficient mana")
 		return
 		
@@ -650,20 +599,6 @@ func select_ability(ability: Ability) -> void:
 		action_button.lighten()
 		
 	Input.set_custom_mouse_cursor(rainbow_cursor)
-
-
-remotesync func _set_unit_focus(unit_name: String, focus_name: String) -> void:
-	var unit = get_node(unit_name)
-	var focus = get_node(focus_name) if focus_name else null
-	
-	unit.focus = focus
-
-
-remotesync func _set_unit_queued_ability_data(unit_name: String, target, ability_index: int) -> void:
-	var unit = get_node(unit_name)
-	var adjusted_target = get_node(target) if target is String else target
-	
-	unit.queue_ability(ability_index, adjusted_target)
 
 
 # TODO: Does this actually need a name?
@@ -683,16 +618,6 @@ func _create_action_button(action_name: String, icon: Texture, action_source: in
 	return action_button
 
 
-func _pursue_target(target_name: String) -> void:
-	_set_player_movement_path(get_node(target_name).position)
-	rpc("_set_unit_focus", player_name, target_name)
-	var player = get_node(player_name)
-	player.get_node("FollowPathingTimer").start(1.0)
-	
-	if get_node(target_name).team != player.team:
-		player.rset("auto_attack_enabled", true)
-
-
 func _get_action_buttons_by_action_name(ability_name: String) -> Array:
 	var result = []
 	
@@ -703,26 +628,34 @@ func _get_action_buttons_by_action_name(ability_name: String) -> Array:
 	return result
 
 
-func _remove_player_movement_path(remote_call := true) -> void:
-	$PathDebug.points = []
-	$PathDebug.hide()
-	
-	if remote_call:
-		get_node(player_name).rpc("set_movement_path", [])
-	else:
-		get_node(player_name).set_movement_path([])
-
-
-func _set_player_movement_path(target_position: Vector2) -> void:
-	var player = get_node(player_name)
-	
-	var movement_path = $Navigation2D.get_simple_path(player.position, target_position)
-	$PathDebug.points = movement_path
-	$PathDebug.show()
-	movement_path.remove(0) # First point is starting point
-	player.rpc("set_movement_path", movement_path)
-
-
 func _is_team_target_valid(ability: Ability, target) -> bool:
 	# If ability targets a unit and the target is a unit of a different team to the ability target team
 	return !(typeof(target) == TYPE_OBJECT && target.get_type() == "Unit" && ability.target_type == Enums.TargetType.Unit && ability.target_team != target.team)
+
+
+remotesync func _unit_cast(unit_name: String, ability_index: int, dirty_target) -> void:
+	if !dirty_target:
+		print("No target provided")
+		
+	var clean_target = dirty_target if dirty_target is Vector2 else get_node(dirty_target)
+	
+	var unit = get_node(unit_name)
+	var ability = unit.get_node("Abilities").get_child(ability_index)
+	unit.cast(ability, clean_target)
+
+
+remotesync func _unit_move_to_point(unit_name: String, position: Vector2) -> void:
+	get_node(unit_name).move_to_point(position)
+
+
+remotesync func _unit_stop_moving(unit_name: String) -> void:
+	get_node(unit_name).stop_moving()
+
+
+remotesync func _unit_attack_target(unit_name: String, target_name: String) -> void:
+	get_node(unit_name).attack_target(get_node(target_name))
+
+
+remotesync func _unit_stop_cast(unit_name: String) -> void:
+	get_node(unit_name).stop_cast()
+
