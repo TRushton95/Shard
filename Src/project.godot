@@ -14,11 +14,6 @@ _global_script_classes=[ {
 "language": "GDScript",
 "path": "res://Gameplay/AbilitySystem/Abilities/Ability.gd"
 }, {
-"base": "Node",
-"class": "AbilityPursueState",
-"language": "GDScript",
-"path": "res://Gameplay/Entities/Unit/NavigationStates/AbilityPursueState.gd"
-}, {
 "base": "TextureButton",
 "class": "ActionButton",
 "language": "GDScript",
@@ -30,9 +25,9 @@ _global_script_classes=[ {
 "path": "res://Gameplay/DataStructures/ActionLookup.gd"
 }, {
 "base": "Node",
-"class": "AutoAttackState",
+"class": "AttackingCombatState",
 "language": "GDScript",
-"path": "res://Gameplay/Entities/Unit/NavigationStates/AutoAttackState.gd"
+"path": "res://Gameplay/Entities/Unit/CombatStates/AttackingCombatState.gd"
 }, {
 "base": "ColorRect",
 "class": "ButtonSlot",
@@ -85,6 +80,11 @@ _global_script_classes=[ {
 "path": "res://Gameplay/Entities/Abilities/Projectile/Projectile.gd"
 }, {
 "base": "Node",
+"class": "PursueState",
+"language": "GDScript",
+"path": "res://Gameplay/Entities/Unit/NavigationStates/PursueState.gd"
+}, {
+"base": "Node",
 "class": "Status",
 "language": "GDScript",
 "path": "res://Gameplay/AbilitySystem/Status/Status.gd"
@@ -106,10 +106,9 @@ _global_script_classes=[ {
 } ]
 _global_script_class_icons={
 "Ability": "",
-"AbilityPursueState": "",
 "ActionButton": "",
 "ActionLookup": "",
-"AutoAttackState": "",
+"AttackingCombatState": "",
 "ButtonSlot": "",
 "CastingCombatState": "",
 "ChannellingCombatState": "",
@@ -120,6 +119,7 @@ _global_script_class_icons={
 "Modifier": "",
 "MovementState": "",
 "Projectile": "",
+"PursueState": "",
 "Status": "",
 "Stopwatch": "",
 "Unit": "",

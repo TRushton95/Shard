@@ -18,6 +18,7 @@ var icon = load("res://Gameplay/Entities/Unit/elementalist_icon.png")
 var moving := false
 var is_casting := false
 var is_channelling := false
+var is_basic_attacking := false
 
 var _navigation_state = IdleNavigationState.new()
 var _combat_state = IdleCombatState.new()
@@ -396,15 +397,20 @@ func move_to_point(point: Vector2) -> void:
 		print("Interrupted")
 		switch_combat_state(IdleCombatState.new())
 		
+	if is_basic_attacking:
+		switch_combat_state(IdleCombatState.new())
+		
 	switch_navigation_state(MovementState.new(point))
 
 
 func stop_moving() -> void:
 	switch_navigation_state(IdleNavigationState.new())
+	switch_combat_state(IdleCombatState.new())
 
 
 func attack_target(target: Unit) -> void:
-	switch_navigation_state(AutoAttackState.new(target))
+	switch_combat_state(AttackingCombatState.new(target))
+	switch_navigation_state(PursueState.new(target, basic_attack_range, false))
 
 
 func cast(ability: Ability, target) -> void:
@@ -412,7 +418,7 @@ func cast(ability: Ability, target) -> void:
 	
 	switch_combat_state(CastingCombatState.new(target, ability))
 	if position.distance_to(target_position) > ability.cast_range:
-		switch_navigation_state(AbilityPursueState.new(ability, target))
+		switch_navigation_state(PursueState.new(target, ability.cast_range, true))
 
 
 func stop_cast() -> void:
