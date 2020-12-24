@@ -1,11 +1,10 @@
-[gd_scene load_steps=26 format=2]
+[gd_scene load_steps=25 format=2]
 
 [ext_resource path="res://Gameplay/Entities/Unit/Unit.gd" type="Script" id=1]
 [ext_resource path="res://Gameplay/Entities/Unit/elementalist.png" type="Texture" id=2]
 [ext_resource path="res://Gameplay/AbilitySystem/Abilities/Fireball/Fireball.tscn" type="PackedScene" id=3]
 [ext_resource path="res://Gameplay/AbilitySystem/Abilities/Consecration/Consecration.tscn" type="PackedScene" id=4]
 [ext_resource path="res://Gameplay/AbilitySystem/Abilities/HealingStream/HealingStream.tscn" type="PackedScene" id=5]
-[ext_resource path="res://Gameplay/Utility/Stopwatch.tscn" type="PackedScene" id=6]
 [ext_resource path="res://Gameplay/UI/SmallHealthBar/SmallHealthBar.tscn" type="PackedScene" id=7]
 [ext_resource path="res://Gameplay/AbilitySystem/Abilities/AstralGuidance/AstralGuidance.tscn" type="PackedScene" id=8]
 [ext_resource path="res://Gameplay/UI/SmallHealthBar/small_white_health_bar.png" type="Texture" id=9]
@@ -259,10 +258,6 @@ shape = SubResource( 14 )
 [node name="StatusEffects" type="Node" parent="."]
 
 [node name="Auras" type="Node" parent="."]
-
-[node name="CastTimer" type="Timer" parent="."]
-
-[node name="ChannelStopwatch" parent="." instance=ExtResource( 6 )]
 
 [node name="FollowPathingTimer" type="Timer" parent="."]
 

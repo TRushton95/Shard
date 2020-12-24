@@ -18,6 +18,9 @@ func _init(destination: Vector2) -> void:
 func on_enter(unit) -> void:
 	unit.set_movement_path(NavigationHelper.get_simple_path(unit.position, _destination))
 	unit.connect("path_finished", self, "on_unit_path_finished")
+	
+	if !unit.is_casting && !unit.is_channelling:
+		unit._play_animation(unit.AnimationType.WALKING, unit.direction)
 
 
 func on_leave(unit) -> void:
@@ -33,4 +36,4 @@ func update(unit, delta: float):
 		distance_to_walk = unit._step_through_path(distance_to_walk) # FIXME: Don't like making unit move this way
 	
 	if _path_finished:
-		return IdleState.new()
+		return IdleNavigationState.new()

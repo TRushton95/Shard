@@ -16,7 +16,11 @@ var team := -1
 var direction := 0
 var icon = load("res://Gameplay/Entities/Unit/elementalist_icon.png")
 var moving := false
-var _state = IdleState.new()
+var is_casting := false
+var is_channelling := false
+
+var _navigation_state = IdleNavigationState.new()
+var _combat_state = IdleCombatState.new()
 
 enum State { IDLE, MOVING, PURSUING }
 enum Direction { DOWN, LEFT, RIGHT, UP }
@@ -73,36 +77,12 @@ func _on_Clickbox_input_event(_viewport, event, _shape_idx):
 			emit_signal("right_clicked")
 
 
-func _on_CastTimer_timeout(ability: Ability, target) -> void:
-	stop_cast()
-	execute_ability(ability, target)
-	
-	if ability.cooldown > 0:
-		ability.try_start_cooldown(ability.cooldown)
-
-
 func _on_FollowPathingTimer_timeout() -> void:
 	emit_signal("follow_path_outdated")
 
 
 func _on_status_expired(status_effect) -> void:
 	remove_status_effect(status_effect.name)
-
-
-func _on_ChannelStopwatch_tick(ability: Ability) -> void:
-	if "channel_cost" in ability:
-		if current_mana < ability.channel_cost:
-			print("Insufficient mana to continue channel")
-			stop_channelling()
-			return
-		else:
-			_set_current_mana(current_mana - ability.channel_cost)
-			
-	emit_signal("channelling_ticked")
-
-
-func _on_ChannelStopwatch_timeout() -> void:
-	stop_channelling()
 
 
 func _on_AutoAttackTimer_timeout():
@@ -154,6 +134,30 @@ func _on_Unit_casting_started(ability_name: String, duration: float) -> void:
 #	_play_animation(AnimationType.CASTING, _get_direction_to_point(target_position))
 
 
+func _on_casting_started(duration) -> void:
+	emit_signal("casting_started", "test_ability_name", duration)
+
+
+func _on_casting_progressed(duration: float) -> void:
+	emit_signal("casting_progressed", duration)
+
+
+func _on_casting_stopped() -> void:
+	emit_signal("casting_stopped", "test_ability_name")
+
+
+func _on_channelling_started(duration) -> void:
+	emit_signal("channelling_started", "test_channel_name", duration)
+
+
+func _on_channelling_progressed(duration: float) -> void:
+	emit_signal("channelling_progressed", duration)
+
+
+func _on_channelling_stopped() -> void:
+	emit_signal("channelling_stopped", "test_channel_name")
+
+
 # End of Stat change handlers
 
 
@@ -184,7 +188,6 @@ func _ready() -> void:
 	
 	$UnitProfile/VBoxContainer/SmallHealthBar.max_value = current_health
 	$UnitProfile/VBoxContainer/SmallHealthBar.value = current_health
-	$CastTimer.one_shot = false
 	$FollowPathingTimer.one_shot = true
 	$AutoAttackTimer.one_shot = true
 	
@@ -192,17 +195,21 @@ func _ready() -> void:
 
 
 func _process(delta: float) -> void:
-	if _state.has_method("update"):
-		var new_state = _state.update(self, delta)
+	if _navigation_state.has_method("update"):
+		var new_navigation_state = _navigation_state.update(self, delta)
+		if new_navigation_state:
+			switch_navigation_state(new_navigation_state)
+			
+	if _combat_state.has_method("update"):
+		var new_combat_state = _combat_state.update(self, delta)
+		if new_combat_state:
+			switch_combat_state(new_combat_state)
 		
-		if new_state:
-			switch_state(new_state)
 		
-		
-	if casting_index >= 0:
-		emit_signal("casting_progressed", $CastTimer.wait_time - $CastTimer.time_left)
-	elif channelling_index >= 0:
-		emit_signal("channelling_progressed", $ChannelStopwatch.get_time_remaining())
+#	if casting_index >= 0:
+#		emit_signal("casting_progressed", $CastTimer.wait_time - $CastTimer.time_left)
+#	elif channelling_index >= 0:
+#		emit_signal("channelling_progressed", $ChannelStopwatch.get_time_remaining())
 		
 	if $AutoAttackTimer.time_left > 0:
 		emit_signal("auto_attack_cooldown_progressed", $AutoAttackTimer.time_left)
@@ -247,57 +254,17 @@ remotesync func heal(value: int, source_name: String) -> void:
 
 
 remotesync func interrupt() -> void:
-	if casting_index >= 0:
-		print("Interrupted cast")
-		stop_cast()
+	if is_casting || is_channelling:
+		print("Interrupted")
+		switch_combat_state(IdleCombatState.new())
 		
-	if channelling_index >= 0:
-		print("Interrupted channel")
-		stop_channelling()
-
-
-func _channel(ability: Ability) -> void:
-	if casting_index >= 0 || channelling_index >= 0:
-		print("Already casting")
-		
-	if !"channel_duration" in ability || ability.channel_duration <= 0:
-		print("Invalid channel_duration property on ability " + ability.Name)
-			
-	$ChannelStopwatch.setup(ability.channel_duration, ability.tick_rate)
-	$ChannelStopwatch.connect("tick", self, "_on_ChannelStopwatch_tick", [ability])
-	$ChannelStopwatch.connect("timeout", self, "_on_ChannelStopwatch_timeout")
-	channelling_index = ability.get_index()
-	emit_signal("channelling_started", ability.name, ability.channel_duration)
-	
-	$ChannelStopwatch.start()
-
-
-func stop_channelling() -> void:
-	if channelling_index == -1:
-		print("Cannot stop channelling: unit is not channelling already")
-		return
-		
-	print("Stopping channel")
-	var ability = get_node("Abilities").get_child(channelling_index)
-	channelling_index = -1
-	$ChannelStopwatch.stop()
-	$ChannelStopwatch.disconnect("tick", self, "_on_ChannelStopwatch_tick")
-	$ChannelStopwatch.disconnect("timeout", self, "_on_ChannelStopwatch_timeout")
-	emit_signal("channelling_stopped", ability.name)
-
-
-func execute_ability(ability: Ability, target) -> void:
-	if "cost" in ability && current_mana < ability.cost:
-		print("Insufficient mana to execute")
-		return
-		
-	ability.execute(target, self)
-	
-	if "cost" in ability:
-		_set_current_mana(current_mana - ability.cost)
-	
-	if "channel_duration" in ability:
-		_channel(ability)
+#	if casting_index >= 0:
+#		print("Interrupted cast")
+#		stop_cast()
+#
+#	if channelling_index >= 0:
+#		print("Interrupted channel")
+#		stop_channelling()
 
 
 remotesync func push_status_effect(status_effect_data: Dictionary) -> void:
@@ -425,32 +392,27 @@ func _set_current_mana(value: int) -> void:
 ########################
 
 func move_to_point(point: Vector2) -> void:
-	if casting_index >= 0:
-		print("Interrupted cast")
-		stop_cast()
+	if is_casting || is_channelling:
+		print("Interrupted")
+		switch_combat_state(IdleCombatState.new())
 		
-	if channelling_index >= 0:
-		print("Interrupted channel")
-		stop_channelling()
-		
-	switch_state(MovementState.new(point))
+	switch_navigation_state(MovementState.new(point))
 
 
 func stop_moving() -> void:
-	switch_state(IdleState.new())
+	switch_navigation_state(IdleNavigationState.new())
 
 
 func attack_target(target: Unit) -> void:
-	switch_state(AutoAttackState.new(target))
+	switch_navigation_state(AutoAttackState.new(target))
 
 
 func cast(ability: Ability, target) -> void:
 	var target_position = target if target is Vector2 else target.position
 	
-	if position.distance_to(target_position) <= ability.cast_range:
-		_start_cast(ability, target)
-	else:
-		switch_state(AbilityPursueState.new(ability, target))
+	switch_combat_state(CastingCombatState.new(target, ability))
+	if position.distance_to(target_position) > ability.cast_range:
+		switch_navigation_state(AbilityPursueState.new(ability, target))
 
 
 func stop_cast() -> void:
@@ -462,67 +424,80 @@ func stop_cast() -> void:
 	
 	print("Stopping cast")
 	casting_index = -1
-	$CastTimer.stop()
-	$CastTimer.disconnect("timeout", self, "_on_CastTimer_timeout")
 	emit_signal("casting_stopped", ability.name)
 
 
-func _start_cast(ability: Ability, target) -> void:
-	if casting_index >= 0:
-		print("Already casting")
-		return
-	
-	if ability.is_on_cooldown():
-		print("Cannot cast ability while it is on cooldown")
-		return
-	
-	if "toggled" in ability && ability.toggled && ability.active:
-		ability.deactivate()
-		return
-	
-	if "cost" in ability && current_mana < ability.cost:
-		print("Insufficient mana to cast")
-		return
-		
-	if channelling_index > -1:
-		stop_channelling()
-		
-	if "cast_time" in ability && ability.cast_time > 0:
-		$CastTimer.connect("timeout", self, "_on_CastTimer_timeout", [ability, target])
-		$CastTimer.start(ability.cast_time)
-		casting_index = ability.get_index()
-		emit_signal("casting_started", ability.name, ability.cast_time) # FIXME: Weird stupid fucking error here about incorrect parameter count when target is added as param
-		
-		if !ability.off_global_cooldown:
-			for a in get_node("Abilities").get_children():
-				if !a.off_global_cooldown:
-					a.try_start_cooldown(Constants.GLOBAL_COOLDOWN)
-	else:
-		execute_ability(ability, target)
-		
-		if !ability.off_global_cooldown:
-			for a in get_node("Abilities").get_children():
-				if a == ability:
-					var cooldown = a.cooldown if a.cooldown > Constants.GLOBAL_COOLDOWN else Constants.GLOBAL_COOLDOWN
-					a.try_start_cooldown(cooldown)
-				else:
-					if !a.off_global_cooldown:
-						a.try_start_cooldown(Constants.GLOBAL_COOLDOWN)
+#func _start_cast(ability: Ability, target) -> void:
+#	if casting_index >= 0:
+#		print("Already casting")
+#		return
+#
+#	if ability.is_on_cooldown():
+#		print("Cannot cast ability while it is on cooldown")
+#		return
+#
+#	if "toggled" in ability && ability.toggled && ability.active:
+#		ability.deactivate()
+#		return
+#
+#	if "cost" in ability && current_mana < ability.cost:
+#		print("Insufficient mana to cast")
+#		return
+#
+##	if channelling_index > -1:
+##		stop_channelling()
+#
+#	if "cast_time" in ability && ability.cast_time > 0:
+#		$CastTimer.connect("timeout", self, "_on_CastTimer_timeout", [ability, target])
+#		$CastTimer.start(ability.cast_time)
+#		casting_index = ability.get_index()
+#		emit_signal("casting_started", ability.name, ability.cast_time) # FIXME: Weird stupid fucking error here about incorrect parameter count when target is added as param
+#
+#		if !ability.off_global_cooldown:
+#			for a in get_node("Abilities").get_children():
+#				if !a.off_global_cooldown:
+#					a.try_start_cooldown(Constants.GLOBAL_COOLDOWN)
+#	else:
+#		execute_ability(ability, target)
+#
+#		if !ability.off_global_cooldown:
+#			for a in get_node("Abilities").get_children():
+#				if a == ability:
+#					var cooldown = a.cooldown if a.cooldown > Constants.GLOBAL_COOLDOWN else Constants.GLOBAL_COOLDOWN
+#					a.try_start_cooldown(cooldown)
+#				else:
+#					if !a.off_global_cooldown:
+#						a.try_start_cooldown(Constants.GLOBAL_COOLDOWN)
 
 
-func switch_state(new_state) -> void:
+func switch_navigation_state(new_state) -> void:
 	if !new_state:
-		print("No new state provided")
+		print("No new navigation state provided")
 		
-	print("State switch: " + _state.state_name + " -> " + new_state.state_name)
+	print("Navigation state switch: " + _navigation_state.state_name + " -> " + new_state.state_name)
 		
-	if _state.has_method("on_leave"):
-		_state.on_leave(self)
+	if _navigation_state.has_method("on_leave"):
+		_navigation_state.on_leave(self)
 		
-	_state = new_state
+	_navigation_state = new_state
 	
-	if _state.has_method("on_enter"):
-		_state.on_enter(self)
+	if _navigation_state.has_method("on_enter"):
+		_navigation_state.on_enter(self)
+
+
+func switch_combat_state(new_state) -> void:
+	if !new_state:
+		print("No new combat state provided")
+		
+	print("Combat state switch: " + _combat_state.state_name + " -> " + new_state.state_name)
+		
+	if _combat_state.has_method("on_leave"):
+		_combat_state.on_leave(self)
+		
+	_combat_state = new_state
+	
+	if _combat_state.has_method("on_enter"):
+		_combat_state.on_enter(self)
 
 
 #func _traverse_path(delta: float) -> void:

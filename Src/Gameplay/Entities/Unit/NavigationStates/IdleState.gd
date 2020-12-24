@@ -1,4 +1,4 @@
 extends Node
-class_name IdleState
+class_name IdleNavigationState
 
 var state_name = "IdleState"
