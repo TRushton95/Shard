@@ -15,7 +15,7 @@ var queued_ability_data : Array
 var team := -1
 var direction := 0
 var icon = load("res://Gameplay/Entities/Unit/elementalist_icon.png")
-var moving := false
+var is_moving := false
 var is_casting := false
 var is_channelling := false
 var is_basic_attacking := false
@@ -419,6 +419,8 @@ func cast(ability: Ability, target) -> void:
 	switch_combat_state(CastingCombatState.new(target, ability))
 	if position.distance_to(target_position) > ability.cast_range:
 		switch_navigation_state(PursueState.new(target, ability.cast_range, true))
+	else:
+		switch_navigation_state(IdleNavigationState.new())
 
 
 func stop_cast() -> void:
