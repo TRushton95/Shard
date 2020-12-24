@@ -414,12 +414,24 @@ func attack_target(target: Unit) -> void:
 
 
 func cast(ability: Ability, target) -> void:
+	if ability.is_on_cooldown():
+		print("Cannot cast ability while it is on cooldown")
+		return
+		
+	if "cost" in ability && current_mana < ability.cost:
+		print("Insufficient mana to cast")
+		return
+		
+	if "toggled" in ability && ability.toggled && ability.active:
+		ability.deactivate()
+		return
+
 	var target_position = target if target is Vector2 else target.position
 	
 	switch_combat_state(CastingCombatState.new(target, ability))
 	if position.distance_to(target_position) > ability.cast_range:
 		switch_navigation_state(PursueState.new(target, ability.cast_range, true))
-	else:
+	elif ability.cast_time > 0  || "channel_duration" in ability:
 		switch_navigation_state(IdleNavigationState.new())
 
 
@@ -433,49 +445,6 @@ func stop_cast() -> void:
 	print("Stopping cast")
 	casting_index = -1
 	emit_signal("casting_stopped", ability.name)
-
-
-#func _start_cast(ability: Ability, target) -> void:
-#	if casting_index >= 0:
-#		print("Already casting")
-#		return
-#
-#	if ability.is_on_cooldown():
-#		print("Cannot cast ability while it is on cooldown")
-#		return
-#
-#	if "toggled" in ability && ability.toggled && ability.active:
-#		ability.deactivate()
-#		return
-#
-#	if "cost" in ability && current_mana < ability.cost:
-#		print("Insufficient mana to cast")
-#		return
-#
-##	if channelling_index > -1:
-##		stop_channelling()
-#
-#	if "cast_time" in ability && ability.cast_time > 0:
-#		$CastTimer.connect("timeout", self, "_on_CastTimer_timeout", [ability, target])
-#		$CastTimer.start(ability.cast_time)
-#		casting_index = ability.get_index()
-#		emit_signal("casting_started", ability.name, ability.cast_time) # FIXME: Weird stupid fucking error here about incorrect parameter count when target is added as param
-#
-#		if !ability.off_global_cooldown:
-#			for a in get_node("Abilities").get_children():
-#				if !a.off_global_cooldown:
-#					a.try_start_cooldown(Constants.GLOBAL_COOLDOWN)
-#	else:
-#		execute_ability(ability, target)
-#
-#		if !ability.off_global_cooldown:
-#			for a in get_node("Abilities").get_children():
-#				if a == ability:
-#					var cooldown = a.cooldown if a.cooldown > Constants.GLOBAL_COOLDOWN else Constants.GLOBAL_COOLDOWN
-#					a.try_start_cooldown(cooldown)
-#				else:
-#					if !a.off_global_cooldown:
-#						a.try_start_cooldown(Constants.GLOBAL_COOLDOWN)
 
 
 func switch_navigation_state(new_state) -> void:

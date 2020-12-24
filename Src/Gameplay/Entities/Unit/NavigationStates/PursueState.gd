@@ -15,10 +15,12 @@ func _init(target, distance: int, stop_on_reach: bool) -> void:
 
 
 func on_enter(unit) -> void:
+	unit.is_moving = true
 	unit.set_movement_path(NavigationHelper.get_simple_path(unit.position, _get_target_position()))
 
 
 func on_leave(unit) -> void:
+	unit.is_moving = false
 	unit.set_movement_path([])
 
 

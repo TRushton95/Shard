@@ -16,6 +16,7 @@ func _init(destination: Vector2) -> void:
 
 
 func on_enter(unit) -> void:
+	unit.is_moving = true
 	unit.set_movement_path(NavigationHelper.get_simple_path(unit.position, _destination))
 	unit.connect("path_finished", self, "on_unit_path_finished")
 	
@@ -24,6 +25,7 @@ func on_enter(unit) -> void:
 
 
 func on_leave(unit) -> void:
+	unit.is_moving = false
 	unit.set_movement_path([])
 
 

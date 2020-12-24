@@ -69,7 +69,8 @@ func _start_cast(unit) -> void:
 	
 	_start_global_cooldown(unit)
 	
-	unit._play_animation(unit.AnimationType.CASTING, unit.direction)
+	if _ability.cast_time > 0:
+		unit._play_animation(unit.AnimationType.CASTING, unit.direction)
 
 
 func _start_global_cooldown(unit) -> void:

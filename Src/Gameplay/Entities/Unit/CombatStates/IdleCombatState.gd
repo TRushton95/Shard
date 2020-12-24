@@ -5,4 +5,7 @@ var state_name = "IdleCombatState"
 
 
 func on_enter(unit) -> void:
-	unit._play_animation(unit.AnimationType.IDLE, unit.direction)
+	if unit.is_moving:
+		unit._play_animation(unit.AnimationType.WALKING, unit.direction)
+	else:
+		unit._play_animation(unit.AnimationType.IDLE, unit.direction)

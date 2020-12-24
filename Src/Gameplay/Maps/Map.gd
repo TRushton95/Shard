@@ -405,10 +405,6 @@ func find_action(action_lookup: ActionLookup) -> Ability:
 
 
 func process_ability_press(ability: Ability):
-	if ability.is_on_cooldown():
-		print("Ability while it is on cooldown")
-		return
-	
 	match ability.target_type:
 		Enums.TargetType.Self:
 				rpc("_unit_cast", player_name, ability.get_index(), player_name)
