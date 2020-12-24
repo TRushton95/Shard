@@ -50,6 +50,7 @@ func update(unit, delta: float):
 			return
 		
 		_ability.execute(_target, unit)
+		_start_ability_cooldown(unit)
 		
 		if "cost" in _ability:
 			unit._set_current_mana(unit.current_mana - _ability.cost)
@@ -66,19 +67,16 @@ func _start_cast(unit) -> void:
 	_connect_signals(unit)
 	emit_signal("casting_started", _ability.cast_time)
 	
-	if !_ability.off_global_cooldown:
-			for a in unit.get_node("Abilities").get_children():
-				if !a.off_global_cooldown:
-					a.try_start_cooldown(Constants.GLOBAL_COOLDOWN)
+	_start_global_cooldown(unit)
 	
 	unit._play_animation(unit.AnimationType.CASTING, unit.direction)
 
 
 func _start_global_cooldown(unit) -> void:
 	if !_ability.off_global_cooldown:
-			for a in unit.get_node("Abilities").get_children():
-				if !a.off_global_cooldown:
-					a.try_start_cooldown(Constants.GLOBAL_COOLDOWN)
+		for a in unit.get_node("Abilities").get_children():
+			if !a.off_global_cooldown:
+				a.try_start_cooldown(Constants.GLOBAL_COOLDOWN)
 
 
 func _start_ability_cooldown(unit) -> void:
