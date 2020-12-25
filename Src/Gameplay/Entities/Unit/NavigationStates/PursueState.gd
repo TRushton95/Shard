@@ -67,7 +67,7 @@ func _step_through_path(unit, distance_to_walk: int) -> int:
 			unit._play_animation(unit.AnimationType.WALKING, unit.direction)
 	
 	if _movement_path.size() == 0:
-		emit_signal("path_finished")
+		emit_signal("state_path_finished")
 		
 	return distance_to_walk
 

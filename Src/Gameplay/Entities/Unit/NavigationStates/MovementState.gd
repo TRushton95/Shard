@@ -10,9 +10,6 @@ var _path_finished := false
 signal state_path_set(path)
 signal state_path_finished
 
-func on_unit_path_finished() -> void:
-	_path_finished = true
-
 
 func _init(destination: Vector2) -> void:
 	_destination = destination
@@ -27,6 +24,7 @@ func on_enter(unit) -> void:
 
 func on_leave(unit) -> void:
 	unit.is_moving = false
+	emit_signal("state_path_finished")
 	_disconnect_signals(unit)
 
 
@@ -36,9 +34,9 @@ func update(unit, delta: float):
 	
 	var distance_to_walk = delta * unit.movement_speed_attr.value
 	while distance_to_walk > 0 && _movement_path.size() > 0:
-		distance_to_walk = _step_through_path(unit, distance_to_walk) # FIXME: Don't like making unit move this way
+		distance_to_walk = _step_through_path(unit, distance_to_walk)
 	
-	if _path_finished:
+	if _movement_path.size() == 0:
 		return IdleNavigationState.new()
 
 
@@ -58,9 +56,6 @@ func _step_through_path(unit, distance_to_walk: int) -> int:
 			unit.direction = new_direction
 			unit._play_animation(unit.AnimationType.WALKING, unit.direction)
 	
-	if _movement_path.size() == 0:
-		emit_signal("state_path_finished")
-		
 	return distance_to_walk
 
 
