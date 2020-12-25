@@ -41,7 +41,6 @@ var movement_speed_attr : ModifiableAttribute
 signal left_clicked
 signal right_clicked
 signal path_finished
-signal follow_path_outdated
 signal path_set(path)
 signal casting_started(ability_name, duration, target)
 signal casting_progressed(time_elapsed)
@@ -75,10 +74,6 @@ func _on_Clickbox_input_event(_viewport, event, _shape_idx):
 			emit_signal("left_clicked")
 		if event.button_index == BUTTON_RIGHT:
 			emit_signal("right_clicked")
-
-
-func _on_FollowPathingTimer_timeout() -> void:
-	emit_signal("follow_path_outdated")
 
 
 func _on_status_expired(status_effect) -> void:
@@ -203,7 +198,6 @@ func _ready() -> void:
 	
 	$UnitProfile/VBoxContainer/SmallHealthBar.max_value = current_health
 	$UnitProfile/VBoxContainer/SmallHealthBar.value = current_health
-	$FollowPathingTimer.one_shot = true
 	$AutoAttackTimer.one_shot = true
 	
 	$AnimationPlayer.play("idle_down")

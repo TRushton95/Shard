@@ -120,18 +120,6 @@ func _on_player_path_finished() -> void:
 	$PathDebug.hide()
 
 
-#DEBUG FOLLOW PATHING PURPOSES ONLY
-func _on_enemy_follow_path_outdated(unit: Unit) -> void:
-	if unit == $Enemy:
-		var movement_path = $Navigation2D.get_simple_path($Enemy.position, $Enemy.focus.position)
-		$Enemy.rpc("set_movement_path", movement_path)
-		
-		var UPDATE_CONST = 0.0004
-		var update_rate = (UPDATE_CONST * $Enemy.position.distance_to($Enemy.focus.position)) + 0.2
-		$Enemy.get_node("FollowPathingTimer").start(update_rate)
-#DEBUG FOLLOW PATHING PURPOSES ONLY
-
-
 func _on_unit_status_effect_applied(status_effect: Status, unit: Unit) -> void:
 	if unit == player:
 		$CanvasLayer/StatusEffectBar.add_status_effect(status_effect)
@@ -550,7 +538,6 @@ func setup(player_name: String, player_lookup: Dictionary) -> void:
 #			var movement_path = $Navigation2D.get_simple_path($Enemy.position, unit.position)
 #			$Enemy.rset("auto_attack_enabled", false)
 #			$Enemy.rpc("set_movement_path", movement_path)
-#			$Enemy.get_node("FollowPathingTimer").start(1.0)
 #			$Enemy.movement_speed_attr.push_modifier(Modifier.new(0.5, Enums.ModifierType.Multiplicative))
 			# PATHING TEST #
 			
