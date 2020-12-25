@@ -446,7 +446,6 @@ func setup(player_name: String, player_lookup: Dictionary) -> void:
 	$Enemy.set_health_bar_color(Color.red)
 	$Enemy.connect("left_clicked", self, "_on_unit_left_clicked", [$Enemy])
 	$Enemy.connect("right_clicked", self, "_on_unit_right_clicked", [$Enemy])
-	$Enemy.connect("follow_path_outdated", self, "_on_enemy_follow_path_outdated", [$Enemy])
 	$Enemy.connect("damage_received", self, "_on_unit_damage_received", [$Enemy])
 	$Enemy.connect("healing_received", self, "_on_unit_healing_received", [$Enemy])
 	$Enemy.connect("status_effect_applied", self, "_on_unit_status_effect_applied", [$Enemy])
