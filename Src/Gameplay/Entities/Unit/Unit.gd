@@ -121,19 +121,24 @@ func _on_ability_cooldown_ended(ability: Ability) -> void:
 
 func _on_state_path_set(path: PoolVector2Array) -> void:
 	if path && path.size() > 0:
-		_play_animation(AnimationType.WALKING, direction)
+		var animation = _get_animation_name(AnimationType.WALKING, direction)
+		if $AnimationPlayer.current_animation != animation:
+			_play_animation(animation)
 	else:
-		_play_animation(AnimationType.IDLE, direction)
+		var animation = _get_animation_name(AnimationType.IDLE, direction)
+		_play_animation(animation)
 	emit_signal("path_set", path)
 
 
-func _on_state_path_finished() -> void:
-	_play_animation(AnimationType.IDLE, direction)
+func _on_state_path_removed() -> void:
+	var animation = _get_animation_name(AnimationType.IDLE, direction)
+	_play_animation(animation)
 	emit_signal("path_finished")
 
 
 func _on_casting_started(duration) -> void:
-	_play_animation(AnimationType.CASTING, direction)
+	var animation = _get_animation_name(AnimationType.CASTING, direction)
+	_play_animation(animation)
 	emit_signal("casting_started", "test_ability_name", duration)
 
 
@@ -142,16 +147,20 @@ func _on_casting_progressed(duration: float) -> void:
 
 
 func _on_casting_stopped() -> void:
+	var animation
 	if is_moving:
-		_play_animation(AnimationType.WALKING, direction)
+		animation = _get_animation_name(AnimationType.WALKING, direction)
 	else:
-		_play_animation(AnimationType.IDLE, direction)
-		
+		animation = _get_animation_name(AnimationType.IDLE, direction)
+	
+	_play_animation(animation)
+	
 	emit_signal("casting_stopped", "test_ability_name")
 
 
 func _on_channelling_started(duration) -> void:
-	_play_animation(AnimationType.CASTING, direction)
+	var animation = _get_animation_name(AnimationType.CASTING, direction)
+	_play_animation(animation)
 	emit_signal("channelling_started", "test_channel_name", duration)
 
 
@@ -160,11 +169,13 @@ func _on_channelling_progressed(duration: float) -> void:
 
 
 func _on_channelling_stopped() -> void:
+	var animation
 	if is_moving:
-		_play_animation(AnimationType.WALKING, direction)
+		animation = _get_animation_name(AnimationType.WALKING, direction)
 	else:
-		_play_animation(AnimationType.IDLE, direction)
+		animation = _get_animation_name(AnimationType.IDLE, direction)
 		
+	_play_animation(animation)
 	emit_signal("channelling_stopped", "test_channel_name")
 
 
@@ -332,7 +343,7 @@ func _get_direction_to_point(point: Vector2) -> int:
 	return result
 
 
-func _play_animation(animation_type: int, current_direction: int) -> void:
+func _get_animation_name(animation_type: int, current_direction: int) -> String:
 	var direction_suffix = ""
 	match current_direction:
 		Direction.UP:
@@ -353,13 +364,17 @@ func _play_animation(animation_type: int, current_direction: int) -> void:
 		AnimationType.CASTING:
 			animation_name = "casting"
 			
-	var full_animation_name = animation_name + direction_suffix
-	var has_animation = $AnimationPlayer.has_animation(full_animation_name)
+	return animation_name + direction_suffix
+
+
+func _play_animation(animation_name: String) -> void:
+	print(animation_name)
+	var has_animation = $AnimationPlayer.has_animation(animation_name)
 	
 	if has_animation:
-		$AnimationPlayer.play(full_animation_name)
+		$AnimationPlayer.play(animation_name)
 	else:
-		print("Cannot find animation:" + full_animation_name)
+		print("Cannot find animation:" + animation_name)
 
 
 func _set_current_health(value: int) -> void:
@@ -387,14 +402,14 @@ func _set_current_mana(value: int) -> void:
 ########################
 
 func move_to_point(point: Vector2) -> void:
+	switch_navigation_state(MovementState.new(point))
+	
 	if is_casting || is_channelling:
 		print("Interrupted")
 		switch_combat_state(IdleCombatState.new())
 		
 	if is_basic_attacking:
 		switch_combat_state(IdleCombatState.new())
-		
-	switch_navigation_state(MovementState.new(point))
 
 
 func stop_moving() -> void:
@@ -403,8 +418,8 @@ func stop_moving() -> void:
 
 
 func attack_target(target: Unit) -> void:
-	switch_combat_state(AttackingCombatState.new(target))
 	switch_navigation_state(PursueState.new(target, basic_attack_range, false))
+	switch_combat_state(AttackingCombatState.new(target))
 
 
 func cast(ability: Ability, target) -> void:
@@ -469,15 +484,6 @@ func switch_combat_state(new_state) -> void:
 	
 	if _combat_state.has_method("on_enter"):
 		_combat_state.on_enter(self)
-
-
-#func _traverse_path(delta: float) -> void:
-#	if casting_index > -1 || channelling_index > -1:
-#		return
-#
-#	var distance_to_walk = delta * movement_speed_attr.value
-#	while distance_to_walk > 0 && _movement_path.size() > 0:
-#		distance_to_walk = _step_through_path(distance_to_walk)
 
 
 func basic_attack(target: Unit) -> void:

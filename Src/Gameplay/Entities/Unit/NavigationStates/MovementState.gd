@@ -8,7 +8,7 @@ var _destination : Vector2
 var _path_finished := false
 
 signal state_path_set(path)
-signal state_path_finished
+signal state_path_removed
 
 
 func _init(destination: Vector2) -> void:
@@ -24,7 +24,7 @@ func on_enter(unit) -> void:
 
 func on_leave(unit) -> void:
 	unit.is_moving = false
-	emit_signal("state_path_finished")
+	emit_signal("state_path_removed")
 	_disconnect_signals(unit)
 
 
@@ -54,16 +54,17 @@ func _step_through_path(unit, distance_to_walk: int) -> int:
 		var new_direction = unit._get_direction_to_point(_movement_path[0])
 		if new_direction > -1 && new_direction != unit.direction:
 			unit.direction = new_direction
-			unit._play_animation(unit.AnimationType.WALKING, unit.direction)
+			var animation = unit._get_animation_name(unit.AnimationType.WALKING, unit.direction)
+			unit._play_animation(animation)
 	
 	return distance_to_walk
 
 
 func _connect_signals(unit) -> void:
 	connect("state_path_set", unit, "_on_state_path_set")
-	connect("state_path_finished", unit, "_on_state_path_finished")
+	connect("state_path_removed", unit, "_on_state_path_removed")
 	
 	
 func _disconnect_signals(unit) -> void:
 	disconnect("state_path_set", unit, "_on_state_path_set")
-	disconnect("state_path_finished", unit, "_on_state_path_finished")
+	disconnect("state_path_removed", unit, "_on_state_path_removed")
