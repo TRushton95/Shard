@@ -7,6 +7,8 @@ var _movement_path : PoolVector2Array
 var _target
 var _distance := 0 # The distance the follow the target from
 var _stop_on_reach := false
+var _path_update_time := 0.0
+var _path_update_rate := 0.0
 
 signal state_path_set(path)
 signal state_path_finished
@@ -21,6 +23,7 @@ func _init(target, distance: int, stop_on_reach: bool) -> void:
 func on_enter(unit) -> void:
 	unit.is_moving = true
 	_movement_path = NavigationHelper.get_simple_path(unit.position, _get_target_position())
+	_path_update_rate = _get_path_update_rate(unit.position, _get_target_position())
 	_connect_signals(unit)
 	emit_signal("state_path_set", _movement_path)
 
@@ -32,8 +35,11 @@ func on_leave(unit) -> void:
 
 
 func update(unit, delta: float):
-	if unit.casting_index > -1 || unit.channelling_index > -1:
-		return
+	_path_update_time += delta
+	if _path_update_time >= _path_update_rate:
+		_movement_path = NavigationHelper.get_simple_path(unit.position, _get_target_position())
+		_path_update_time -= _path_update_rate
+		emit_signal("state_path_set", _movement_path)
 	
 	var distance_to_walk = delta * unit.movement_speed_attr.value
 	while distance_to_walk > 0 && _movement_path.size() > 0:
@@ -51,6 +57,13 @@ func update(unit, delta: float):
 
 func _get_target_position() -> Vector2:
 	return _target if _target is Vector2 else _target.position
+
+
+func _get_path_update_rate(from: Vector2, to: Vector2) -> float:
+	var UPDATE_CONST = 0.0004
+	var update_rate = (UPDATE_CONST * from.distance_to(to)) + 0.2
+	
+	return update_rate
 
 
 func _step_through_path(unit, distance_to_walk: int) -> int:
