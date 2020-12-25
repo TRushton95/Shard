@@ -19,6 +19,10 @@ func on_enter(unit) -> void:
 	unit.is_moving = true
 	_movement_path = NavigationHelper.get_simple_path(unit.position, _destination)
 	_connect_signals(unit)
+	
+	var animation = unit._get_animation_name(unit.AnimationType.WALKING, unit.direction)
+	unit._play_animation(animation)
+	
 	emit_signal("state_path_set", _movement_path)
 
 

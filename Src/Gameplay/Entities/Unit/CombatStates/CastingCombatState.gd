@@ -64,10 +64,12 @@ func update(unit, delta: float):
 func _start_cast(unit) -> void:
 	_cast = true
 	unit.is_casting = true
-	_connect_signals(unit)
-	emit_signal("casting_started", _ability.cast_time)
-	
+	var animation = unit._get_animation_name(unit.AnimationType.IDLE, unit.direction)
+	unit._play_animation(animation)
 	_start_global_cooldown(unit)
+	_connect_signals(unit)
+	
+	emit_signal("casting_started", _ability.cast_time)
 
 
 func _start_global_cooldown(unit) -> void:

@@ -120,19 +120,10 @@ func _on_ability_cooldown_ended(ability: Ability) -> void:
 
 
 func _on_state_path_set(path: PoolVector2Array) -> void:
-	if path && path.size() > 0:
-		var animation = _get_animation_name(AnimationType.WALKING, direction)
-		if $AnimationPlayer.current_animation != animation:
-			_play_animation(animation)
-	else:
-		var animation = _get_animation_name(AnimationType.IDLE, direction)
-		_play_animation(animation)
 	emit_signal("path_set", path)
 
 
 func _on_state_path_removed() -> void:
-	var animation = _get_animation_name(AnimationType.IDLE, direction)
-	_play_animation(animation)
 	emit_signal("path_finished")
 
 
@@ -147,20 +138,10 @@ func _on_casting_progressed(duration: float) -> void:
 
 
 func _on_casting_stopped() -> void:
-	var animation
-	if is_moving:
-		animation = _get_animation_name(AnimationType.WALKING, direction)
-	else:
-		animation = _get_animation_name(AnimationType.IDLE, direction)
-	
-	_play_animation(animation)
-	
 	emit_signal("casting_stopped", "test_ability_name")
 
 
 func _on_channelling_started(duration) -> void:
-	var animation = _get_animation_name(AnimationType.CASTING, direction)
-	_play_animation(animation)
 	emit_signal("channelling_started", "test_channel_name", duration)
 
 
