@@ -1,7 +1,6 @@
 extends KinematicBody2D
 class_name Unit
 
-var _movement_path : PoolVector2Array
 var current_health : int setget _set_current_health
 remotesync var current_mana : int setget _set_current_mana # Remove remotesync when test_mana_refill is removed
 var casting_index := -1 # -1 for not casting
@@ -125,15 +124,17 @@ func _on_ability_cooldown_ended(ability: Ability) -> void:
 	emit_signal("ability_cooldown_ended", ability)
 
 
-func _on_Unit_path_set(path: PoolVector2Array) -> void:
+func _on_state_path_set(path: PoolVector2Array) -> void:
 	if path && path.size() > 0:
 		_play_animation(AnimationType.WALKING, direction)
 	else:
 		_play_animation(AnimationType.IDLE, direction)
+	emit_signal("path_set", path)
 
 
-func _on_Unit_path_finished() -> void:
+func _on_state_path_finished() -> void:
 	_play_animation(AnimationType.IDLE, direction)
+	emit_signal("path_finished")
 
 
 func _on_casting_started(duration) -> void:
@@ -227,15 +228,6 @@ func _process(delta: float) -> void:
 		
 	if $AutoAttackTimer.time_left > 0:
 		emit_signal("auto_attack_cooldown_progressed", $AutoAttackTimer.time_left)
-
-
-func set_movement_path(movement_path: PoolVector2Array) -> void:
-	_movement_path = movement_path
-	emit_signal("path_set", _movement_path)
-
-
-func is_moving() -> bool:
-	return _movement_path && _movement_path.size() > 0
 
 
 remotesync func damage(value: int, source_name: String) -> void:
@@ -492,28 +484,6 @@ func switch_combat_state(new_state) -> void:
 #	var distance_to_walk = delta * movement_speed_attr.value
 #	while distance_to_walk > 0 && _movement_path.size() > 0:
 #		distance_to_walk = _step_through_path(distance_to_walk)
-
-
-func _step_through_path(distance_to_walk: int) -> int:
-	var distance_to_next_point = position.distance_to(_movement_path[0])
-	if distance_to_walk <= distance_to_next_point:
-		position += position.direction_to(_movement_path[0]) * distance_to_walk
-	else:
-		position = _movement_path[0]
-		_movement_path.remove(0)
-		
-	distance_to_walk -= distance_to_next_point
-	
-	if _movement_path.size() > 0:
-		var new_direction = _get_direction_to_point(_movement_path[0])
-		if new_direction > -1 && new_direction != direction:
-			direction = new_direction
-			_play_animation(AnimationType.WALKING, direction)
-	
-	if _movement_path.size() == 0:
-		emit_signal("path_finished")
-		
-	return distance_to_walk
 
 
 func basic_attack(target: Unit) -> void:
