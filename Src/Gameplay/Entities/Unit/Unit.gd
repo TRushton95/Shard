@@ -143,7 +143,7 @@ func _on_casting_progressed(duration: float) -> void:
 
 func _on_casting_stopped() -> void:
 	if is_moving:
-		_play_animation(AnimationType.MOVING, direction)
+		_play_animation(AnimationType.WALKING, direction)
 	else:
 		_play_animation(AnimationType.IDLE, direction)
 		
@@ -161,7 +161,7 @@ func _on_channelling_progressed(duration: float) -> void:
 
 func _on_channelling_stopped() -> void:
 	if is_moving:
-		_play_animation(AnimationType.MOVING, direction)
+		_play_animation(AnimationType.WALKING, direction)
 	else:
 		_play_animation(AnimationType.IDLE, direction)
 		
