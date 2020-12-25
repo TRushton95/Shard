@@ -305,8 +305,8 @@ margin_right = 75.0
 margin_bottom = 28.0
 mouse_filter = 2
 texture_progress = ExtResource( 9 )
-[connection signal="casting_started" from="." to="." method="_on_Unit_casting_started"]
 [connection signal="path_finished" from="." to="." method="_on_Unit_path_finished"]
+[connection signal="path_set" from="." to="." method="_on_Unit_path_set"]
 [connection signal="input_event" from="Clickbox" to="." method="_on_Clickbox_input_event"]
 [connection signal="timeout" from="FollowPathingTimer" to="." method="_on_FollowPathingTimer_timeout"]
 [connection signal="timeout" from="AutoAttackTimer" to="." method="_on_AutoAttackTimer_timeout"]

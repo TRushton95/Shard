@@ -109,8 +109,11 @@ func _on_unit_right_clicked(unit: Unit) -> void:
 
 
 func _on_player_path_set(path: PoolVector2Array) -> void:
-	$PathDebug.points = path
-	$PathDebug.show()
+	if path && path.size() > 0:
+		$PathDebug.points = path
+		$PathDebug.show()
+	else:
+		$PathDebug.hide()
 
 
 func _on_player_path_finished() -> void:

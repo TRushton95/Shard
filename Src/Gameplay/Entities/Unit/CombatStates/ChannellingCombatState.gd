@@ -23,7 +23,6 @@ func on_enter(unit) -> void:
 	unit.is_channelling = true
 	_connect_signals(unit)
 	emit_signal("channelling_started", _ability.channel_duration)
-	unit._play_animation(unit.AnimationType.CASTING, unit.direction)
 
 
 func on_leave(unit) -> void:

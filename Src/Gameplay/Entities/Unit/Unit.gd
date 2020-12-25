@@ -125,17 +125,19 @@ func _on_ability_cooldown_ended(ability: Ability) -> void:
 	emit_signal("ability_cooldown_ended", ability)
 
 
+func _on_Unit_path_set(path: PoolVector2Array) -> void:
+	if path && path.size() > 0:
+		_play_animation(AnimationType.WALKING, direction)
+	else:
+		_play_animation(AnimationType.IDLE, direction)
+
+
 func _on_Unit_path_finished() -> void:
 	_play_animation(AnimationType.IDLE, direction)
 
 
-func _on_Unit_casting_started(ability_name: String, duration: float) -> void:
-	pass
-#	var target_position = target if target is Vector2 else target.position
-#	_play_animation(AnimationType.CASTING, _get_direction_to_point(target_position))
-
-
 func _on_casting_started(duration) -> void:
+	_play_animation(AnimationType.CASTING, direction)
 	emit_signal("casting_started", "test_ability_name", duration)
 
 
@@ -144,10 +146,16 @@ func _on_casting_progressed(duration: float) -> void:
 
 
 func _on_casting_stopped() -> void:
+	if is_moving:
+		_play_animation(AnimationType.MOVING, direction)
+	else:
+		_play_animation(AnimationType.IDLE, direction)
+		
 	emit_signal("casting_stopped", "test_ability_name")
 
 
 func _on_channelling_started(duration) -> void:
+	_play_animation(AnimationType.CASTING, direction)
 	emit_signal("channelling_started", "test_channel_name", duration)
 
 
@@ -156,6 +164,11 @@ func _on_channelling_progressed(duration: float) -> void:
 
 
 func _on_channelling_stopped() -> void:
+	if is_moving:
+		_play_animation(AnimationType.MOVING, direction)
+	else:
+		_play_animation(AnimationType.IDLE, direction)
+		
 	emit_signal("channelling_stopped", "test_channel_name")
 
 
@@ -218,11 +231,6 @@ func _process(delta: float) -> void:
 
 func set_movement_path(movement_path: PoolVector2Array) -> void:
 	_movement_path = movement_path
-	if !is_moving():
-		emit_signal("path_finished")
-	else:
-		_play_animation(AnimationType.WALKING, direction)
-		
 	emit_signal("path_set", _movement_path)
 
 
@@ -451,7 +459,7 @@ func switch_navigation_state(new_state) -> void:
 	if !new_state:
 		print("No new navigation state provided")
 		
-	print("Navigation state switch: " + _navigation_state.state_name + " -> " + new_state.state_name)
+#	print("Navigation state switch: " + _navigation_state.state_name + " -> " + new_state.state_name)
 		
 	if _navigation_state.has_method("on_leave"):
 		_navigation_state.on_leave(self)
@@ -466,7 +474,7 @@ func switch_combat_state(new_state) -> void:
 	if !new_state:
 		print("No new combat state provided")
 		
-	print("Combat state switch: " + _combat_state.state_name + " -> " + new_state.state_name)
+#	print("Combat state switch: " + _combat_state.state_name + " -> " + new_state.state_name)
 		
 	if _combat_state.has_method("on_leave"):
 		_combat_state.on_leave(self)

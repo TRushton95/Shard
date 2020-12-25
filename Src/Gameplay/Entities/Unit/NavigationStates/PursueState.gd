@@ -21,7 +21,6 @@ func on_enter(unit) -> void:
 
 func on_leave(unit) -> void:
 	unit.is_moving = false
-	unit.set_movement_path([])
 
 
 func update(unit, delta: float):

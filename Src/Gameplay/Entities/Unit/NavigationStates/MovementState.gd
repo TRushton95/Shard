@@ -19,14 +19,10 @@ func on_enter(unit) -> void:
 	unit.is_moving = true
 	unit.set_movement_path(NavigationHelper.get_simple_path(unit.position, _destination))
 	unit.connect("path_finished", self, "on_unit_path_finished")
-	
-	if !unit.is_casting && !unit.is_channelling:
-		unit._play_animation(unit.AnimationType.WALKING, unit.direction)
 
 
 func on_leave(unit) -> void:
 	unit.is_moving = false
-	unit.set_movement_path([])
 
 
 func update(unit, delta: float):
