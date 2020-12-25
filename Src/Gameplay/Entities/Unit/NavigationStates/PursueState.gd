@@ -27,6 +27,7 @@ func on_enter(unit) -> void:
 
 func on_leave(unit) -> void:
 	unit.is_moving = false
+	emit_signal("state_path_finished")
 	_disconnect_signals(unit)
 
 
@@ -40,6 +41,8 @@ func update(unit, delta: float):
 			if _stop_on_reach:
 				emit_signal("state_path_finished")
 				return IdleNavigationState.new()
+			else:
+				return
 		
 		distance_to_walk = _step_through_path(unit, distance_to_walk)
 		
