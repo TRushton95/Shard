@@ -259,8 +259,6 @@ shape = SubResource( 14 )
 
 [node name="Auras" type="Node" parent="."]
 
-[node name="FollowPathingTimer" type="Timer" parent="."]
-
 [node name="AutoAttackTimer" type="Timer" parent="."]
 
 [node name="UnitProfile" type="CenterContainer" parent="."]
@@ -306,5 +304,4 @@ margin_bottom = 28.0
 mouse_filter = 2
 texture_progress = ExtResource( 9 )
 [connection signal="input_event" from="Clickbox" to="." method="_on_Clickbox_input_event"]
-[connection signal="timeout" from="FollowPathingTimer" to="." method="_on_FollowPathingTimer_timeout"]
 [connection signal="timeout" from="AutoAttackTimer" to="." method="_on_AutoAttackTimer_timeout"]
