@@ -5,12 +5,10 @@ var current_health : int setget _set_current_health
 remotesync var current_mana : int setget _set_current_mana # Remove remotesync when test_mana_refill is removed
 var casting_index := -1 # -1 for not casting
 var channelling_index := -1 # -1 for not channeling
-var focus : Unit
 remotesync var auto_attack_enabled := false # Requires focus to be set to do anything
 var basic_attack_range := 200
 var auto_attack_speed := 1.0
 var _is_basic_attack_ready := true
-var queued_ability_data : Array
 var team := -1
 var direction := 0
 var icon = load("res://Gameplay/Entities/Unit/elementalist_icon.png")
@@ -18,6 +16,10 @@ var is_moving := false
 var is_casting := false
 var is_channelling := false
 var is_basic_attacking := false
+var default_torso_animation = AnimationType.IDLE
+var default_arms_animation = AnimationType.IDLE
+var playing_arms_animation := false
+var playing_torso_animation := false
 
 var _navigation_state = IdleNavigationState.new()
 var _combat_state = IdleCombatState.new()
@@ -506,12 +508,64 @@ func get_arms_anim_player() -> Node:
 	return $ArmsSprite/AnimationPlayer
 
 
-func _on_AnimationPlayer_animation_finished(anim_name) -> void:
-	var animation_name
-	if is_moving:
-		animation_name = _get_animation_name(AnimationType.WALKING, direction)
-	else:
-		animation_name = _get_animation_name(AnimationType.IDLE, direction)
+func set_default_arms_animation(anim_name) -> void:
+	_set_arms_animation_type_looping(default_arms_animation, false)
+	default_arms_animation = anim_name
+	_set_arms_animation_type_looping(default_arms_animation, true)
+	
+	if !playing_arms_animation:
+		var default = _get_animation_name(default_arms_animation, direction)
+		$ArmsSprite/AnimationPlayer.play(default)
+		print(default)
+
+
+func set_default_torso_animation(anim_name) -> void:
+	_set_torso_animation_type_looping(default_torso_animation, false)
+	default_torso_animation = anim_name
+	_set_torso_animation_type_looping(default_torso_animation, true)
 		
-	$ArmsSprite/AnimationPlayer.play(animation_name)
-	$ArmsSprite/AnimationPlayer.get_animation(anim_name).loop = true
+	if !playing_torso_animation:
+		var default = _get_animation_name(default_torso_animation, direction)
+		$TorsoSprite/AnimationPlayer.play(default)
+
+
+func play_arms_animation(anim_name) -> void:
+	$ArmsSprite/AnimationPlayer.get_animation(anim_name).set_loop(false)
+	
+	playing_arms_animation = true
+	$ArmsSprite/AnimationPlayer.play(anim_name)
+
+
+func play_torso_animation(anim_name) -> void:
+	$TorsoSprite/AnimationPlayer.get_animation(anim_name).set_loop(false)
+	
+	playing_torso_animation = true
+	$TorsoSprite/AnimationPlayer.play(anim_name)
+
+
+func _set_arms_animation_type_looping(animation_type: int, loop: bool) -> void:
+	for value in Direction.values():
+		var animation = _get_animation_name(animation_type, value)
+		$ArmsSprite/AnimationPlayer.get_animation(animation).set_loop(loop)
+
+
+func _set_torso_animation_type_looping(animation_type: int, loop: bool) -> void:
+	for value in Direction.values():
+		var animation = _get_animation_name(animation_type, value)
+		$TorsoSprite/AnimationPlayer.get_animation(animation).set_loop(loop)
+
+
+func _on_ArmsAnimationPlayer_animation_finished(anim_name):
+	playing_arms_animation = false
+	var animation = _get_animation_name(default_arms_animation, direction)
+	$ArmsSprite/AnimationPlayer.play(animation)
+	
+	$ArmsSprite/AnimationPlayer.get_animation(anim_name).set_loop(true)
+
+
+func _on_TorsoAnimationPlayer_animation_finished(anim_name):
+	playing_torso_animation = false
+	var animation = _get_animation_name(default_torso_animation, direction)
+	$TorsoSprite/AnimationPlayer.play(animation)
+	
+	$TorsoSprite/AnimationPlayer.get_animation(anim_name).set_loop(true)
