@@ -21,7 +21,18 @@ func on_enter(unit) -> void:
 	_connect_signals(unit)
 	
 	var animation = unit._get_animation_name(unit.AnimationType.WALKING, unit.direction)
-	unit._play_animation(animation)
+#	unit._play_animation(animation)
+	
+	unit._play_torso_animation(animation)
+	
+	if !unit.is_casting && !unit.is_channelling:
+		var current_anim_name = unit.get_arms_anim_player().current_animation
+		var current_anim = unit.get_arms_anim_player().get_animation(current_anim_name)
+		if current_anim.loop:
+			unit.get_arms_anim_player().play(animation)
+		else:
+			unit.get_arms_anim_player().clear_queue()
+			unit.get_arms_anim_player().queue(animation)
 	
 	emit_signal("state_path_set", _movement_path)
 
@@ -59,7 +70,9 @@ func _step_through_path(unit, distance_to_walk: int) -> int:
 		if new_direction > -1 && new_direction != unit.direction:
 			unit.direction = new_direction
 			var animation = unit._get_animation_name(unit.AnimationType.WALKING, unit.direction)
-			unit._play_animation(animation)
+#			unit._play_animation(animation)
+			unit._play_torso_animation(animation)
+			unit._play_arms_animation(animation)
 	
 	return distance_to_walk
 

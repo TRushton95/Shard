@@ -23,13 +23,21 @@ func on_enter(unit) -> void:
 	var clean_target_position = _target if _target is Vector2 else _target.position
 	if unit.position.distance_to(clean_target_position) <= _ability.cast_range:
 		_start_cast(unit)
-		
 
 
 func on_leave(unit) -> void:
 	unit.is_casting = false
 	emit_signal("casting_stopped")
 	_disconnect_signals(unit)
+	
+	if _ability.cast_time > 0:
+		var animation
+		if unit.is_moving:
+			animation = unit._get_animation_name(unit.AnimationType.WALKING, unit.direction)
+		else:
+			animation = unit._get_animation_name(unit.AnimationType.IDLE, unit.direction)
+		
+		unit._play_arms_animation(animation)
 
 
 func update(unit, delta: float):
@@ -64,8 +72,18 @@ func update(unit, delta: float):
 func _start_cast(unit) -> void:
 	_cast = true
 	unit.is_casting = true
-	var animation = unit._get_animation_name(unit.AnimationType.IDLE, unit.direction)
-	unit._play_animation(animation)
+	var body_animation = unit._get_animation_name(unit.AnimationType.IDLE, unit.direction)
+	var arms_animation = unit._get_animation_name(unit.AnimationType.CASTING, unit.direction)
+#	unit._play_animation(animation)
+	
+	if _ability.cast_time > 0:
+		unit.get_node("ArmsSprite/AnimationPlayer").get_animation(arms_animation).set_loop(true)
+		unit._play_torso_animation(body_animation)
+	else:
+		unit.get_node("ArmsSprite/AnimationPlayer").get_animation(arms_animation).set_loop(false)
+		
+	unit._play_arms_animation(arms_animation)
+	
 	_start_global_cooldown(unit)
 	_connect_signals(unit)
 	

@@ -192,7 +192,8 @@ func _ready() -> void:
 	$UnitProfile/VBoxContainer/SmallHealthBar.value = current_health
 	$AutoAttackTimer.one_shot = true
 	
-	$AnimationPlayer.play("idle_down")
+	$TorsoSprite/AnimationPlayer.play("idle_down")
+	$ArmsSprite/AnimationPlayer.play("idle_down")
 
 
 func _process(delta: float) -> void:
@@ -320,7 +321,7 @@ func _get_direction_to_point(point: Vector2) -> int:
 		result = Direction.DOWN
 	elif angle > -45 && angle <= 45:
 		result = Direction.LEFT
-			
+	
 	return result
 
 
@@ -344,18 +345,35 @@ func _get_animation_name(animation_type: int, current_direction: int) -> String:
 			animation_name = "walking"
 		AnimationType.CASTING:
 			animation_name = "casting"
-			
+	
 	return animation_name + direction_suffix
 
 
 func _play_animation(animation_name: String) -> void:
-	print(animation_name)
 	var has_animation = $AnimationPlayer.has_animation(animation_name)
 	
 	if has_animation:
 		$AnimationPlayer.play(animation_name)
 	else:
 		print("Cannot find animation:" + animation_name)
+
+
+func _play_torso_animation(animation_name: String) -> void:
+	var has_animation = $AnimationPlayer.has_animation(animation_name)
+	
+	if has_animation:
+		$TorsoSprite/AnimationPlayer.play(animation_name)
+	else:
+		print("Cannot find torso animation:" + animation_name)
+
+
+func _play_arms_animation(animation_name: String) -> void:
+	var has_animation = $AnimationPlayer.has_animation(animation_name)
+	
+	if has_animation:
+		$ArmsSprite/AnimationPlayer.play(animation_name)
+	else:
+		print("Cannot find arms animation:" + animation_name)
 
 
 func _set_current_health(value: int) -> void:
@@ -478,3 +496,22 @@ func basic_attack(target: Unit) -> void:
 
 func is_basic_attack_off_cooldown() -> bool:
 	return _is_basic_attack_ready
+
+
+func get_torso_anim_player() -> Node:
+	return $TorsoSprite/AnimationPlayer
+
+
+func get_arms_anim_player() -> Node:
+	return $ArmsSprite/AnimationPlayer
+
+
+func _on_AnimationPlayer_animation_finished(anim_name) -> void:
+	var animation_name
+	if is_moving:
+		animation_name = _get_animation_name(AnimationType.WALKING, direction)
+	else:
+		animation_name = _get_animation_name(AnimationType.IDLE, direction)
+		
+	$ArmsSprite/AnimationPlayer.play(animation_name)
+	$ArmsSprite/AnimationPlayer.get_animation(anim_name).loop = true
