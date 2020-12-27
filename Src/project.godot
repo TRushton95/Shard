@@ -138,6 +138,7 @@ StatusHelper="*res://Gameplay/AbilitySystem/Helpers/StatusHelper.gd"
 Enums="*res://Gameplay/Global/Enums.gd"
 Constants="*res://Gameplay/Global/Constants.gd"
 NavigationHelper="*res://Gameplay/Global/NavigationHelper.gd"
+TargetHelper="*res://Gameplay/Global/TargetHelper.gd"
 
 [debug]
 

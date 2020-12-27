@@ -22,8 +22,8 @@ func _init(target, distance: int, stop_on_reach: bool) -> void:
 
 func on_enter(unit) -> void:
 	unit.is_moving = true
-	_movement_path = NavigationHelper.get_simple_path(unit.position, _get_target_position())
-	_path_update_rate = _get_path_update_rate(unit.position, _get_target_position())
+	_movement_path = NavigationHelper.get_simple_path(unit.position, TargetHelper.get_target_position(_target))
+	_path_update_rate = _get_path_update_rate(unit.position, TargetHelper.get_target_position(_target))
 	_connect_signals(unit)
 	
 	unit.set_default_torso_animation_type(Enums.UnitAnimationType.WALKING)
@@ -43,13 +43,13 @@ func on_leave(unit) -> void:
 func update(unit, delta: float):
 	_path_update_time += delta
 	if _path_update_time >= _path_update_rate:
-		_movement_path = NavigationHelper.get_simple_path(unit.position, _get_target_position())
+		_movement_path = NavigationHelper.get_simple_path(unit.position, TargetHelper.get_target_position(_target))
 		_path_update_time -= _path_update_rate
 		emit_signal("state_path_set", _movement_path)
 	
 	var distance_to_walk = delta * unit.movement_speed_attr.value
 	while distance_to_walk > 0 && _movement_path.size() > 0:
-		if unit.position.distance_to(_get_target_position()) <= _distance:
+		if unit.position.distance_to(TargetHelper.get_target_position(_target)) <= _distance:
 			if _stop_on_reach:
 				return IdleNavigationState.new()
 			else:
@@ -58,10 +58,6 @@ func update(unit, delta: float):
 		distance_to_walk = _step_through_path(unit, distance_to_walk)
 		
 	return null
-
-
-func _get_target_position() -> Vector2:
-	return _target if _target is Vector2 else _target.position
 
 
 func _get_path_update_rate(from: Vector2, to: Vector2) -> float:

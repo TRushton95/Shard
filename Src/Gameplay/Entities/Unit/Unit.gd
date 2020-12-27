@@ -385,7 +385,7 @@ func cast(ability: Ability, target) -> void:
 		ability.deactivate()
 		return
 
-	var target_position = target if target is Vector2 else target.position
+	var target_position = TargetHelper.get_target_position(target)
 	
 	switch_combat_state(CastingCombatState.new(target, ability))
 	if position.distance_to(target_position) > ability.cast_range:

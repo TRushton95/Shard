@@ -20,8 +20,7 @@ func _init(target, ability) -> void:
 
 
 func on_enter(unit) -> void:
-	var clean_target_position = _target if _target is Vector2 else _target.position
-	if unit.position.distance_to(clean_target_position) <= _ability.cast_range:
+	if unit.position.distance_to(TargetHelper.get_target_position(_target)) <= _ability.cast_range:
 		_start_cast(unit)
 
 
@@ -34,8 +33,7 @@ func on_leave(unit) -> void:
 func update(unit, delta: float):
 	# If ability has not yet been cast then player was out of range, check if player can cast yet
 	if !_cast:
-		var clean_target_position = _target if _target is Vector2 else _target.position
-		if unit.position.distance_to(clean_target_position) <= _ability.cast_range:
+		if unit.position.distance_to(TargetHelper.get_target_position(_target)) <= _ability.cast_range:
 			_start_cast(unit)
 			
 		return
