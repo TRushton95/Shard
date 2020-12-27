@@ -3,6 +3,7 @@
 [ext_resource path="res://Gameplay/UI/StatusEffectBar/StatusEffectBar.gd" type="Script" id=1]
 
 [node name="StatusEffectBar" type="GridContainer"]
+mouse_filter = 2
 columns = 8
 script = ExtResource( 1 )
 __meta__ = {
