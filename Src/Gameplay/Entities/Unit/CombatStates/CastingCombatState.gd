@@ -68,7 +68,7 @@ func _start_cast(unit) -> void:
 		unit.set_default_arms_animation(unit.AnimationType.CASTING)
 	else:
 		var casting_animation = unit._get_animation_name(unit.AnimationType.CASTING, unit.direction)
-		unit.play_arms_animation(casting_animation)
+		unit.play_priority_arms_animation(casting_animation)
 	
 	_start_global_cooldown(unit)
 	_connect_signals(unit)
