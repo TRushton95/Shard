@@ -1,7 +1,7 @@
 extends Node
 class_name IdleNavigationState
 
-var state_name = "IdleState"
+var state_name = "IdleNavigationState"
 
 
 func on_enter(unit) -> void:

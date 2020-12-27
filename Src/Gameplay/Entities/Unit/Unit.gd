@@ -352,7 +352,7 @@ func _set_current_mana(value: int) -> void:
 ########################
 
 func move_to_point(point: Vector2) -> void:
-	switch_navigation_state(MovementState.new(point))
+	switch_navigation_state(MovementNavigationState.new(point))
 	
 	if is_casting || is_channelling:
 		print("Interrupted")
@@ -368,7 +368,7 @@ func stop_moving() -> void:
 
 
 func attack_target(target: Unit) -> void:
-	switch_navigation_state(PursueState.new(target, basic_attack_range, false))
+	switch_navigation_state(PursueNavigationState.new(target, basic_attack_range, false))
 	switch_combat_state(AttackingCombatState.new(target))
 
 
@@ -389,7 +389,7 @@ func cast(ability: Ability, target) -> void:
 	
 	switch_combat_state(CastingCombatState.new(target, ability))
 	if position.distance_to(target_position) > ability.cast_range:
-		switch_navigation_state(PursueState.new(target, ability.cast_range, true))
+		switch_navigation_state(PursueNavigationState.new(target, ability.cast_range, true))
 	elif ability.cast_time > 0  || "channel_duration" in ability:
 		switch_navigation_state(IdleNavigationState.new())
 

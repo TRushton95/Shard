@@ -52,7 +52,7 @@ _global_script_classes=[ {
 "base": "Node",
 "class": "IdleNavigationState",
 "language": "GDScript",
-"path": "res://Gameplay/Entities/Unit/NavigationStates/IdleState.gd"
+"path": "res://Gameplay/Entities/Unit/NavigationStates/IdleNavigationState.gd"
 }, {
 "base": "Node",
 "class": "Item",
@@ -70,9 +70,9 @@ _global_script_classes=[ {
 "path": "res://Gameplay/Entities/Unit/Modifier.gd"
 }, {
 "base": "Node",
-"class": "MovementState",
+"class": "MovementNavigationState",
 "language": "GDScript",
-"path": "res://Gameplay/Entities/Unit/NavigationStates/MovementState.gd"
+"path": "res://Gameplay/Entities/Unit/NavigationStates/MovementNavigationState.gd"
 }, {
 "base": "KinematicBody2D",
 "class": "Projectile",
@@ -80,9 +80,9 @@ _global_script_classes=[ {
 "path": "res://Gameplay/Entities/Abilities/Projectile/Projectile.gd"
 }, {
 "base": "Node",
-"class": "PursueState",
+"class": "PursueNavigationState",
 "language": "GDScript",
-"path": "res://Gameplay/Entities/Unit/NavigationStates/PursueState.gd"
+"path": "res://Gameplay/Entities/Unit/NavigationStates/PursueNavigationState.gd"
 }, {
 "base": "Node",
 "class": "Status",
@@ -117,9 +117,9 @@ _global_script_class_icons={
 "Item": "",
 "ModifiableAttribute": "",
 "Modifier": "",
-"MovementState": "",
+"MovementNavigationState": "",
 "Projectile": "",
-"PursueState": "",
+"PursueNavigationState": "",
 "Status": "",
 "Stopwatch": "",
 "Unit": "",
