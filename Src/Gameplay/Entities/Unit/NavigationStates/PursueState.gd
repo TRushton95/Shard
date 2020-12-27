@@ -26,13 +26,10 @@ func on_enter(unit) -> void:
 	_path_update_rate = _get_path_update_rate(unit.position, _get_target_position())
 	_connect_signals(unit)
 	
-	var animation = unit._get_animation_name(unit.AnimationType.WALKING, unit.direction)
-#	unit._play_animation(animation)
-	
-	unit._play_torso_animation(animation)
+	unit.set_default_torso_animation(unit.AnimationType.WALKING)
 	
 	if !unit.is_casting && !unit.is_channelling:
-		unit._play_arms_animation(animation)
+		unit.set_default_arms_animation(unit.AnimationType.WALKING)
 	
 	emit_signal("state_path_set", _movement_path)
 

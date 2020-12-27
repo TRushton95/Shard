@@ -150,13 +150,6 @@ func _on_channelling_progressed(duration: float) -> void:
 
 
 func _on_channelling_stopped() -> void:
-	var animation
-	if is_moving:
-		animation = _get_animation_name(AnimationType.WALKING, direction)
-	else:
-		animation = _get_animation_name(AnimationType.IDLE, direction)
-		
-	_play_animation(animation)
 	emit_signal("channelling_stopped", "test_channel_name")
 
 
@@ -347,36 +340,6 @@ func _get_animation_name(animation_type: int, current_direction: int) -> String:
 			animation_name = "casting"
 	
 	return animation_name + direction_suffix
-
-
-func _play_animation(animation_name: String) -> void:
-	print("Used a bad method")
-	var has_animation = $AnimationPlayer.has_animation(animation_name)
-	
-	if has_animation:
-		$AnimationPlayer.play(animation_name)
-	else:
-		print("Cannot find animation:" + animation_name)
-
-
-func _play_torso_animation(animation_name: String) -> void:
-	print("Used a bad method")
-	var has_animation = $AnimationPlayer.has_animation(animation_name)
-	
-	if has_animation:
-		$TorsoSprite/AnimationPlayer.play(animation_name)
-	else:
-		print("Cannot find torso animation:" + animation_name)
-
-
-func _play_arms_animation(animation_name: String) -> void:
-	print("Used a bad method")
-	var has_animation = $AnimationPlayer.has_animation(animation_name)
-	
-	if has_animation:
-		$ArmsSprite/AnimationPlayer.play(animation_name)
-	else:
-		print("Cannot find arms animation:" + animation_name)
 
 
 func _set_current_health(value: int) -> void:
