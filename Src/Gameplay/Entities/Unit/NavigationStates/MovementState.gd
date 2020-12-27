@@ -20,8 +20,8 @@ func on_enter(unit) -> void:
 	_movement_path = NavigationHelper.get_simple_path(unit.position, _destination)
 	_connect_signals(unit)
 	
-	unit.set_default_torso_animation(unit.AnimationType.WALKING)
-	unit.set_default_arms_animation(unit.AnimationType.WALKING)
+	unit.set_default_torso_animation_type(Enums.UnitAnimationType.WALKING)
+	unit.set_default_arms_animation_type(Enums.UnitAnimationType.WALKING)
 	
 	emit_signal("state_path_set", _movement_path)
 

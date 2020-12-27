@@ -16,8 +16,8 @@ var is_moving := false
 var is_casting := false
 var is_channelling := false
 var is_basic_attacking := false
-var default_torso_animation = AnimationType.IDLE
-var default_arms_animation = AnimationType.IDLE
+var default_torso_animation_type = Enums.UnitAnimationType.IDLE
+var default_arms_animation_type = Enums.UnitAnimationType.IDLE
 var playing_priority_arms_animation := false
 var playing_priority_torso_animation := false
 
@@ -25,8 +25,7 @@ var _navigation_state = IdleNavigationState.new()
 var _combat_state = IdleCombatState.new()
 
 enum State { IDLE, MOVING, PURSUING }
-enum Direction { DOWN, LEFT, RIGHT, UP }
-enum AnimationType { IDLE, WALKING, CASTING }
+enum Direction { UP, DOWN, LEFT, RIGHT }
 
 var base_movement_speed := 250
 var base_health := 50
@@ -185,8 +184,8 @@ func _ready() -> void:
 	$UnitProfile/VBoxContainer/SmallHealthBar.value = current_health
 	$AutoAttackTimer.one_shot = true
 	
-	set_default_torso_animation(AnimationType.IDLE)
-	set_default_arms_animation(AnimationType.IDLE)
+	set_default_torso_animation_type(Enums.UnitAnimationType.IDLE)
+	set_default_arms_animation_type(Enums.UnitAnimationType.IDLE)
 
 
 func _process(delta: float) -> void:
@@ -332,11 +331,11 @@ func _get_animation_name(animation_type: int, current_direction: int) -> String:
 	
 	var animation_name = ""
 	match animation_type:
-		AnimationType.IDLE:
+		Enums.UnitAnimationType.IDLE:
 			animation_name = "idle"
-		AnimationType.WALKING:
+		Enums.UnitAnimationType.WALKING:
 			animation_name = "walking"
-		AnimationType.CASTING:
+		Enums.UnitAnimationType.CASTING:
 			animation_name = "casting"
 	
 	return animation_name + direction_suffix
@@ -464,24 +463,24 @@ func is_basic_attack_off_cooldown() -> bool:
 	return _is_basic_attack_ready
 
 
-func set_default_arms_animation(anim_name) -> void:
-	_set_arms_animation_type_looping(default_arms_animation, false)
-	default_arms_animation = anim_name
-	_set_arms_animation_type_looping(default_arms_animation, true)
+func set_default_arms_animation_type(anim_type) -> void:
+	_set_arms_animation_type_looping(default_arms_animation_type, false)
+	default_arms_animation_type = anim_type
+	_set_arms_animation_type_looping(default_arms_animation_type, true)
 	
 	if !playing_priority_arms_animation:
-		var default = _get_animation_name(default_arms_animation, direction)
+		var default = _get_animation_name(default_arms_animation_type, direction)
 		#FIXME: This seems to be playing the previous direction, direction not updated yet at this point?
 		$ArmsSprite/AnimationPlayer.play(default)
 
 
-func set_default_torso_animation(anim_name) -> void:
-	_set_torso_animation_type_looping(default_torso_animation, false)
-	default_torso_animation = anim_name
-	_set_torso_animation_type_looping(default_torso_animation, true)
+func set_default_torso_animation_type(anim_type) -> void:
+	_set_torso_animation_type_looping(default_torso_animation_type, false)
+	default_torso_animation_type = anim_type
+	_set_torso_animation_type_looping(default_torso_animation_type, true)
 		
 	if !playing_priority_torso_animation:
-		var default = _get_animation_name(default_torso_animation, direction)
+		var default = _get_animation_name(default_torso_animation_type, direction)
 		$TorsoSprite/AnimationPlayer.play(default)
 
 
@@ -551,7 +550,7 @@ func _set_torso_animation_type_looping(animation_type: int, loop: bool) -> void:
 
 func _on_ArmsAnimationPlayer_animation_finished(anim_name):
 	playing_priority_arms_animation = false
-	var default_animation = _get_animation_name(default_arms_animation, direction)
+	var default_animation = _get_animation_name(default_arms_animation_type, direction)
 	$ArmsSprite/AnimationPlayer.play(default_animation)
 	
 	# Sync up with body animation
@@ -561,7 +560,7 @@ func _on_ArmsAnimationPlayer_animation_finished(anim_name):
 
 func _on_TorsoAnimationPlayer_animation_finished(anim_name):
 	playing_priority_torso_animation = false
-	var default_animation = _get_animation_name(default_torso_animation, direction)
+	var default_animation = _get_animation_name(default_torso_animation_type, direction)
 	$TorsoSprite/AnimationPlayer.play(default_animation)
 	
 	# Sync up with arms animation
