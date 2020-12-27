@@ -66,7 +66,7 @@ func _start_cast(unit) -> void:
 	
 	if _ability.cast_time > 0:
 		unit.set_default_arms_animation_type(Enums.UnitAnimationType.CASTING)
-	else:
+	elif !"channel_duration" in _ability:
 		var casting_animation = unit._get_animation_name(Enums.UnitAnimationType.CASTING, unit.direction)
 		unit.play_priority_arms_animation(casting_animation)
 	
