@@ -199,12 +199,6 @@ func _process(delta: float) -> void:
 		if new_combat_state:
 			switch_combat_state(new_combat_state)
 		
-		
-#	if casting_index >= 0:
-#		emit_signal("casting_progressed", $CastTimer.wait_time - $CastTimer.time_left)
-#	elif channelling_index >= 0:
-#		emit_signal("channelling_progressed", $ChannelStopwatch.get_time_remaining())
-		
 	if $AutoAttackTimer.time_left > 0:
 		emit_signal("auto_attack_cooldown_progressed", $AutoAttackTimer.time_left)
 
@@ -237,14 +231,6 @@ remotesync func interrupt() -> void:
 	if is_casting || is_channelling:
 		print("Interrupted")
 		switch_combat_state(IdleCombatState.new())
-		
-#	if casting_index >= 0:
-#		print("Interrupted cast")
-#		stop_cast()
-#
-#	if channelling_index >= 0:
-#		print("Interrupted channel")
-#		stop_channelling()
 
 
 remotesync func push_status_effect(status_effect_data: Dictionary) -> void:

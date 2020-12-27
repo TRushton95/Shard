@@ -21,6 +21,7 @@ func _init(target, ability) -> void:
 
 func on_enter(unit) -> void:
 	unit.is_channelling = true
+	unit.set_default_arms_animation_type(Enums.UnitAnimationType.CASTING)
 	_connect_signals(unit)
 	emit_signal("channelling_started", _ability.channel_duration)
 
@@ -37,6 +38,10 @@ func update(unit, delta: float):
 	emit_signal("channelling_progressed", _progress)
 	
 	if _tick_progress >= _ability.tick_rate:
+		if "channel_cost" in _ability && unit.current_mana < _ability.channel_cost:
+			print("Insufficient mana for channel")
+			return IdleCombatState.new()
+			
 		_ability._on_caster_channelling_ticked(_target, unit)
 		_tick_progress = _tick_progress - _ability.tick_rate
 	
