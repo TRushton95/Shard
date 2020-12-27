@@ -350,7 +350,7 @@ func _process(_delta: float) -> void:
 	if Input.is_action_just_pressed("stop"):
 		if player.casting_index >= 0 || player.channelling_index >= 0:
 			player.rpc("interrupt")
-		if player.is_casting:
+		if player.is_casting || player.is_channelling:
 			rpc("_unit_stop_cast", player_name)
 		if player.is_moving:
 			rpc("_unit_stop_moving", player_name)
@@ -644,6 +644,5 @@ remotesync func _unit_attack_target(unit_name: String, target_name: String) -> v
 
 
 remotesync func _unit_stop_cast(unit_name: String) -> void:
-	get_node(unit_name).stop_cast()
-	# TODO: Include channelling in this, not added to player api yet
+	get_node(unit_name).interrupt()
 

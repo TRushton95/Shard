@@ -394,18 +394,6 @@ func cast(ability: Ability, target) -> void:
 		switch_navigation_state(IdleNavigationState.new())
 
 
-func stop_cast() -> void:
-	if casting_index == -1:
-		print("Unit is not casting")
-		return
-		
-	var ability = get_node("Abilities").get_child(casting_index)
-	
-	print("Stopping cast")
-	casting_index = -1
-	emit_signal("casting_stopped", ability.name)
-
-
 func switch_navigation_state(new_state) -> void:
 	if !new_state:
 		print("No new navigation state provided")
