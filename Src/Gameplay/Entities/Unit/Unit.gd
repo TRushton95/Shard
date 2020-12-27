@@ -128,27 +128,27 @@ func _on_state_path_removed() -> void:
 	emit_signal("path_finished")
 
 
-func _on_casting_started(duration) -> void:
-	emit_signal("casting_started", "test_ability_name", duration)
+func _on_casting_started(ability: Ability) -> void:
+	emit_signal("casting_started", ability.name, ability.cast_time)
 
 
-func _on_casting_progressed(duration: float) -> void:
+func _on_casting_progressed(ability: Ability, duration: float) -> void:
 	emit_signal("casting_progressed", duration)
 
 
-func _on_casting_stopped() -> void:
-	emit_signal("casting_stopped", "test_ability_name")
+func _on_casting_stopped(ability: Ability) -> void:
+	emit_signal("casting_stopped", ability.name)
 
 
-func _on_channelling_started(duration) -> void:
-	emit_signal("channelling_started", "test_channel_name", duration)
+func _on_channelling_started(ability: Ability) -> void:
+	emit_signal("channelling_started", ability.name, ability.channel_duration)
 
 
-func _on_channelling_progressed(duration: float) -> void:
+func _on_channelling_progressed(ability: Ability, duration: float) -> void:
 	emit_signal("channelling_progressed", duration)
 
 
-func _on_channelling_stopped() -> void:
+func _on_channelling_stopped(ability: Ability) -> void:
 	emit_signal("channelling_stopped", "test_channel_name")
 
 

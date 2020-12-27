@@ -8,9 +8,9 @@ var _ability : Ability
 var _progress := 0.0
 var _cast := false
 
-signal casting_started(cast_time)
-signal casting_progressed(progress)
-signal casting_stopped
+signal casting_started(ability)
+signal casting_progressed(ability, duration)
+signal casting_stopped(ability)
 
 
 func _init(target, ability) -> void:
@@ -27,7 +27,7 @@ func on_enter(unit) -> void:
 
 func on_leave(unit) -> void:
 	unit.is_casting = false
-	emit_signal("casting_stopped")
+	emit_signal("casting_stopped", _ability)
 	_disconnect_signals(unit)
 
 
@@ -41,7 +41,7 @@ func update(unit, delta: float):
 		return
 		
 	_progress += delta
-	emit_signal("casting_progressed", _progress)
+	emit_signal("casting_progressed", _ability, _progress)
 	
 	if _progress >= _ability.cast_time:
 		if "cost" in _ability && unit.current_mana < _ability.cost:
@@ -73,7 +73,7 @@ func _start_cast(unit) -> void:
 	_start_global_cooldown(unit)
 	_connect_signals(unit)
 	
-	emit_signal("casting_started", _ability.cast_time)
+	emit_signal("casting_started", _ability)
 
 
 func _start_global_cooldown(unit) -> void:
