@@ -201,7 +201,7 @@ func _on_unit_mana_changed(_value: int, unit: Unit) -> void:
 
 
 func _on_unit_casting_started(ability_name: String, duration: float, unit: Unit) -> void:
-	if unit == player:
+	if unit == player && duration > 0.0:
 		$CanvasLayer/CastBar.initialise(ability_name, duration)
 		$CanvasLayer/CastBar.show()
 		
