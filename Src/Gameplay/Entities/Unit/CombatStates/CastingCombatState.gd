@@ -54,7 +54,7 @@ func update(unit, delta: float):
 		if "cost" in _ability:
 			unit._set_current_mana(unit.current_mana - _ability.cost)
 		
-		if "channel_duration" in _ability && _ability.channel_duration > 0:
+		if "channel_time" in _ability && _ability.channel_time > 0:
 			return ChannellingCombatState.new(_target, _ability)
 			
 		return IdleCombatState.new()
@@ -66,7 +66,7 @@ func _start_cast(unit) -> void:
 	
 	if _ability.cast_time > 0:
 		unit.set_default_arms_animation_type(Enums.UnitAnimationType.CASTING)
-	elif !"channel_duration" in _ability:
+	elif !"channel_time" in _ability:
 		var casting_animation = unit._get_animation_name(Enums.UnitAnimationType.CASTING, unit.direction)
 		unit.play_priority_arms_animation(casting_animation)
 	

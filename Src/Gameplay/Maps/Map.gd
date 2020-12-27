@@ -222,9 +222,9 @@ func _on_unit_casting_stopped(ability_name: String, unit: Unit) -> void:
 		action_button.set_active(false)
 
 
-func _on_unit_channelling_started(ability_name: String, channel_duration: float, unit: Unit) -> void:
+func _on_unit_channelling_started(ability_name: String, channel_time: float, unit: Unit) -> void:
 	if unit == player:
-		$CanvasLayer/CastBar.initialise(ability_name, channel_duration)
+		$CanvasLayer/CastBar.initialise(ability_name, channel_time)
 		$CanvasLayer/CastBar.show()
 		
 		for action_button in _get_action_buttons_by_action_name(ability_name):

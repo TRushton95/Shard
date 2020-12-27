@@ -16,7 +16,7 @@ signal channelling_stopped(ability)
 func _init(target, ability) -> void:
 	_target = target
 	_ability = ability
-	_progress = ability.channel_duration
+	_progress = ability.channel_time
 
 
 func on_enter(unit) -> void:

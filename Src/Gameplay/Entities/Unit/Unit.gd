@@ -141,7 +141,7 @@ func _on_casting_stopped(ability: Ability) -> void:
 
 
 func _on_channelling_started(ability: Ability) -> void:
-	emit_signal("channelling_started", ability.name, ability.channel_duration)
+	emit_signal("channelling_started", ability.name, ability.channel_time)
 
 
 func _on_channelling_progressed(ability: Ability, duration: float) -> void:
@@ -390,7 +390,7 @@ func cast(ability: Ability, target) -> void:
 	switch_combat_state(CastingCombatState.new(target, ability))
 	if position.distance_to(target_position) > ability.cast_range:
 		switch_navigation_state(PursueNavigationState.new(target, ability.cast_range, true))
-	elif ability.cast_time > 0  || "channel_duration" in ability:
+	elif ability.cast_time > 0  || "channel_time" in ability:
 		switch_navigation_state(IdleNavigationState.new())
 
 
