@@ -9,8 +9,8 @@ var player : Unit
 var player_name : String
 var selected_unit : Unit
 var selected_action_lookup : ActionLookup
-var force_dragged_button : ActionButton
-var force_dragged_button_clone
+var button_drag_handled := false
+var dragging_button : ActionButton
 
 
 #This should hook into whatever mechanism determines when an ability key is clicked
@@ -44,7 +44,8 @@ func _on_action_button_mouse_exited(button: ActionButton) -> void:
 	$CanvasLayer/Tooltip.hide()
 
 
-func _on_action_button_dragged() -> void:
+func _on_action_button_dragged(button: ActionButton) -> void:
+	dragging_button = button
 	$CanvasLayer/Tooltip.hide()
 
 
@@ -55,6 +56,8 @@ func _on_Bag_button_dropped_in_slot(button: ActionButton, slot: ButtonSlot) -> v
 			var to_index = slot.get_index()
 			$CanvasLayer/Bag.move(from_index, to_index)
 			player.get_node("Inventory").move(from_index, to_index)
+			
+	button_drag_handled = true
 
 
 func _on_Bag_button_dropped_on_button(dropped_button: ActionButton, target_button: ActionButton) -> void:
@@ -64,6 +67,8 @@ func _on_Bag_button_dropped_on_button(dropped_button: ActionButton, target_butto
 			var to_index = $CanvasLayer/Bag.get_button_index(target_button)
 			$CanvasLayer/Bag.move(from_index, to_index)
 			player.get_node("Inventory").move(from_index, to_index)
+			
+	button_drag_handled = true
 
 
 func _on_ActionBar_button_dropped_in_slot(button: ActionButton, slot: ButtonSlot) -> void:
@@ -80,6 +85,8 @@ func _on_ActionBar_button_dropped_in_slot(button: ActionButton, slot: ButtonSlot
 			var from_index = $CanvasLayer/ActionBar.get_button_index(button)
 			var to_index = slot.get_index()
 			$CanvasLayer/ActionBar.move(from_index, to_index)
+			
+	button_drag_handled = true
 
 
 func _on_ActionBar_button_dropped_on_button(dropped_button: ActionButton, target_button: ActionButton) -> void:
@@ -87,6 +94,8 @@ func _on_ActionBar_button_dropped_on_button(dropped_button: ActionButton, target
 	var to_index = $CanvasLayer/ActionBar.get_button_index(target_button)
 	$CanvasLayer/ActionBar.move(from_index, to_index)
 	target_button.start_force_drag()
+	
+	button_drag_handled = true
 
 
 func _on_unit_left_clicked(unit: Unit) -> void:
@@ -407,7 +416,10 @@ func process_ability_press(action_lookup: ActionLookup):
 
 
 func _unhandled_input(event) -> void:
-	if event is InputEventMouseButton && event.pressed:
+	if !event is InputEventMouseButton:
+		return
+		
+	if event.pressed:
 		if event.button_index == BUTTON_RIGHT:
 			rpc("_unit_move_to_point", player_name, get_global_mouse_position())
 			if selected_action_lookup && selected_action_lookup.is_valid():
@@ -422,6 +434,20 @@ func _unhandled_input(event) -> void:
 					select_ability(null)
 			else:
 				select_unit(null)
+				
+	else:
+		if event.button_index == BUTTON_LEFT:
+			if dragging_button:
+				if !button_drag_handled:
+					match dragging_button.source:
+						Enums.ButtonSource.ActionBar:
+							var button_index = $CanvasLayer/ActionBar.get_button_index(dragging_button)
+							$CanvasLayer/ActionBar.remove_action_button(button_index)
+							
+				button_drag_handled = false
+				dragging_button = null
+				
+			
 
 
 func setup(player_name: String, player_lookup: Dictionary) -> void:
@@ -579,7 +605,7 @@ func _create_action_button(action_name: String, icon: Texture, action_source: in
 	action_button.connect("mouse_entered", self, "_on_action_button_mouse_entered", [action_button])
 	action_button.connect("mouse_exited", self, "_on_action_button_mouse_exited", [action_button])
 	action_button.connect("pressed", self, "_on_action_button_pressed", [action_button])
-	action_button.connect("dragged", self, "_on_action_button_dragged")
+	action_button.connect("dragged", self, "_on_action_button_dragged", [action_button])
 	
 	return action_button
 
