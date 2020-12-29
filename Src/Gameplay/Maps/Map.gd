@@ -19,7 +19,7 @@ func _on_ability_button_pressed(button: ActionButton) -> void:
 
 
 func _on_ability_button_mouse_entered(button: ActionButton) -> void:
-	if button.action_lookup.source == Enums.ActionSource.Ability:
+	if button.action_lookup.source == Enums.ActionSource.Spell:
 		var ability = player.get_node("Abilities").get_child(button.action_lookup.index)
 		
 		$CanvasLayer/Tooltip.set_name(ability.name)
@@ -376,7 +376,7 @@ func _process(_delta: float) -> void:
 func find_action(action_lookup: ActionLookup) -> Ability:
 	var result
 	
-	if action_lookup.source == Enums.ActionSource.Ability:
+	if action_lookup.source == Enums.ActionSource.Spell:
 		var ability = player.get_node("Abilities").get_child(action_lookup.index)
 		result = ability
 	elif action_lookup.source == Enums.ActionSource.Inventory:
@@ -495,10 +495,10 @@ func setup(player_name: String, player_lookup: Dictionary) -> void:
 				if ability.get_index() == 0: # HACK: To leave out basic attack, should add an ability category
 					continue
 				
-				var action_bar_button = _create_action_button(ability.name, ability.icon, Enums.ActionSource.Ability, ability.get_index(), Enums.ButtonSource.ActionBar)
+				var action_bar_button = _create_action_button(ability.name, ability.icon, Enums.ActionSource.Spell, ability.get_index(), Enums.ButtonSource.ActionBar)
 				$CanvasLayer/ActionBar.add_action_button(action_bar_button)
 				
-				var spellbook_button = _create_action_button(ability.name, ability.icon, Enums.ActionSource.Ability, ability.get_index(), Enums.ButtonSource.Spellbook)
+				var spellbook_button = _create_action_button(ability.name, ability.icon, Enums.ActionSource.Spell, ability.get_index(), Enums.ButtonSource.Spellbook)
 				$CanvasLayer/Spellbook.add_entry(ability.name, spellbook_button)
 			
 			$CanvasLayer/ActionBar.set_max_health(unit.health_attr.value)
