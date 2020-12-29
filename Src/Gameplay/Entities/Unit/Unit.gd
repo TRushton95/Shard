@@ -152,6 +152,25 @@ func _on_channelling_stopped(ability: Ability) -> void:
 	emit_signal("channelling_stopped", "test_channel_name")
 
 
+func _on_ArmsAnimationPlayer_animation_finished(anim_name):
+	playing_priority_arms_animation = false
+	var default_animation = _get_animation_name(default_arms_animation_type, direction)
+	$ArmsSprite/AnimationPlayer.play(default_animation)
+	
+	# Sync up with body animation
+	var body_animation_position = $TorsoSprite/AnimationPlayer.current_animation_position
+	$ArmsSprite/AnimationPlayer.seek(body_animation_position, true)
+
+
+func _on_TorsoAnimationPlayer_animation_finished(anim_name):
+	playing_priority_torso_animation = false
+	var default_animation = _get_animation_name(default_torso_animation_type, direction)
+	$TorsoSprite/AnimationPlayer.play(default_animation)
+	
+	# Sync up with arms animation
+	var arms_animation_position = $ArmsSprite/AnimationPlayer.current_animation_position
+	$TorsoSprite/AnimationPlayer.seek(arms_animation_position, true)
+
 # End of Stat change handlers
 
 
@@ -532,26 +551,6 @@ func _set_torso_animation_type_looping(animation_type: int, loop: bool) -> void:
 	for value in Direction.values():
 		var default_animation = _get_animation_name(animation_type, value)
 		$TorsoSprite/AnimationPlayer.get_animation(default_animation).set_loop(loop)
-
-
-func _on_ArmsAnimationPlayer_animation_finished(anim_name):
-	playing_priority_arms_animation = false
-	var default_animation = _get_animation_name(default_arms_animation_type, direction)
-	$ArmsSprite/AnimationPlayer.play(default_animation)
-	
-	# Sync up with body animation
-	var body_animation_position = $TorsoSprite/AnimationPlayer.current_animation_position
-	$ArmsSprite/AnimationPlayer.seek(body_animation_position, true)
-
-
-func _on_TorsoAnimationPlayer_animation_finished(anim_name):
-	playing_priority_torso_animation = false
-	var default_animation = _get_animation_name(default_torso_animation_type, direction)
-	$TorsoSprite/AnimationPlayer.play(default_animation)
-	
-	# Sync up with arms animation
-	var arms_animation_position = $ArmsSprite/AnimationPlayer.current_animation_position
-	$TorsoSprite/AnimationPlayer.seek(arms_animation_position, true)
 
 
 func _is_team_target_valid(ability: Ability, target) -> bool:

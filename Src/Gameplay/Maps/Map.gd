@@ -14,11 +14,11 @@ var force_dragged_button_clone
 
 
 #This should hook into whatever mechanism determines when an ability key is clicked
-func _on_ability_button_pressed(button: ActionButton) -> void:
+func _on_action_button_pressed(button: ActionButton) -> void:
 	process_ability_press(button.action_lookup)
 
 
-func _on_ability_button_mouse_entered(button: ActionButton) -> void:
+func _on_action_button_mouse_entered(button: ActionButton) -> void:
 	if button.action_lookup.source == Enums.ActionSource.Spell:
 		var ability = player.get_node("Abilities").get_child(button.action_lookup.index)
 		
@@ -40,11 +40,11 @@ func _on_ability_button_mouse_entered(button: ActionButton) -> void:
 		$CanvasLayer/Tooltip.rect_position = button.get_global_rect().position - Vector2(0, $CanvasLayer/Tooltip.rect_size.y + 20)
 
 
-func _on_ability_button_mouse_exited(button: ActionButton) -> void:
+func _on_action_button_mouse_exited(button: ActionButton) -> void:
 	$CanvasLayer/Tooltip.hide()
 
 
-func _on_ability_button_dragged() -> void:
+func _on_action_button_dragged() -> void:
 	$CanvasLayer/Tooltip.hide()
 
 
@@ -517,19 +517,6 @@ func setup(player_name: String, player_lookup: Dictionary) -> void:
 			$CanvasLayer/ActionBar.connect("button_dropped_in_slot", self, "_on_ActionBar_button_dropped_in_slot")
 			$CanvasLayer/ActionBar.connect("button_dropped_on_button", self, "_on_ActionBar_button_dropped_on_button")
 			
-#			var item_ability = unit.get_node("Inventory").get_child(0).get_ability()
-#			var icon = item_ability.icon # This should probably be the icon from the item, not the ability
-#			var action_lookup = ActionLookup.new(Enums.ActionSource.Inventory, item_ability.get_index())
-#			$CanvasLayer/Inventory.add_item(icon).connect("clicked", self, "_on_ability_button_clicked", [action_lookup])
-			
-			# PATHING TEST #
-#			$Enemy.rset("focus", unit)
-#			var movement_path = $Navigation2D.get_simple_path($Enemy.position, unit.position)
-#			$Enemy.rset("auto_attack_enabled", false)
-#			$Enemy.rpc("set_movement_path", movement_path)
-#			$Enemy.movement_speed_attr.push_modifier(Modifier.new(0.5, Enums.ModifierType.Multiplicative))
-			# PATHING TEST #
-			
 		spawn_index += 1
 
 
@@ -589,10 +576,10 @@ func _create_action_button(action_name: String, icon: Texture, action_source: in
 	action_button.source = button_source
 	action_button.add_to_group("action_buttons")
 	
-	action_button.connect("mouse_entered", self, "_on_ability_button_mouse_entered", [action_button])
-	action_button.connect("mouse_exited", self, "_on_ability_button_mouse_exited", [action_button])
-	action_button.connect("pressed", self, "_on_ability_button_pressed", [action_button])
-	action_button.connect("dragged", self, "_on_ability_button_dragged")
+	action_button.connect("mouse_entered", self, "_on_action_button_mouse_entered", [action_button])
+	action_button.connect("mouse_exited", self, "_on_action_button_mouse_exited", [action_button])
+	action_button.connect("pressed", self, "_on_action_button_pressed", [action_button])
+	action_button.connect("dragged", self, "_on_action_button_dragged")
 	
 	return action_button
 
