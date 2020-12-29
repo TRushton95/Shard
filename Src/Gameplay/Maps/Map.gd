@@ -308,12 +308,25 @@ func _process(_delta: float) -> void:
 	# End of test commands
 	
 	if Input.is_action_just_pressed("cancel"):
-		if $CanvasLayer/CharacterPanel.visible:
-			$CanvasLayer/CharacterPanel.visible = !$CanvasLayer/CharacterPanel.visible
-		elif selected_unit:
-			select_unit(null)
-		elif selected_action_lookup && selected_action_lookup.is_valid():
+		var handled = false
+		
+		if selected_action_lookup && selected_action_lookup.is_valid():
 			select_ability(null)
+			handled = true
+		
+		if !handled:
+			if $CanvasLayer/CharacterPanel.visible:
+				$CanvasLayer/CharacterPanel.visible = false
+				handled = true
+			if $CanvasLayer/Spellbook.visible:
+				$CanvasLayer/Spellbook.visible = false
+				handled = true
+			if $CanvasLayer/Bag.visible:
+				$CanvasLayer/Bag.visible = false
+				handled = true
+			
+		if !handled && selected_unit:
+			select_unit(null)
 	
 	if Input.is_action_just_pressed("toggle_character_panel"):
 		$CanvasLayer/CharacterPanel.visible = !$CanvasLayer/CharacterPanel.visible
