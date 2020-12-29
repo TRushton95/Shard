@@ -373,6 +373,10 @@ func attack_target(target: Unit) -> void:
 
 
 func cast(ability: Ability, target) -> void:
+	if !_is_team_target_valid(ability, target):
+		print("Invalid target")
+		return
+		
 	if ability.is_on_cooldown():
 		print("Cannot cast ability while it is on cooldown")
 		return
@@ -540,3 +544,8 @@ func _on_TorsoAnimationPlayer_animation_finished(anim_name):
 	# Sync up with arms animation
 	var arms_animation_position = $ArmsSprite/AnimationPlayer.current_animation_position
 	$TorsoSprite/AnimationPlayer.seek(arms_animation_position, true)
+
+
+func _is_team_target_valid(ability: Ability, target) -> bool:
+	# If ability targets a unit and the target is a unit of a different team to the ability target team
+	return !(typeof(target) == TYPE_OBJECT && target.get_type() == "Unit" && ability.target_type == Enums.TargetType.Unit && ability.target_team != target.team)

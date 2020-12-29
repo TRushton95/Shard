@@ -8,15 +8,14 @@ var action_button_scene = load("res://Gameplay/UI/ActionButton/ActionButton.tscn
 var player : Unit
 var player_name : String
 var selected_unit : Unit
-var selected_ability : Ability
+var selected_action_lookup : ActionLookup
 var force_dragged_button : ActionButton
 var force_dragged_button_clone
 
 
 #This should hook into whatever mechanism determines when an ability key is clicked
 func _on_ability_button_pressed(button: ActionButton) -> void:
-	var ability = find_action(button.action_lookup)
-	process_ability_press(ability)
+	process_ability_press(button.action_lookup)
 
 
 func _on_ability_button_mouse_entered(button: ActionButton) -> void:
@@ -91,12 +90,8 @@ func _on_ActionBar_button_dropped_on_button(dropped_button: ActionButton, target
 
 
 func _on_unit_left_clicked(unit: Unit) -> void:
-	if selected_ability:
-		if !_is_team_target_valid(selected_ability, unit):
-			print("Invalid target")
-			return
-			
-		rpc("_unit_cast", player_name, selected_ability.get_index(), unit.name)
+	if selected_action_lookup && selected_action_lookup.is_valid():
+		rpc("_unit_cast", player_name, selected_action_lookup.source, selected_action_lookup.index, unit.name)
 		select_unit(unit)
 		select_ability(null)
 	else:
@@ -308,7 +303,7 @@ func _process(_delta: float) -> void:
 			$CanvasLayer/CharacterPanel.visible = !$CanvasLayer/CharacterPanel.visible
 		elif selected_unit:
 			select_unit(null)
-		elif selected_ability:
+		elif selected_action_lookup && selected_action_lookup.is_valid():
 			select_ability(null)
 	
 	if Input.is_action_just_pressed("toggle_character_panel"):
@@ -364,13 +359,7 @@ func _process(_delta: float) -> void:
 		var pressed_button = $CanvasLayer/ActionBar.get_button(button_index)
 		
 		if pressed_button:
-			var ability = find_action(pressed_button.action_lookup)
-		
-			if ability.target_type == Enums.TargetType.Unset:
-				print("Target type not set on casted ability " + ability.name)
-				return
-				
-			process_ability_press(ability)
+			process_ability_press(pressed_button.action_lookup)
 		
 	for status in player.get_node("StatusEffects").get_children():
 		var index = status.get_index()
@@ -397,23 +386,21 @@ func find_action(action_lookup: ActionLookup) -> Ability:
 	return result
 
 
-func process_ability_press(ability: Ability):
+func process_ability_press(action_lookup: ActionLookup):
+	var ability = find_action(action_lookup)
+	
 	match ability.target_type:
 		Enums.TargetType.Self:
-				rpc("_unit_cast", player_name, ability.get_index(), player_name)
+				rpc("_unit_cast", player_name, action_lookup.source, action_lookup.index, player_name)
 		Enums.TargetType.Unit:
 			if selected_unit && ability.autocast_on_target:
-				if !_is_team_target_valid(ability, selected_unit):
-					print("Invalid target")
-					return
-				
-				rpc("_unit_cast", player_name, ability.get_index(), selected_unit.name)
+				rpc("_unit_cast", player_name, action_lookup.source, action_lookup.index, selected_unit.name)
 				select_ability(null)
 			else:
-				select_ability(ability)
+				select_ability(action_lookup)
 				
 		Enums.TargetType.Position:
-			select_ability(ability)
+			select_ability(action_lookup)
 			
 		_:
 			print("Invalid target type on ability press")
@@ -423,13 +410,16 @@ func _unhandled_input(event) -> void:
 	if event is InputEventMouseButton && event.pressed:
 		if event.button_index == BUTTON_RIGHT:
 			rpc("_unit_move_to_point", player_name, get_global_mouse_position())
-			if selected_ability:
+			if selected_action_lookup && selected_action_lookup.is_valid():
 				select_ability(null)
 			
 		elif event.button_index == BUTTON_LEFT:
-			if selected_ability && selected_ability.target_type == Enums.TargetType.Position:
-				rpc("_unit_cast", player_name, selected_ability.get_index(), get_global_mouse_position())
-				select_ability(null)
+			if selected_action_lookup && selected_action_lookup.is_valid():
+				var ability = find_action(selected_action_lookup)
+				
+				if ability && ability.target_type == Enums.TargetType.Position:
+					rpc("_unit_cast", player_name, selected_action_lookup.source, selected_action_lookup.index, get_global_mouse_position())
+					select_ability(null)
 			else:
 				select_unit(null)
 
@@ -562,17 +552,19 @@ func select_unit(unit: Unit) -> void:
 		$CanvasLayer/TargetFrame.hide()
 
 
-func select_ability(ability: Ability) -> void:
+func select_ability(action_lookup: ActionLookup) -> void:
 	# Deselect any currently selected ability buttons
-	if selected_ability:
+	if selected_action_lookup && selected_action_lookup.is_valid():
+		var selected_ability = find_action(selected_action_lookup)
 		for action_button in _get_action_buttons_by_action_name(selected_ability.name):
 			action_button.darken()
 				
-	if !ability:
-		selected_ability = null
+	if !action_lookup || !action_lookup.is_valid():
+		selected_action_lookup = null
 		Input.set_custom_mouse_cursor(null)
 		return
 		
+	var ability = find_action(action_lookup)
 	if player.current_mana < ability.cost:
 		print("Insufficient mana")
 		return
@@ -581,8 +573,8 @@ func select_ability(ability: Ability) -> void:
 		print("Ability is on cooldown")
 		return
 	
-	selected_ability = ability
-	for action_button in _get_action_buttons_by_action_name(selected_ability.name):
+	selected_action_lookup = action_lookup
+	for action_button in _get_action_buttons_by_action_name(ability.name):
 		action_button.lighten()
 		
 	Input.set_custom_mouse_cursor(rainbow_cursor)
@@ -615,19 +607,14 @@ func _get_action_buttons_by_action_name(ability_name: String) -> Array:
 	return result
 
 
-func _is_team_target_valid(ability: Ability, target) -> bool:
-	# If ability targets a unit and the target is a unit of a different team to the ability target team
-	return !(typeof(target) == TYPE_OBJECT && target.get_type() == "Unit" && ability.target_type == Enums.TargetType.Unit && ability.target_team != target.team)
-
-
-remotesync func _unit_cast(unit_name: String, ability_index: int, dirty_target) -> void:
+remotesync func _unit_cast(unit_name: String, action_source: int, action_index: int, dirty_target) -> void:
 	if !dirty_target:
 		print("No target provided")
 		
 	var clean_target = dirty_target if dirty_target is Vector2 else get_node(dirty_target)
 	
 	var unit = get_node(unit_name)
-	var ability = unit.get_node("Abilities").get_child(ability_index)
+	var ability = find_action(ActionLookup.new(action_source, action_index))
 	unit.cast(ability, clean_target)
 
 
