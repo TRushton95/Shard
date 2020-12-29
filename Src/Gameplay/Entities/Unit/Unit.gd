@@ -208,6 +208,8 @@ func _ready() -> void:
 
 
 func _process(delta: float) -> void:
+	z_index = position.y
+	
 	if _navigation_state.has_method("update"):
 		var new_navigation_state = _navigation_state.update(self, delta)
 		if new_navigation_state:
