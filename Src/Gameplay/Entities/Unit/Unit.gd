@@ -308,7 +308,7 @@ func _get_direction_to_point(point: Vector2) -> int:
 	var result = -1
 	
 	var angle_rads = position.angle_to_point(point)
-	var angle = rad2deg(angle_rads)
+	var angle = stepify(rad2deg(angle_rads), 0.01) # Identical angles vary by extremely small margins, falling either side of direction breakpoints
 	
 	if angle > 45 && angle <= 135:
 		result = Direction.UP
