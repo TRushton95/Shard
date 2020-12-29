@@ -432,6 +432,7 @@ func basic_attack(target: Unit) -> void:
 	if get_tree().is_network_server():
 		target.rpc("damage", attack_power_attr.value, name)
 		
+	change_direction(_get_direction_to_point(target.position))
 	_is_basic_attack_ready = false
 	$AutoAttackTimer.start(auto_attack_speed)
 	emit_signal("auto_attack_cooldown_started", auto_attack_speed)
@@ -496,6 +497,13 @@ func change_direction(new_direction: int) -> void:
 	var full_arms_animation_name = current_arms_animation_type + "_" + direction_name
 	$ArmsSprite/AnimationPlayer.play(full_arms_animation_name)
 	$ArmsSprite/AnimationPlayer.seek(current_arms_animation_position, true)
+
+
+func face_point(point: Vector2) -> void:
+	var new_direction = _get_direction_to_point(point)
+	
+	if new_direction != direction:
+		change_direction(new_direction)
 
 
 func get_arms_animation_name() -> String:

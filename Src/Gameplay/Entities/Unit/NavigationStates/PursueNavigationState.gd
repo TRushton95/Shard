@@ -78,10 +78,7 @@ func _step_through_path(unit, distance_to_walk: int) -> int:
 	distance_to_walk -= distance_to_next_point
 	
 	if _movement_path.size() > 0:
-		var new_direction = unit._get_direction_to_point(_movement_path[0])
-		if new_direction > -1 && new_direction != unit.direction:
-			unit.direction = new_direction
-			unit.change_direction(unit.direction)
+		unit.face_point(_movement_path[0])
 		
 	return distance_to_walk
 

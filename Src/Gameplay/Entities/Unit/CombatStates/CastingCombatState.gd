@@ -68,6 +68,8 @@ func _start_cast(unit) -> void:
 		var casting_animation = unit._get_animation_name(Enums.UnitAnimationType.CASTING, unit.direction)
 		unit.play_priority_arms_animation(casting_animation)
 	
+	var target_position = TargetHelper.get_target_position(_target)
+	unit.face_point(target_position)
 	_start_global_cooldown(unit)
 	_connect_signals(unit)
 	
