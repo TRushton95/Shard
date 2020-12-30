@@ -1,4 +1,4 @@
-[gd_scene load_steps=39 format=2]
+[gd_scene load_steps=40 format=2]
 
 [ext_resource path="res://Gameplay/Entities/Units/Player/elementalist.png" type="Texture" id=1]
 [ext_resource path="res://Gameplay/Entities/Units/Player/elementalist_torso.png" type="Texture" id=2]
@@ -12,6 +12,7 @@
 [ext_resource path="res://Gameplay/AbilitySystem/Abilities/Consecration/Consecration.tscn" type="PackedScene" id=10]
 [ext_resource path="res://Gameplay/Entities/Inventory/Inventory.tscn" type="PackedScene" id=11]
 [ext_resource path="res://Gameplay/Entities/Units/Player/Player.gd" type="Script" id=12]
+[ext_resource path="res://Gameplay/Entities/Units/Player/elementalist_icon.png" type="Texture" id=13]
 
 [sub_resource type="Animation" id=1]
 resource_local_to_scene = true
@@ -468,6 +469,7 @@ extents = Vector2( 32, 64 )
 
 [node name="Player" type="KinematicBody2D"]
 script = ExtResource( 12 )
+icon = ExtResource( 13 )
 
 [node name="Sprite" type="Sprite" parent="."]
 visible = false

@@ -1,6 +1,8 @@
 extends KinematicBody2D
 class_name Unit
 
+export var icon : Texture
+
 var current_health : int setget _set_current_health
 remotesync var current_mana : int setget _set_current_mana # Remove remotesync when test_mana_refill is removed
 remotesync var auto_attack_enabled := false # Requires focus to be set to do anything
@@ -9,7 +11,6 @@ var auto_attack_speed := 1.0
 var _is_basic_attack_ready := true
 var team := -1
 var direction := 0
-var icon = load("res://Gameplay/Entities/Units/Player/elementalist_icon.png")
 var is_moving := false
 var is_casting := false
 var is_channelling := false
