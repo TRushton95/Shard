@@ -1,7 +1,7 @@
 extends Node2D
 
 var rainbow_cursor = load("res://pointer.png")
-var unit_scene = load("res://Gameplay/Entities/Unit/Unit.tscn")
+var player_scene = load("res://Gameplay/Entities/Units/Player/Player.tscn")
 var floating_text_scene = load("res://Gameplay/UI/FloatingText/FloatingText.tscn")
 var action_button_scene = load("res://Gameplay/UI/ActionButton/ActionButton.tscn")
 
@@ -483,7 +483,7 @@ func setup(player_name: String, player_lookup: Dictionary) -> void:
 	
 	var spawn_index = 0
 	for player_list_entry in player_list:
-		var unit = unit_scene.instance()
+		var unit = player_scene.instance()
 		unit.set_name(player_list_entry)
 		unit.position = $PlayerSpawnPoints.get_node(str(spawn_index)).position
 		add_child(unit)

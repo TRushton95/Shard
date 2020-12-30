@@ -9,7 +9,7 @@ var auto_attack_speed := 1.0
 var _is_basic_attack_ready := true
 var team := -1
 var direction := 0
-var icon = load("res://Gameplay/Entities/Unit/elementalist_icon.png")
+var icon = load("res://Gameplay/Entities/Units/Player/elementalist_icon.png")
 var is_moving := false
 var is_casting := false
 var is_channelling := false
@@ -200,9 +200,6 @@ func _ready() -> void:
 	$UnitProfile/VBoxContainer/SmallHealthBar.max_value = current_health
 	$UnitProfile/VBoxContainer/SmallHealthBar.value = current_health
 	$AutoAttackTimer.one_shot = true
-	
-	set_default_torso_animation_type(Enums.UnitAnimationType.IDLE)
-	set_default_arms_animation_type(Enums.UnitAnimationType.IDLE)
 
 
 func _process(delta: float) -> void:
@@ -426,8 +423,6 @@ func switch_navigation_state(new_state) -> void:
 	if !new_state:
 		print("No new navigation state provided")
 		
-#	print("Navigation state switch: " + _navigation_state.state_name + " -> " + new_state.state_name)
-		
 	if _navigation_state.has_method("on_leave"):
 		_navigation_state.on_leave(self)
 		
@@ -440,8 +435,6 @@ func switch_navigation_state(new_state) -> void:
 func switch_combat_state(new_state) -> void:
 	if !new_state:
 		print("No new combat state provided")
-		
-#	print("Combat state switch: " + _combat_state.state_name + " -> " + new_state.state_name)
 		
 	if _combat_state.has_method("on_leave"):
 		_combat_state.on_leave(self)
@@ -466,61 +459,8 @@ func is_basic_attack_off_cooldown() -> bool:
 	return _is_basic_attack_ready
 
 
-func set_default_arms_animation_type(anim_type) -> void:
-	_set_arms_animation_type_looping(default_arms_animation_type, false)
-	default_arms_animation_type = anim_type
-	_set_arms_animation_type_looping(default_arms_animation_type, true)
-	
-	if !playing_priority_arms_animation:
-		var default = _get_animation_name(default_arms_animation_type, direction)
-		#FIXME: This seems to be playing the previous direction, direction not updated yet at this point?
-		$ArmsSprite/AnimationPlayer.play(default)
-
-
-func set_default_torso_animation_type(anim_type) -> void:
-	_set_torso_animation_type_looping(default_torso_animation_type, false)
-	default_torso_animation_type = anim_type
-	_set_torso_animation_type_looping(default_torso_animation_type, true)
-		
-	if !playing_priority_torso_animation:
-		var default = _get_animation_name(default_torso_animation_type, direction)
-		$TorsoSprite/AnimationPlayer.play(default)
-
-
-func play_priority_arms_animation(anim_name: String, position := 0.0) -> void:
-	playing_priority_arms_animation = true
-	$ArmsSprite/AnimationPlayer.play(anim_name)
-	
-	if position > 0.0:
-		$ArmsSprite/AnimationPlayer.seek(position, true)
-
-
-func play_priority_torso_animation(anim_name: String, position := 0.0) -> void:
-	playing_priority_torso_animation = true
-	$TorsoSprite/AnimationPlayer.play(anim_name)
-	
-	if position > 0.0:
-		$TorsoSprite/AnimationPlayer.seek(position, true)
-
-
 func change_direction(new_direction: int) -> void:
 	direction = new_direction
-	
-	var direction_name = Direction.keys()[direction].to_lower() # FIXME: Do this properly
-	
-	var current_torso_animation_type = get_torso_animation_name().split("_")[0]
-	var current_torso_animation_position = get_torso_animation_position()
-	
-	var full_torso_animation_name = current_torso_animation_type + "_" + direction_name
-	$TorsoSprite/AnimationPlayer.play(full_torso_animation_name)
-	$TorsoSprite/AnimationPlayer.seek(current_torso_animation_position, true)
-	
-	var current_arms_animation_type = get_arms_animation_name().split("_")[0]
-	var current_arms_animation_position = get_arms_animation_position()
-	
-	var full_arms_animation_name = current_arms_animation_type + "_" + direction_name
-	$ArmsSprite/AnimationPlayer.play(full_arms_animation_name)
-	$ArmsSprite/AnimationPlayer.seek(current_arms_animation_position, true)
 
 
 func face_point(point: Vector2) -> void:
@@ -528,34 +468,6 @@ func face_point(point: Vector2) -> void:
 	
 	if new_direction != direction:
 		change_direction(new_direction)
-
-
-func get_arms_animation_name() -> String:
-	return $ArmsSprite/AnimationPlayer.current_animation
-
-
-func get_arms_animation_position() -> float:
-	return $ArmsSprite/AnimationPlayer.current_animation_position
-
-
-func get_torso_animation_name() -> String:
-	return $TorsoSprite/AnimationPlayer.current_animation
-
-
-func get_torso_animation_position() -> float:
-	return $TorsoSprite/AnimationPlayer.current_animation_position
-
-
-func _set_arms_animation_type_looping(animation_type: int, loop: bool) -> void:
-	for value in Direction.values():
-		var animation = _get_animation_name(animation_type, value)
-		$ArmsSprite/AnimationPlayer.get_animation(animation).set_loop(loop)
-
-
-func _set_torso_animation_type_looping(animation_type: int, loop: bool) -> void:
-	for value in Direction.values():
-		var default_animation = _get_animation_name(animation_type, value)
-		$TorsoSprite/AnimationPlayer.get_animation(default_animation).set_loop(loop)
 
 
 func _is_team_target_valid(ability: Ability, target) -> bool:
