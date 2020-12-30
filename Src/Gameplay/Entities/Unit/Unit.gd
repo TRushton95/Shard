@@ -3,8 +3,6 @@ class_name Unit
 
 var current_health : int setget _set_current_health
 remotesync var current_mana : int setget _set_current_mana # Remove remotesync when test_mana_refill is removed
-var casting_index := -1 # -1 for not casting
-var channelling_index := -1 # -1 for not channeling
 remotesync var auto_attack_enabled := false # Requires focus to be set to do anything
 var basic_attack_range := 200
 var auto_attack_speed := 1.0
@@ -371,6 +369,11 @@ func _set_current_mana(value: int) -> void:
 ########################
 # NEW API METHODS HERE #
 ########################
+
+func input_command(command) -> void:
+	if command.has_method("execute"):
+		command.execute(self)
+
 
 func move_to_point(point: Vector2) -> void:
 	switch_navigation_state(MovementNavigationState.new(point))

@@ -365,13 +365,8 @@ func _process(_delta: float) -> void:
 	if Input.is_action_just_pressed("cast_12"):
 		button_index = 11
 	if Input.is_action_just_pressed("stop"):
-		if player.casting_index >= 0 || player.channelling_index >= 0:
-			player.rpc("interrupt")
-		if player.is_casting || player.is_channelling:
-			rpc("_unit_stop_cast", player_name)
-		if player.is_moving:
-			rpc("_unit_stop_moving", player_name)
-			
+		rpc("_unit_stop", player_name)
+		
 	if Input.is_action_just_pressed("test_interrupt"):
 		player.rpc("interrupt")
 	if Input.is_action_just_pressed("test_mana_refill"):
@@ -641,21 +636,16 @@ remotesync func _unit_cast(unit_name: String, action_source: int, action_index: 
 	
 	var unit = get_node(unit_name)
 	var ability = find_action(ActionLookup.new(action_source, action_index))
-	unit.cast(ability, clean_target)
+	unit.input_command(CastCommand.new(ability, clean_target))
 
 
 remotesync func _unit_move_to_point(unit_name: String, position: Vector2) -> void:
-	get_node(unit_name).move_to_point(position)
+	get_node(unit_name).input_command(MoveCommand.new(position))
 
 
-remotesync func _unit_stop_moving(unit_name: String) -> void:
-	get_node(unit_name).stop_moving()
-
+remotesync func _unit_stop(unit_name: String) -> void:
+	get_node(unit_name).input_command(StopCommand.new())
 
 remotesync func _unit_attack_target(unit_name: String, target_name: String) -> void:
-	get_node(unit_name).attack_target(get_node(target_name))
-
-
-remotesync func _unit_stop_cast(unit_name: String) -> void:
-	get_node(unit_name).interrupt()
+	get_node(unit_name).input_command(AttackCommand.new(get_node(target_name)))
 

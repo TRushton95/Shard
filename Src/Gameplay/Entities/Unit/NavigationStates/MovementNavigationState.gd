@@ -33,7 +33,7 @@ func on_leave(unit) -> void:
 
 
 func update(unit, delta: float):
-	if unit.casting_index > -1 || unit.channelling_index > -1:
+	if unit.is_casting || unit.is_channelling:
 		return
 	
 	var distance_to_walk = delta * unit.movement_speed_attr.value
