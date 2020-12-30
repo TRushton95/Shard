@@ -13,7 +13,7 @@
 [ext_resource path="res://Gameplay/AbilitySystem/Abilities/AutoAttack/AutoAttack.tscn" type="PackedScene" id=11]
 [ext_resource path="res://Gameplay/Entities/Unit/elementalist_arms.png" type="Texture" id=12]
 
-[sub_resource type="Animation" id=27]
+[sub_resource type="Animation" id=1]
 resource_local_to_scene = true
 resource_name = "casting_down"
 tracks/0/type = "value"
@@ -29,7 +29,7 @@ tracks/0/keys = {
 "values": [ 3 ]
 }
 
-[sub_resource type="Animation" id=28]
+[sub_resource type="Animation" id=2]
 resource_local_to_scene = true
 resource_name = "casting_left"
 tracks/0/type = "value"
@@ -45,7 +45,7 @@ tracks/0/keys = {
 "values": [ 7 ]
 }
 
-[sub_resource type="Animation" id=29]
+[sub_resource type="Animation" id=3]
 resource_local_to_scene = true
 resource_name = "casting_right"
 tracks/0/type = "value"
@@ -61,7 +61,7 @@ tracks/0/keys = {
 "values": [ 11 ]
 }
 
-[sub_resource type="Animation" id=30]
+[sub_resource type="Animation" id=4]
 resource_local_to_scene = true
 resource_name = "casting_up"
 tracks/0/type = "value"
@@ -77,7 +77,7 @@ tracks/0/keys = {
 "values": [ 15 ]
 }
 
-[sub_resource type="Animation" id=31]
+[sub_resource type="Animation" id=5]
 resource_local_to_scene = true
 resource_name = "idle_down"
 loop = true
@@ -94,7 +94,7 @@ tracks/0/keys = {
 "values": [ 0 ]
 }
 
-[sub_resource type="Animation" id=32]
+[sub_resource type="Animation" id=6]
 resource_local_to_scene = true
 resource_name = "idle_left"
 loop = true
@@ -111,7 +111,7 @@ tracks/0/keys = {
 "values": [ 4 ]
 }
 
-[sub_resource type="Animation" id=33]
+[sub_resource type="Animation" id=7]
 resource_local_to_scene = true
 resource_name = "idle_right"
 loop = true
@@ -128,7 +128,7 @@ tracks/0/keys = {
 "values": [ 8 ]
 }
 
-[sub_resource type="Animation" id=34]
+[sub_resource type="Animation" id=8]
 resource_local_to_scene = true
 resource_name = "idle_up"
 loop = true
@@ -145,7 +145,7 @@ tracks/0/keys = {
 "values": [ 12 ]
 }
 
-[sub_resource type="Animation" id=35]
+[sub_resource type="Animation" id=9]
 resource_local_to_scene = true
 length = 0.8
 tracks/0/type = "value"
@@ -173,7 +173,7 @@ tracks/1/keys = {
 "values": [ Vector2( 0, -4 ), Vector2( 0, 0 ), Vector2( 0, -4 ), Vector2( 0, 0 ) ]
 }
 
-[sub_resource type="Animation" id=36]
+[sub_resource type="Animation" id=10]
 resource_local_to_scene = true
 resource_name = "walking_left"
 length = 0.8
@@ -202,7 +202,7 @@ tracks/1/keys = {
 "values": [ Vector2( 0, -4 ), Vector2( 0, 0 ), Vector2( 0, -4 ), Vector2( 0, 0 ) ]
 }
 
-[sub_resource type="Animation" id=37]
+[sub_resource type="Animation" id=11]
 resource_local_to_scene = true
 resource_name = "walking_right"
 length = 0.8
@@ -231,7 +231,7 @@ tracks/1/keys = {
 "values": [ Vector2( 0, -4 ), Vector2( 0, 0 ), Vector2( 0, -4 ), Vector2( 0, 0 ) ]
 }
 
-[sub_resource type="Animation" id=38]
+[sub_resource type="Animation" id=12]
 resource_local_to_scene = true
 resource_name = "walking_up"
 length = 0.8
@@ -260,7 +260,7 @@ tracks/1/keys = {
 "values": [ Vector2( 0, -4 ), Vector2( 0, 0 ), Vector2( 0, -4 ), Vector2( 0, 0 ) ]
 }
 
-[sub_resource type="Animation" id=39]
+[sub_resource type="Animation" id=13]
 resource_local_to_scene = true
 resource_name = "casting_down"
 tracks/0/type = "value"
@@ -276,7 +276,7 @@ tracks/0/keys = {
 "values": [ 3 ]
 }
 
-[sub_resource type="Animation" id=40]
+[sub_resource type="Animation" id=14]
 resource_local_to_scene = true
 resource_name = "casting_left"
 tracks/0/type = "value"
@@ -292,7 +292,7 @@ tracks/0/keys = {
 "values": [ 7 ]
 }
 
-[sub_resource type="Animation" id=41]
+[sub_resource type="Animation" id=15]
 resource_local_to_scene = true
 resource_name = "casting_right"
 tracks/0/type = "value"
@@ -308,7 +308,7 @@ tracks/0/keys = {
 "values": [ 11 ]
 }
 
-[sub_resource type="Animation" id=42]
+[sub_resource type="Animation" id=16]
 resource_local_to_scene = true
 resource_name = "casting_up"
 tracks/0/type = "value"
@@ -324,7 +324,7 @@ tracks/0/keys = {
 "values": [ 15 ]
 }
 
-[sub_resource type="Animation" id=43]
+[sub_resource type="Animation" id=17]
 resource_local_to_scene = true
 resource_name = "idle_down"
 loop = true
@@ -341,7 +341,7 @@ tracks/0/keys = {
 "values": [ 0 ]
 }
 
-[sub_resource type="Animation" id=44]
+[sub_resource type="Animation" id=18]
 resource_local_to_scene = true
 resource_name = "idle_left"
 loop = true
@@ -358,7 +358,7 @@ tracks/0/keys = {
 "values": [ 4 ]
 }
 
-[sub_resource type="Animation" id=45]
+[sub_resource type="Animation" id=19]
 resource_local_to_scene = true
 resource_name = "idle_right"
 loop = true
@@ -375,7 +375,7 @@ tracks/0/keys = {
 "values": [ 8 ]
 }
 
-[sub_resource type="Animation" id=46]
+[sub_resource type="Animation" id=20]
 resource_local_to_scene = true
 resource_name = "idle_up"
 loop = true
@@ -392,7 +392,7 @@ tracks/0/keys = {
 "values": [ 12 ]
 }
 
-[sub_resource type="Animation" id=47]
+[sub_resource type="Animation" id=21]
 resource_local_to_scene = true
 resource_name = "walking_down"
 length = 0.8
@@ -409,7 +409,7 @@ tracks/0/keys = {
 "values": [ 1, 0, 2, 0 ]
 }
 
-[sub_resource type="Animation" id=48]
+[sub_resource type="Animation" id=22]
 resource_local_to_scene = true
 resource_name = "walking_left"
 length = 0.8
@@ -426,7 +426,7 @@ tracks/0/keys = {
 "values": [ 5, 4, 6, 4 ]
 }
 
-[sub_resource type="Animation" id=49]
+[sub_resource type="Animation" id=23]
 resource_local_to_scene = true
 resource_name = "walking_right"
 length = 0.8
@@ -443,7 +443,7 @@ tracks/0/keys = {
 "values": [ 9, 8, 10, 8 ]
 }
 
-[sub_resource type="Animation" id=50]
+[sub_resource type="Animation" id=24]
 resource_local_to_scene = true
 resource_name = "walking_up"
 length = 0.8
@@ -477,51 +477,51 @@ hframes = 4
 frame = 3
 
 [node name="TorsoSprite" type="Sprite" parent="."]
+position = Vector2( 0, -48 )
 texture = ExtResource( 6 )
 vframes = 4
 hframes = 4
-frame = 13
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="TorsoSprite"]
-anims/casting_down = SubResource( 27 )
-anims/casting_left = SubResource( 28 )
-anims/casting_right = SubResource( 29 )
-anims/casting_up = SubResource( 30 )
-anims/idle_down = SubResource( 31 )
-anims/idle_left = SubResource( 32 )
-anims/idle_right = SubResource( 33 )
-anims/idle_up = SubResource( 34 )
-anims/walking_down = SubResource( 35 )
-anims/walking_left = SubResource( 36 )
-anims/walking_right = SubResource( 37 )
-anims/walking_up = SubResource( 38 )
+anims/casting_down = SubResource( 1 )
+anims/casting_left = SubResource( 2 )
+anims/casting_right = SubResource( 3 )
+anims/casting_up = SubResource( 4 )
+anims/idle_down = SubResource( 5 )
+anims/idle_left = SubResource( 6 )
+anims/idle_right = SubResource( 7 )
+anims/idle_up = SubResource( 8 )
+anims/walking_down = SubResource( 9 )
+anims/walking_left = SubResource( 10 )
+anims/walking_right = SubResource( 11 )
+anims/walking_up = SubResource( 12 )
 
 [node name="ArmsSprite" type="Sprite" parent="."]
+position = Vector2( 0, -48 )
 texture = ExtResource( 12 )
-offset = Vector2( 0, -4 )
 vframes = 4
 hframes = 4
-frame = 13
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="ArmsSprite"]
-anims/casting_down = SubResource( 39 )
-anims/casting_left = SubResource( 40 )
-anims/casting_right = SubResource( 41 )
-anims/casting_up = SubResource( 42 )
-anims/idle_down = SubResource( 43 )
-anims/idle_left = SubResource( 44 )
-anims/idle_right = SubResource( 45 )
-anims/idle_up = SubResource( 46 )
-anims/walking_down = SubResource( 47 )
-anims/walking_left = SubResource( 48 )
-anims/walking_right = SubResource( 49 )
-anims/walking_up = SubResource( 50 )
+anims/casting_down = SubResource( 13 )
+anims/casting_left = SubResource( 14 )
+anims/casting_right = SubResource( 15 )
+anims/casting_up = SubResource( 16 )
+anims/idle_down = SubResource( 17 )
+anims/idle_left = SubResource( 18 )
+anims/idle_right = SubResource( 19 )
+anims/idle_up = SubResource( 20 )
+anims/walking_down = SubResource( 21 )
+anims/walking_left = SubResource( 22 )
+anims/walking_right = SubResource( 23 )
+anims/walking_up = SubResource( 24 )
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
-position = Vector2( 0, 32 )
+position = Vector2( 0, -16 )
 shape = SubResource( 25 )
 
 [node name="Clickbox" type="Area2D" parent="."]
+position = Vector2( 0, -48 )
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Clickbox"]
 shape = SubResource( 26 )
@@ -552,9 +552,9 @@ anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
 margin_left = -56.0
-margin_top = -104.0
+margin_top = -152.0
 margin_right = 56.0
-margin_bottom = -75.0
+margin_bottom = -123.0
 mouse_filter = 2
 size_flags_horizontal = 0
 size_flags_vertical = 0
