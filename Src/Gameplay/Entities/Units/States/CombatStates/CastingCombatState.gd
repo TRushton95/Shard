@@ -23,8 +23,6 @@ func on_enter(unit) -> void:
 	
 	if unit.position.distance_to(TargetHelper.get_target_position(_target)) <= _ability.cast_range:
 		_start_cast(unit)
-		
-	emit_signal("state_entered")
 
 
 func on_leave(unit) -> void:
@@ -68,7 +66,6 @@ func _start_cast(unit) -> void:
 	var target_position = TargetHelper.get_target_position(_target)
 	unit.face_point(target_position)
 	_start_global_cooldown(unit)
-	_connect_signals(unit)
 	
 	emit_signal("casting_started", _ability)
 
