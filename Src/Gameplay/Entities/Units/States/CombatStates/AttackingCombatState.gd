@@ -1,21 +1,22 @@
-extends Node
+extends State
 class_name AttackingCombatState
-
-var state_name = "AttackingCombatState"
 
 var _target
 
 
 func _init(target) -> void:
+	state_name = "AttackingCombatState"
 	_target = target
 
 
 func on_enter(unit) -> void:
+	.on_enter(unit)
 	unit.is_basic_attacking = true
 
 
 func on_leave(unit) -> void:
 	unit.is_basic_attacking = false
+	.on_leave(unit)
 
 
 func update(unit, delta: float) -> void:

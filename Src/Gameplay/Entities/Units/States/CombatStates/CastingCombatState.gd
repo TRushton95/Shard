@@ -1,7 +1,5 @@
-extends Node
+extends State
 class_name CastingCombatState
-
-var state_name = "CastingCombatState"
 
 var _target
 var _ability : Ability
@@ -14,20 +12,25 @@ signal casting_stopped(ability)
 
 
 func _init(target, ability) -> void:
+	state_name = "CastingCombatState"
 	_target = target
 	_ability = ability
 	_progress = 0
 
 
 func on_enter(unit) -> void:
+	.on_enter(unit)
+	
 	if unit.position.distance_to(TargetHelper.get_target_position(_target)) <= _ability.cast_range:
 		_start_cast(unit)
+		
+	emit_signal("state_entered")
 
 
 func on_leave(unit) -> void:
 	unit.is_casting = false
 	emit_signal("casting_stopped", _ability)
-	_disconnect_signals(unit)
+	.on_leave(unit)
 
 
 func update(unit, delta: float):
@@ -62,12 +65,6 @@ func _start_cast(unit) -> void:
 	_cast = true
 	unit.is_casting = true
 	
-	if _ability.cast_time > 0:
-		unit.set_default_arms_animation_type(Enums.UnitAnimationType.CASTING)
-	elif !"channel_time" in _ability:
-		var casting_animation = unit._get_animation_name(Enums.UnitAnimationType.CASTING, unit.direction)
-		unit.play_priority_arms_animation(casting_animation)
-	
 	var target_position = TargetHelper.get_target_position(_target)
 	unit.face_point(target_position)
 	_start_global_cooldown(unit)
@@ -95,12 +92,14 @@ func _start_ability_cooldown(unit) -> void:
 
 
 func _connect_signals(unit) -> void:
+	._connect_signals(unit)
 	connect("casting_started", unit, "_on_casting_started")
 	connect("casting_progressed", unit, "_on_casting_progressed")
 	connect("casting_stopped", unit, "_on_casting_stopped")
 
 
 func _disconnect_signals(unit) -> void:
+	._disconnect_signals(unit)
 	disconnect("casting_started", unit, "_on_casting_started")
 	disconnect("casting_progressed", unit, "_on_casting_progressed")
 	disconnect("casting_stopped", unit, "_on_casting_stopped")

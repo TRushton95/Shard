@@ -1,7 +1,5 @@
-extends Node
+extends State
 class_name MovementNavigationState
-
-var state_name = "MovementNavigationState"
 
 var _movement_path : PoolVector2Array
 var _destination : Vector2
@@ -12,16 +10,14 @@ signal state_path_removed
 
 
 func _init(destination: Vector2) -> void:
+	state_name = "MovementNavigationState"
 	_destination = destination
 
 
 func on_enter(unit) -> void:
+	.on_enter(unit)
 	unit.is_moving = true
 	_movement_path = NavigationHelper.get_simple_path(unit.position, _destination)
-	_connect_signals(unit)
-	
-	unit.set_default_torso_animation_type(Enums.UnitAnimationType.WALKING)
-	unit.set_default_arms_animation_type(Enums.UnitAnimationType.WALKING)
 	
 	emit_signal("state_path_set", _movement_path)
 
@@ -29,7 +25,7 @@ func on_enter(unit) -> void:
 func on_leave(unit) -> void:
 	unit.is_moving = false
 	emit_signal("state_path_removed")
-	_disconnect_signals(unit)
+	.on_leave(unit)
 
 
 func update(unit, delta: float):
@@ -61,10 +57,12 @@ func _step_through_path(unit, distance_to_walk: int) -> int:
 
 
 func _connect_signals(unit) -> void:
+	._connect_signals(unit)
 	connect("state_path_set", unit, "_on_state_path_set")
 	connect("state_path_removed", unit, "_on_state_path_removed")
 	
 	
 func _disconnect_signals(unit) -> void:
+	._disconnect_signals(unit)
 	disconnect("state_path_set", unit, "_on_state_path_set")
 	disconnect("state_path_removed", unit, "_on_state_path_removed")

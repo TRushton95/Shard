@@ -1,0 +1,240 @@
+[gd_scene load_steps=17 format=2]
+
+[ext_resource path="res://Gameplay/Entities/Units/Blob/blob.png" type="Texture" id=1]
+[ext_resource path="res://Gameplay/Entities/Units/Blob/AI.gd" type="Script" id=2]
+[ext_resource path="res://Gameplay/UI/SmallHealthBar/small_white_health_bar.png" type="Texture" id=4]
+[ext_resource path="res://Gameplay/UI/SmallHealthBar/SmallHealthBar.tscn" type="PackedScene" id=6]
+[ext_resource path="res://Gameplay/Entities/Inventory/Inventory.tscn" type="PackedScene" id=11]
+[ext_resource path="res://Gameplay/Entities/Units/Blob/Blob.gd" type="Script" id=12]
+
+[sub_resource type="Animation" id=1]
+resource_local_to_scene = true
+resource_name = "idle_down"
+loop = true
+tracks/0/type = "value"
+tracks/0/path = NodePath(".:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 1,
+"values": [ 0 ]
+}
+
+[sub_resource type="Animation" id=2]
+resource_local_to_scene = true
+resource_name = "idle_left"
+loop = true
+tracks/0/type = "value"
+tracks/0/path = NodePath(".:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 1,
+"values": [ 3 ]
+}
+
+[sub_resource type="Animation" id=3]
+resource_local_to_scene = true
+resource_name = "idle_right"
+loop = true
+tracks/0/type = "value"
+tracks/0/path = NodePath(".:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 1,
+"values": [ 6 ]
+}
+
+[sub_resource type="Animation" id=4]
+resource_local_to_scene = true
+resource_name = "idle_up"
+loop = true
+tracks/0/type = "value"
+tracks/0/path = NodePath(".:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 1,
+"values": [ 9 ]
+}
+
+[sub_resource type="Animation" id=5]
+resource_local_to_scene = true
+length = 0.8
+tracks/0/type = "value"
+tracks/0/path = NodePath(".:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0, 0.3, 0.4, 0.7 ),
+"transitions": PoolRealArray( 1, 1, 1, 1 ),
+"update": 1,
+"values": [ 1, 0, 2, 0 ]
+}
+
+[sub_resource type="Animation" id=6]
+resource_local_to_scene = true
+resource_name = "walking_left"
+length = 0.8
+tracks/0/type = "value"
+tracks/0/path = NodePath(".:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0, 0.3, 0.4, 0.7 ),
+"transitions": PoolRealArray( 1, 1, 1, 1 ),
+"update": 1,
+"values": [ 4, 3, 5, 3 ]
+}
+
+[sub_resource type="Animation" id=7]
+resource_local_to_scene = true
+resource_name = "walking_right"
+length = 0.8
+tracks/0/type = "value"
+tracks/0/path = NodePath(".:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0, 0.3, 0.4, 0.7 ),
+"transitions": PoolRealArray( 1, 1, 1, 1 ),
+"update": 1,
+"values": [ 7, 6, 8, 6 ]
+}
+
+[sub_resource type="Animation" id=8]
+resource_local_to_scene = true
+resource_name = "walking_up"
+length = 0.8
+tracks/0/type = "value"
+tracks/0/path = NodePath(".:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0, 0.3, 0.4, 0.7 ),
+"transitions": PoolRealArray( 1, 1, 1, 1 ),
+"update": 1,
+"values": [ 10, 9, 11, 9 ]
+}
+
+[sub_resource type="CircleShape2D" id=9]
+radius = 58.0
+
+[sub_resource type="RectangleShape2D" id=10]
+extents = Vector2( 56, 58 )
+
+[node name="Blob" type="KinematicBody2D"]
+script = ExtResource( 12 )
+base_movement_speed = 150
+
+[node name="Sprite" type="Sprite" parent="."]
+position = Vector2( 0, -48 )
+texture = ExtResource( 1 )
+vframes = 4
+hframes = 3
+frame = 8
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="Sprite"]
+anims/idle_down = SubResource( 1 )
+anims/idle_left = SubResource( 2 )
+anims/idle_right = SubResource( 3 )
+anims/idle_up = SubResource( 4 )
+anims/walking_down = SubResource( 5 )
+anims/walking_left = SubResource( 6 )
+anims/walking_right = SubResource( 7 )
+anims/walking_up = SubResource( 8 )
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+position = Vector2( 0, -42 )
+shape = SubResource( 9 )
+
+[node name="Clickbox" type="Area2D" parent="."]
+position = Vector2( 0, -48 )
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Clickbox"]
+position = Vector2( 0, 6 )
+shape = SubResource( 10 )
+
+[node name="AI" type="Node" parent="."]
+script = ExtResource( 2 )
+
+[node name="Inventory" parent="." instance=ExtResource( 11 )]
+
+[node name="Abilities" type="Node" parent="."]
+
+[node name="StatusEffects" type="Node" parent="."]
+
+[node name="Auras" type="Node" parent="."]
+
+[node name="AutoAttackTimer" type="Timer" parent="."]
+
+[node name="UnitProfile" type="CenterContainer" parent="."]
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+margin_left = -56.0
+margin_top = -152.0
+margin_right = 56.0
+margin_bottom = -123.0
+mouse_filter = 2
+size_flags_horizontal = 0
+size_flags_vertical = 0
+__meta__ = {
+"_edit_group_": true,
+"_edit_use_anchors_": false
+}
+
+[node name="VBoxContainer" type="VBoxContainer" parent="UnitProfile"]
+margin_left = 18.0
+margin_right = 93.0
+margin_bottom = 28.0
+mouse_filter = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="NameLabel" type="Label" parent="UnitProfile/VBoxContainer"]
+margin_right = 75.0
+margin_bottom = 14.0
+text = "Test name"
+align = 1
+
+[node name="SmallHealthBar" parent="UnitProfile/VBoxContainer" instance=ExtResource( 6 )]
+anchor_right = 0.0
+anchor_bottom = 0.0
+margin_top = 18.0
+margin_right = 75.0
+margin_bottom = 28.0
+mouse_filter = 2
+texture_progress = ExtResource( 4 )
+[connection signal="animation_finished" from="Sprite/AnimationPlayer" to="." method="_on_TorsoAnimationPlayer_animation_finished"]
+[connection signal="input_event" from="Clickbox" to="." method="_on_Clickbox_input_event"]
+[connection signal="timeout" from="AutoAttackTimer" to="." method="_on_AutoAttackTimer_timeout"]

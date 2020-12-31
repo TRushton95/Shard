@@ -1,7 +1,5 @@
-extends Node
+extends State
 class_name ChannellingCombatState
-
-var state_name = "ChannellingCombatState"
 
 var _target
 var _ability : Ability
@@ -14,22 +12,22 @@ signal channelling_stopped(ability)
 
 
 func _init(target, ability) -> void:
+	state_name = "ChannellingCombatState"
 	_target = target
 	_ability = ability
 	_progress = ability.channel_time
 
 
 func on_enter(unit) -> void:
+	.on_enter(unit)
 	unit.is_channelling = true
-	unit.set_default_arms_animation_type(Enums.UnitAnimationType.CASTING)
-	_connect_signals(unit)
 	emit_signal("channelling_started", _ability)
 
 
 func on_leave(unit) -> void:
 	unit.is_channelling = false
 	emit_signal("channelling_stopped", _ability)
-	_disconnect_signals(unit)
+	.on_leave(unit)
 
 
 func update(unit, delta: float):
@@ -50,12 +48,14 @@ func update(unit, delta: float):
 
 
 func _connect_signals(unit) -> void:
+	._connect_signals(unit)
 	connect("channelling_started", unit, "_on_channelling_started")
 	connect("channelling_progressed", unit, "_on_channelling_progressed")
 	connect("channelling_stopped", unit, "_on_channelling_stopped")
 
 
 func _disconnect_signals(unit) -> void:
+	._disconnect_signals(unit)
 	disconnect("channelling_started", unit, "_on_channelling_started")
 	disconnect("channelling_progressed", unit, "_on_channelling_progressed")
 	disconnect("channelling_stopped", unit, "_on_channelling_stopped")

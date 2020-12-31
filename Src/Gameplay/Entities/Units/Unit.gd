@@ -1,6 +1,9 @@
 extends KinematicBody2D
 class_name Unit
 
+enum State { IDLE, MOVING, PURSUING }
+enum Direction { UP, DOWN, LEFT, RIGHT }
+
 export var icon : Texture
 
 var current_health : int setget _set_current_health
@@ -10,27 +13,20 @@ var basic_attack_range := 200
 var auto_attack_speed := 1.0
 var _is_basic_attack_ready := true
 var team := -1
-var direction := 0
+var direction : int = Direction.DOWN
 var is_moving := false
 var is_casting := false
 var is_channelling := false
 var is_basic_attacking := false
-var default_torso_animation_type = Enums.UnitAnimationType.IDLE
-var default_arms_animation_type = Enums.UnitAnimationType.IDLE
-var playing_priority_arms_animation := false
-var playing_priority_torso_animation := false
 
 var _navigation_state = IdleNavigationState.new()
 var _combat_state = IdleCombatState.new()
 
-enum State { IDLE, MOVING, PURSUING }
-enum Direction { UP, DOWN, LEFT, RIGHT }
-
-var base_movement_speed := 250
-var base_health := 50
-var base_mana := 25
-var base_attack_power := 5
-var base_spell_power := 0
+export var base_movement_speed := 250
+export var base_health := 50
+export var base_mana := 25
+export var base_attack_power := 5
+export var base_spell_power := 0
 
 var health_attr : ModifiableAttribute
 var mana_attr : ModifiableAttribute
@@ -151,25 +147,6 @@ func _on_channelling_stopped(ability: Ability) -> void:
 	emit_signal("channelling_stopped", "test_channel_name")
 
 
-func _on_ArmsAnimationPlayer_animation_finished(anim_name):
-	playing_priority_arms_animation = false
-	var default_animation = _get_animation_name(default_arms_animation_type, direction)
-	$ArmsSprite/AnimationPlayer.play(default_animation)
-	
-	# Sync up with body animation
-	var body_animation_position = $TorsoSprite/AnimationPlayer.current_animation_position
-	$ArmsSprite/AnimationPlayer.seek(body_animation_position, true)
-
-
-func _on_TorsoAnimationPlayer_animation_finished(anim_name):
-	playing_priority_torso_animation = false
-	var default_animation = _get_animation_name(default_torso_animation_type, direction)
-	$TorsoSprite/AnimationPlayer.play(default_animation)
-	
-	# Sync up with arms animation
-	var arms_animation_position = $ArmsSprite/AnimationPlayer.current_animation_position
-	$TorsoSprite/AnimationPlayer.seek(arms_animation_position, true)
-
 # End of Stat change handlers
 
 
@@ -218,6 +195,9 @@ func _process(delta: float) -> void:
 		
 	if $AutoAttackTimer.time_left > 0:
 		emit_signal("auto_attack_cooldown_progressed", $AutoAttackTimer.time_left)
+		
+	if has_node("AI"):
+		get_node("AI").update(self)
 
 
 remotesync func damage(value: int, source_name: String) -> void:

@@ -552,6 +552,8 @@ func setup(player_name: String, player_lookup: Dictionary) -> void:
 			$CanvasLayer/ActionBar.connect("button_dropped_on_button", self, "_on_ActionBar_button_dropped_on_button")
 			
 		spawn_index += 1
+		
+	$Enemy.target = player # TODO: Remove once aggro table is added
 
 
 func select_unit(unit: Unit) -> void:
