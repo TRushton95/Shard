@@ -155,7 +155,6 @@ icon = ExtResource( 3 )
 base_movement_speed = 150
 
 [node name="Sprite" type="Sprite" parent="."]
-light_mask = 0
 position = Vector2( 0, -48 )
 texture = ExtResource( 1 )
 vframes = 4
