@@ -200,7 +200,7 @@ func _process(delta: float) -> void:
 		get_node("AI").update(self)
 
 
-remotesync func damage(value: int, source_name: String) -> void:
+remotesync func damage(value: int, source_name: String, owner_id: int) -> void:
 	var new_health = current_health - value
 	
 	if new_health < 0:
@@ -208,11 +208,12 @@ remotesync func damage(value: int, source_name: String) -> void:
 		
 	_set_current_health(new_health)
 	
-	print("%s received %s damage from %s" % [name, value, source_name])
+	var owner = instance_from_id(owner_id)
+	print("%s received %s damage from %s's %s" % [name, value, owner.name, source_name])
 	emit_signal("damage_received", value)
 
 
-remotesync func heal(value: int, source_name: String) -> void:
+remotesync func heal(value: int, source_name: String,  owner_id: int) -> void:
 	var new_health = current_health + value
 	
 	if new_health > health_attr.value:
@@ -220,7 +221,8 @@ remotesync func heal(value: int, source_name: String) -> void:
 		
 	_set_current_health(new_health)
 	
-	print("%s received %s healing from %s" % [name, value, source_name])
+	var owner = instance_from_id(owner_id)
+	print("%s received %s healing from %s's %s" % [name, value, owner.name, source_name])
 	emit_signal("healing_received", value)
 
 
@@ -428,7 +430,7 @@ func switch_combat_state(new_state) -> void:
 
 func basic_attack(target: Unit) -> void:
 	if get_tree().is_network_server():
-		target.rpc("damage", attack_power_attr.value, name)
+		target.rpc("damage", attack_power_attr.value, name, get_instance_id())
 		
 	change_direction(_get_direction_to_point(target.position))
 	_is_basic_attack_ready = false

@@ -38,7 +38,7 @@ func execute(target, caster: Unit) -> void:
 	get_tree().get_root().add_child(zone) # TODO: This shouldn't be added to the tree root
 	zone.setup()
 	
-	var status = Status.new()
+	var status = Status.new(_owner_id)
 	status.is_debuff = is_debuff
 	status.duration = status_duration
 	status.name = status_name

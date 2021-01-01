@@ -1,8 +1,8 @@
 extends Node
 
 
-func dot(status_name: String, damage_per_tick: int, duration: float, tick_rate: float, icon_texture: Texture) -> Status:
-	var result = Status.new()
+func dot(status_name: String, damage_per_tick: int, duration: float, tick_rate: float, icon_texture: Texture, owner_id: int) -> Status:
+	var result = Status.new(owner_id)
 	result.name = status_name
 	result.is_debuff = true
 	result.duration = duration
@@ -15,6 +15,7 @@ func dot(status_name: String, damage_per_tick: int, duration: float, tick_rate: 
 
 func build_from_data(data: Dictionary) -> Status:
 	var status_name = data["name"]
+	var owner_id = data["owner_id"]
 	var icon_texture_path = data["icon_texture"]
 	var is_debuff = data["is_debuff"]
 	var duration = data["duration"]
@@ -27,7 +28,7 @@ func build_from_data(data: Dictionary) -> Status:
 	var spell_power_modifier = _build_modifier_from_data(data["spell_power_modifier"])
 	var movement_speed_modifier = _build_modifier_from_data(data["movement_speed_modifier"])
 	
-	var result = Status.new()
+	var result = Status.new(owner_id)
 	result.name = status_name
 	result.is_debuff = is_debuff
 	result.duration = duration

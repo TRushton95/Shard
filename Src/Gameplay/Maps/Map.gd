@@ -526,6 +526,8 @@ func setup(player_name: String, player_lookup: Dictionary) -> void:
 			unit.add_child(camera)
 			
 			for ability in unit.get_node("Abilities").get_children():
+				ability.setup(unit.get_instance_id())
+				
 				if ability.get_index() == 0: # HACK: To leave out basic attack, should add an ability category
 					continue
 				

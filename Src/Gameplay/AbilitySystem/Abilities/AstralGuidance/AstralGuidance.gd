@@ -33,9 +33,9 @@ func execute(target, caster: Unit) -> void:
 	zone.texture = consecration_texture
 	zone.position = target.position
 	get_tree().get_root().add_child(zone) # TODO: This shouldn't be added to the tree root
-	zone.setup()
+	zone.setup(_owner_id)
 	
-	var status = Status.new()
+	var status = Status.new(_owner_id)
 	status.name = "Astral Guidance"
 	status.is_debuff = false
 	status.duration = Constants.INDEFINITE_DURATION

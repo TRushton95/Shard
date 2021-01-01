@@ -8,6 +8,7 @@ signal cooldown_ended
 
 # Convention properties
 
+var _owner_id := -1
 export var cooldown := 0.0
 export var off_global_cooldown := false
 export var cast_time := 0.0
@@ -37,6 +38,10 @@ func _ready() -> void:
 func _process(_delta: float) -> void:
 	if _cooldown_timer.time_left > 0:
 		emit_signal("cooldown_progressed")
+
+
+func setup(owner_id: int) -> void:
+	_owner_id = owner_id
 
 
 func try_start_cooldown(duration) -> void:

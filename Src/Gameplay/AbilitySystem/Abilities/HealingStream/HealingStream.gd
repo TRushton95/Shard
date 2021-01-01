@@ -12,7 +12,7 @@ var tick_rate := 0.5
 
 func _on_caster_channelling_ticked(target: Unit, caster: Unit) -> void:
 	var healing = base_tick_healing + (tick_healing_per_sp * caster.spell_power_attr.value)
-	target.heal(healing, name)
+	target.heal(healing, name, _owner_id)
 
 
 func _on_caster_channelling_stopped(ability_name: String, caster: Unit) -> void:
