@@ -35,7 +35,7 @@ func execute(target, caster: Unit) -> void:
 	get_tree().get_root().add_child(zone) # TODO: This shouldn't be added to the tree root
 	zone.setup(_owner_id)
 	
-	var status = Status.new(_owner_id)
+	var status = Status.new(get_instance_id(), _owner_id)
 	status.name = "Astral Guidance"
 	status.is_debuff = false
 	status.duration = Constants.INDEFINITE_DURATION

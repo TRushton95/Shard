@@ -53,8 +53,8 @@ signal ability_cooldown_progressed(ability)
 signal ability_cooldown_ended(ability)
 signal status_effect_applied(status_effect)
 signal status_effect_removed(status_effect, index)
-signal damage_received(value)
-signal healing_received(value)
+signal damage_received(value, source_id, caster_id)
+signal healing_received(value, source_id, caster_id)
 signal team_changed
 signal mana_changed(value)
 signal health_attr_changed(value)
@@ -200,7 +200,7 @@ func _process(delta: float) -> void:
 		get_node("AI").update(self)
 
 
-remotesync func damage(value: int, source_name: String, owner_id: int) -> void:
+remotesync func damage(value: int, source_id: int, owner_id: int) -> void:
 	var new_health = current_health - value
 	
 	if new_health < 0:
@@ -209,11 +209,12 @@ remotesync func damage(value: int, source_name: String, owner_id: int) -> void:
 	_set_current_health(new_health)
 	
 	var owner = instance_from_id(owner_id)
-	print("%s received %s damage from %s's %s" % [name, value, owner.name, source_name])
-	emit_signal("damage_received", value)
+	var source = instance_from_id(source_id)
+	print("%s received %s damage from %s's %s" % [name, value, owner.name, source.name])
+	emit_signal("damage_received", value, source_id, owner_id)
 
 
-remotesync func heal(value: int, source_name: String,  owner_id: int) -> void:
+remotesync func heal(value: int, source_id: int,  owner_id: int) -> void:
 	var new_health = current_health + value
 	
 	if new_health > health_attr.value:
@@ -222,8 +223,9 @@ remotesync func heal(value: int, source_name: String,  owner_id: int) -> void:
 	_set_current_health(new_health)
 	
 	var owner = instance_from_id(owner_id)
-	print("%s received %s healing from %s's %s" % [name, value, owner.name, source_name])
-	emit_signal("healing_received", value)
+	var source = instance_from_id(source_id)
+	print("%s received %s healing from %s's %s" % [name, value, owner.name, source.name])
+	emit_signal("healing_received", value, source_id, owner_id)
 
 
 remotesync func interrupt() -> void:
@@ -430,7 +432,7 @@ func switch_combat_state(new_state) -> void:
 
 func basic_attack(target: Unit) -> void:
 	if get_tree().is_network_server():
-		target.rpc("damage", attack_power_attr.value, name, get_instance_id())
+		target.rpc("damage", attack_power_attr.value, get_instance_id(), get_instance_id())
 		
 	change_direction(_get_direction_to_point(target.position))
 	_is_basic_attack_ready = false

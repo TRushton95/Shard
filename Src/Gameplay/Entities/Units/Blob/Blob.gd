@@ -7,12 +7,25 @@ var target # TODO: Remove once aggro table is added
 var aggro_table := {}
 
 
-func _on_threat_unit_healed(value: int, body_id: int) -> void:
-	if !aggro_table[body_id]:
-		aggro_table[body_id] = 1
+func _on_Blob_damage_received(value: int, source_id: int, caster_id: int) -> void:
+	if !aggro_table.has(caster_id):
+		aggro_table[caster_id] = 1
 	else:
-		aggro_table[body_id] = aggro_table[body_id] + 1
+		aggro_table[caster_id] = aggro_table[caster_id] + 1
 		
+	# TODO: debug remove me
+	target = instance_from_id(caster_id)
+	print("Threat changed due to damage received")
+
+
+func _on_threat_unit_healed(value: int, source_id: int, caster_id: int, body_id: int) -> void:
+	if !aggro_table.has(caster_id):
+		aggro_table[caster_id] = 1
+	else:
+		aggro_table[caster_id] = aggro_table[caster_id] + 1
+		
+	# TODO: debug remove me
+	target = instance_from_id(caster_id)
 	print("Threat changed due to healing")
 
 
@@ -24,6 +37,8 @@ func _on_AggroArea_body_entered(body):
 		var body_id = body.get_instance_id()
 		aggro_table[body_id] = 1
 		body.connect("healing_received", self, "_on_threat_unit_healed", [body_id])
+		
+	# TODO: debug remove me
 		target = body
 
 

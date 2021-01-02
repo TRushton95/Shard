@@ -19,10 +19,10 @@ func _on_projectile_target_reached(projectile: Projectile, target: Unit, caster:
 	
 	if get_tree().is_network_server():
 		var damage = base_damage + (damage_per_sp * caster.spell_power_attr.value)
-		target.rpc("damage", damage, name, _owner_id)
+		target.rpc("damage", damage, get_instance_id(), _owner_id)
 		
 		var dot_damage = base_dot_damage + (dot_damage_per_sp * caster.spell_power_attr.value)
-		var dot = StatusHelper.dot(dot_name, dot_damage, dot_duration, dot_tick_rate, burn_icon_texture, _owner_id)
+		var dot = StatusHelper.dot(dot_name, dot_damage, dot_duration, dot_tick_rate, burn_icon_texture, get_instance_id(), _owner_id)
 		
 		target.rpc("push_status_effect", dot.to_data())
 

@@ -2,6 +2,7 @@ extends Node
 class_name Status
 
 var _owner_id := -1
+var _source_id := -1
 var is_debuff := false
 var icon_texture: Texture
 var duration := 0.0
@@ -23,11 +24,11 @@ signal expired
 func _on_stopwatch_tick():
 	if damage_per_tick > 0:
 		if get_tree().is_network_server():
-			get_owner().rpc("damage", damage_per_tick, name, _owner_id)
+			get_owner().rpc("damage", damage_per_tick, _source_id, _owner_id)
 	
 	if healing_per_tick > 0:
 		if get_tree().is_network_server():
-			get_owner().rpc("heal", healing_per_tick, name, _owner_id)
+			get_owner().rpc("heal", healing_per_tick, _source_id, _owner_id)
 
 
 func _on_stopwatch_timeout():
@@ -37,7 +38,8 @@ func _on_stopwatch_timeout():
 		emit_signal("expired")
 
 
-func _init(owner_id: int) -> void:
+func _init(source_id: int, owner_id: int) -> void:
+	_source_id = source_id
 	_owner_id = owner_id
 
 
@@ -100,6 +102,7 @@ func to_data() -> Dictionary:
 	return {
 		"name": name,
 		"owner_id": _owner_id,
+		"source_id": _source_id,
 		"icon_texture": icon_texture.resource_path if icon_texture else "",
 		"is_debuff": is_debuff,
 		"duration": duration,

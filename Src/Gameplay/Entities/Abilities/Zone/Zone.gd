@@ -62,14 +62,14 @@ func _on_stopwatch_tick() -> void:
 		for affected_body in get_overlapping_bodies():
 			if affected_body.team == team:
 				if friendly_damage_per_tick > 0:
-					affected_body.rpc("damage", friendly_damage_per_tick, name, _owner_id)
+					affected_body.rpc("damage", friendly_damage_per_tick, get_instance_id(), _owner_id)
 				if friendly_healing_per_tick > 0:
-					affected_body.rpc("heal", friendly_healing_per_tick, name, _owner_id)
+					affected_body.rpc("heal", friendly_healing_per_tick, get_instance_id(), _owner_id)
 			else:
 				if hostile_damage_per_tick > 0:
-					affected_body.rpc("damage", hostile_damage_per_tick, name, _owner_id)
+					affected_body.rpc("damage", hostile_damage_per_tick, get_instance_id(), _owner_id)
 				if hostile_healing_per_tick > 0:
-					affected_body.rpc("heal", hostile_healing_per_tick, name, _owner_id)
+					affected_body.rpc("heal", hostile_healing_per_tick, get_instance_id(), _owner_id)
 				
 	_on_tick_details(get_overlapping_bodies())
 
@@ -100,14 +100,14 @@ func _physics_process(_delta: float) -> void:
 			if get_tree().is_network_server():
 				if affected_body.team == team:
 					if friendly_impact_damage > 0:
-						collision_data.collider.rpc("damage", friendly_impact_damage, name, _owner_id)
+						collision_data.collider.rpc("damage", friendly_impact_damage, get_instance_id(), _owner_id)
 					if friendly_impact_healing > 0:
-						collision_data.collider.rpc("heal", friendly_impact_healing, name, _owner_id)
+						collision_data.collider.rpc("heal", friendly_impact_healing, get_instance_id(), _owner_id)
 				else:
 					if hostile_impact_damage > 0:
-						collision_data.collider.rpc("damage", hostile_impact_damage, name, _owner_id)
+						collision_data.collider.rpc("damage", hostile_impact_damage, get_instance_id(), _owner_id)
 					if hostile_impact_healing > 0:
-						collision_data.collider.rpc("heal", hostile_impact_healing, name, _owner_id)
+						collision_data.collider.rpc("heal", hostile_impact_healing, get_instance_id(), _owner_id)
 					
 		_on_one_shot_details(affected_bodies)
 		queue_free()

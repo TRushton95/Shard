@@ -168,7 +168,7 @@ func _on_player_movement_speed_attr_changed(value: int) -> void:
 	$CanvasLayer/CharacterPanel.set_movement_speed_attr(value)
 
 
-func _on_unit_damage_received(value: int, unit: Unit) -> void:
+func _on_unit_damage_received(value: int, source_id: int, caster_id: int, unit: Unit) -> void:
 	var floating_text = floating_text_scene.instance()
 	floating_text.setup(value, unit.position, Color.red)
 	add_child(floating_text)
@@ -180,7 +180,7 @@ func _on_unit_damage_received(value: int, unit: Unit) -> void:
 		$CanvasLayer/ActionBar.set_current_health(unit.current_health)
 
 
-func _on_unit_healing_received(value: int, unit: Unit) -> void:
+func _on_unit_healing_received(value: int, source_id: int, caster_id: int, unit: Unit) -> void:
 	var floating_text = floating_text_scene.instance()
 	floating_text.setup(value, unit.position, Color.green)
 	add_child(floating_text)
