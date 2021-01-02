@@ -145,7 +145,7 @@ width = 1.0
 default_color = Color( 1, 1, 1, 1 )
 
 [node name="Enemy" parent="." instance=ExtResource( 1 )]
-position = Vector2( 864, 352 )
+position = Vector2( 944, 432 )
 
 [node name="Navigation2D" type="Navigation2D" parent="."]
 

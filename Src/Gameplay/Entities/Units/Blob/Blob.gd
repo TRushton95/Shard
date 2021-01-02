@@ -4,6 +4,27 @@ class_name Blob
 var default_animation_type = Enums.UnitAnimationType.IDLE
 var playing_priority_animation := false
 var target # TODO: Remove once aggro table is added
+var aggro_table := {}
+
+
+func _on_threat_unit_healed(value: int, body_id: int) -> void:
+	if !aggro_table[body_id]:
+		aggro_table[body_id] = 1
+	else:
+		aggro_table[body_id] = aggro_table[body_id] + 1
+		
+	print("Threat changed due to healing")
+
+
+func _on_AggroArea_body_entered(body):
+	if !body is Unit || body == self:
+		return
+		
+	if aggro_table.size() == 0:
+		var body_id = body.get_instance_id()
+		aggro_table[body_id] = 1
+		body.connect("healing_received", self, "_on_threat_unit_healed", [body_id])
+		target = body
 
 
 func _on_state_entered(state_name: String) -> void:
