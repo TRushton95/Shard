@@ -1,7 +1,7 @@
 extends Node
 class_name ThreatTable
 
-var threats := []
+var _threats := []
 
 
 func add_threat(unit_id: int, threat: int) -> void:
@@ -11,28 +11,28 @@ func add_threat(unit_id: int, threat: int) -> void:
 		threat_data.threat += threat
 	else:
 		threat_data = ThreatData.new(unit_id, threat)
-		threats.push_front(threat_data)
+		_threats.push_front(threat_data)
 		
-	threats.sort_custom(self, "sort_by_threat")
+	_threats.sort_custom(self, "sort_by_threat")
 	print(str(threat_data.threat))
 
 
 func remove_threat_data(unit_id: int) -> void:
-	for i in range(threats.size()):
-		if threats[i].unit_id == unit_id:
-			threats.remove(i)
+	for i in range(_threats.size()):
+		if _threats[i].unit_id == unit_id:
+			_threats.remove(i)
 			break
 
 
 func clear_threat_data() -> void:
-	threats = []
+	_threats = []
 
 
 func get_highest_threat_target() -> ThreatData:
 	var result
 	
-	if threats.size() > 0:
-		result = threats[0]
+	if _threats.size() > 0:
+		result = _threats[0]
 	
 	return result
 
@@ -40,7 +40,7 @@ func get_highest_threat_target() -> ThreatData:
 func get_threat_data(unit_id: int) -> ThreatData:
 	var result
 	
-	for threat in threats:
+	for threat in _threats:
 		if threat.unit_id == unit_id:
 			result = threat
 	
@@ -48,8 +48,12 @@ func get_threat_data(unit_id: int) -> ThreatData:
 
 
 func empty() -> bool:
-	return threats.empty()
+	return _threats.empty()
 
 
 func sort_by_threat(a: ThreatData, b: ThreatData) -> bool:
 	return a.threat < b.threat
+
+
+func get_data() -> Array:
+	return _threats

@@ -1,5 +1,7 @@
 extends Node2D
 
+const THREAT_METER_REFRESH_TIME = 2.0
+
 var rainbow_cursor = load("res://pointer.png")
 var player_scene = load("res://Gameplay/Entities/Units/Player/Player.tscn")
 var floating_text_scene = load("res://Gameplay/UI/FloatingText/FloatingText.tscn")
@@ -285,6 +287,10 @@ func _on_unit_team_changed(unit: Unit) -> void:
 		unit.set_health_bar_color(Color.red)
 
 
+func _on_ThreatMeterTimer_timeout() -> void:
+	$CanvasLayer/ThreatMeter.set_data($Enemy.threat_table)
+
+
 func _process(_delta: float) -> void:
 	# Test commands for testing whatever
 	if Input.is_action_just_pressed("test_right"):
@@ -477,6 +483,8 @@ func setup(player_name: String, player_lookup: Dictionary) -> void:
 	$Enemy.connect("team_changed", self, "_on_unit_team_changed", [$Enemy])
 	#END OF TEST ENEMY
 	
+	$ThreatMeterTimer.start(THREAT_METER_REFRESH_TIME)
+	
 	var player_list = player_lookup.values()
 	player_list.append(player_name)
 	player_list.sort()
@@ -650,4 +658,3 @@ remotesync func _unit_stop(unit_name: String) -> void:
 
 remotesync func _unit_attack_target(unit_name: String, target_name: String) -> void:
 	get_node(unit_name).input_command(AttackCommand.new(get_node(target_name)))
-
