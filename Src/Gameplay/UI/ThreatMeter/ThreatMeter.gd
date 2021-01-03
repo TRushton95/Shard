@@ -1,5 +1,18 @@
 extends PanelContainer
 
+var DATA_EXPIRY_TIME = 1.0
+
+signal data_expired
+
+
+func _on_DataExpiryTimer_timeout() -> void:
+	emit_signal("data_expired")
+
+
+func _ready() -> void:
+	$DataExpiryTimer.one_shot = false
+	$DataExpiryTimer.start(DATA_EXPIRY_TIME)
+
 
 func set_name(name: String) -> void:
 	$VBoxContainer/Title.text = name

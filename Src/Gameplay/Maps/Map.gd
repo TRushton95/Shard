@@ -1,7 +1,5 @@
 extends Node2D
 
-const THREAT_METER_REFRESH_TIME = 2.0
-
 var rainbow_cursor = load("res://pointer.png")
 var player_scene = load("res://Gameplay/Entities/Units/Player/Player.tscn")
 var floating_text_scene = load("res://Gameplay/UI/FloatingText/FloatingText.tscn")
@@ -295,7 +293,7 @@ func _on_unit_team_changed(unit: Unit) -> void:
 		unit.set_health_bar_color(Color.red)
 
 
-func _on_ThreatMeterTimer_timeout() -> void:
+func _on_ThreatMeter_data_expired():
 	$CanvasLayer/ThreatMeter.set_data($Enemy.threat_table)
 
 
@@ -490,8 +488,6 @@ func setup(player_name: String, player_lookup: Dictionary) -> void:
 	$Enemy.connect("status_effect_removed", self, "_on_unit_status_effect_removed", [$Enemy])
 	$Enemy.connect("team_changed", self, "_on_unit_team_changed", [$Enemy])
 	#END OF TEST ENEMY
-	
-	$ThreatMeterTimer.start(THREAT_METER_REFRESH_TIME)
 	
 	var player_list = player_lookup.values()
 	player_list.append(player_name)

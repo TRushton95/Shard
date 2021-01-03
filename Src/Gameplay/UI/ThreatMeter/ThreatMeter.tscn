@@ -26,3 +26,6 @@ align = 1
 margin_top = 18.0
 margin_right = 146.0
 margin_bottom = 18.0
+
+[node name="DataExpiryTimer" type="Timer" parent="."]
+[connection signal="timeout" from="DataExpiryTimer" to="." method="_on_DataExpiryTimer_timeout"]
