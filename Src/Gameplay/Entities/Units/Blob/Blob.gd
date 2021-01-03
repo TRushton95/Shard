@@ -3,34 +3,31 @@ class_name Blob
 
 var default_animation_type = Enums.UnitAnimationType.IDLE
 var playing_priority_animation := false
-var target # TODO: Remove once aggro table is added
-var aggro_table := {}
+var threat_table := ThreatTable.new()
 
 
 func _on_Blob_damage_received(value: int, source_id: int, caster_id: int) -> void:
-	if !aggro_table.has(caster_id):
-		aggro_table[caster_id] = 1
+	if !threat_table.get_threat_data(caster_id):
 		instance_from_id(caster_id).connect("healing_received", self, "_on_threat_unit_healed", [caster_id])
-	else:
-		aggro_table[caster_id] = aggro_table[caster_id] + 1
+		
+	threat_table.add_threat(caster_id, 1)
 	print("Threat changed due to damage received")
 
 
 func _on_threat_unit_healed(value: int, source_id: int, caster_id: int, body_id: int) -> void:
-	if !aggro_table.has(caster_id):
-		aggro_table[caster_id] = 1
+	if !threat_table.get_threat_data(caster_id):
 		instance_from_id(caster_id).connect("healing_received", self, "_on_threat_unit_healed", [caster_id])
-	else:
-		aggro_table[caster_id] = aggro_table[caster_id] + 1
+	
+	threat_table.add_threat(caster_id, 1)
 
 
 func _on_AggroArea_body_entered(body):
 	if !body is Unit || body == self:
 		return
 		
-	if aggro_table.size() == 0:
+	if threat_table.empty():
 		var body_id = body.get_instance_id()
-		aggro_table[body_id] = 1
+		threat_table.add_threat(body_id, 1)
 		body.connect("healing_received", self, "_on_threat_unit_healed", [body_id])
 
 
