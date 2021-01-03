@@ -10,23 +10,18 @@ var aggro_table := {}
 func _on_Blob_damage_received(value: int, source_id: int, caster_id: int) -> void:
 	if !aggro_table.has(caster_id):
 		aggro_table[caster_id] = 1
+		instance_from_id(caster_id).connect("healing_received", self, "_on_threat_unit_healed", [caster_id])
 	else:
 		aggro_table[caster_id] = aggro_table[caster_id] + 1
-		
-	# TODO: debug remove me
-	target = instance_from_id(caster_id)
 	print("Threat changed due to damage received")
 
 
 func _on_threat_unit_healed(value: int, source_id: int, caster_id: int, body_id: int) -> void:
 	if !aggro_table.has(caster_id):
 		aggro_table[caster_id] = 1
+		instance_from_id(caster_id).connect("healing_received", self, "_on_threat_unit_healed", [caster_id])
 	else:
 		aggro_table[caster_id] = aggro_table[caster_id] + 1
-		
-	# TODO: debug remove me
-	target = instance_from_id(caster_id)
-	print("Threat changed due to healing")
 
 
 func _on_AggroArea_body_entered(body):
@@ -37,9 +32,6 @@ func _on_AggroArea_body_entered(body):
 		var body_id = body.get_instance_id()
 		aggro_table[body_id] = 1
 		body.connect("healing_received", self, "_on_threat_unit_healed", [body_id])
-		
-	# TODO: debug remove me
-		target = body
 
 
 func _on_state_entered(state_name: String) -> void:
