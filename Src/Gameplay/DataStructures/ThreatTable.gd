@@ -14,7 +14,6 @@ func add_threat(unit_id: int, threat: int) -> void:
 		_threats.push_front(threat_data)
 		
 	_threats.sort_custom(self, "sort_by_threat")
-	print(str(threat_data.threat))
 
 
 func remove_threat_data(unit_id: int) -> void:

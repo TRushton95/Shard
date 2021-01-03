@@ -8,15 +8,18 @@ var threat_table := ThreatTable.new()
 
 func _on_Blob_damage_received(value: int, source_id: int, caster_id: int) -> void:
 	if !threat_table.get_threat_data(caster_id):
-		instance_from_id(caster_id).connect("healing_received", self, "_on_threat_unit_healed", [caster_id])
+		var caster = instance_from_id(caster_id)
+		caster.connect("healing_received", self, "_on_threat_unit_healed", [caster_id])
+		caster.add_combat_target(self)
 		
 	threat_table.add_threat(caster_id, 1)
-	print("Threat changed due to damage received")
 
 
 func _on_threat_unit_healed(value: int, source_id: int, caster_id: int, body_id: int) -> void:
 	if !threat_table.get_threat_data(caster_id):
-		instance_from_id(caster_id).connect("healing_received", self, "_on_threat_unit_healed", [caster_id])
+		var caster = instance_from_id(caster_id)
+		caster.connect("healing_received", self, "_on_threat_unit_healed", [caster_id])
+		caster.add_combat_target(self)
 	
 	threat_table.add_threat(caster_id, 1)
 
@@ -29,6 +32,7 @@ func _on_AggroArea_body_entered(body):
 		var body_id = body.get_instance_id()
 		threat_table.add_threat(body_id, 1)
 		body.connect("healing_received", self, "_on_threat_unit_healed", [body_id])
+		body.add_combat_target(self)
 
 
 func _on_state_entered(state_name: String) -> void:

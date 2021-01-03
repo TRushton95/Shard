@@ -18,6 +18,7 @@ var is_moving := false
 var is_casting := false
 var is_channelling := false
 var is_basic_attacking := false
+var _combat_targets := []
 
 var _navigation_state = IdleNavigationState.new()
 var _combat_state = IdleCombatState.new()
@@ -55,6 +56,8 @@ signal status_effect_applied(status_effect)
 signal status_effect_removed(status_effect, index)
 signal damage_received(value, source_id, caster_id)
 signal healing_received(value, source_id, caster_id)
+signal combat_entered
+signal combat_exited
 signal team_changed
 signal mana_changed(value)
 signal health_attr_changed(value)
@@ -453,6 +456,24 @@ func face_point(point: Vector2) -> void:
 	
 	if new_direction != direction:
 		change_direction(new_direction)
+
+
+func add_combat_target(unit: Unit) -> void:
+	if _combat_targets.size() == 0:
+		emit_signal("combat_entered")
+	
+	_combat_targets.push_back(unit)
+
+
+func remove_combat_target(unit: Unit) -> void:
+	_combat_targets.erase(unit)
+	
+	if _combat_targets.size() == 0:
+		emit_signal("combat_exited")
+
+
+func is_in_combat() -> bool:
+	return _combat_targets.size() > 0
 
 
 func _is_team_target_valid(ability: Ability, target) -> bool:

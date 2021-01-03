@@ -170,6 +170,14 @@ func _on_player_movement_speed_attr_changed(value: int) -> void:
 	$CanvasLayer/CharacterPanel.set_movement_speed_attr(value)
 
 
+func _on_player_combat_entered() -> void:
+	print("Entered combat")
+
+
+func _on_player_combat_exited() -> void:
+	print("Exited combat")
+
+
 func _on_unit_damage_received(value: int, source_id: int, caster_id: int, unit: Unit) -> void:
 	var floating_text = floating_text_scene.instance()
 	floating_text.setup(value, unit.position, Color.red)
@@ -526,6 +534,8 @@ func setup(player_name: String, player_lookup: Dictionary) -> void:
 			unit.connect("ability_cooldown_ended", self, "_on_ability_cooldown_ended")
 			unit.connect("ability_cooldown_progressed", self, "_on_ability_cooldown_progressed")
 			unit.connect("path_set", self, "_on_player_path_set")
+			unit.connect("combat_entered", self, "_on_player_combat_entered")
+			unit.connect("combat_exited", self, "_on_player_combat_exited")
 			
 			player = unit
 			
