@@ -36,7 +36,7 @@ func execute(target, caster: Unit) -> void:
 	zone.friendly_healing_per_tick = tick_damage + (tick_damage_per_sp * caster.spell_power_attr.value)
 	zone.texture = consecration_texture
 	get_tree().get_root().add_child(zone) # TODO: This shouldn't be added to the tree root
-	zone.setup()
+	zone.setup(_owner_id)
 	
 	var status = Status.new(get_instance_id(), _owner_id)
 	status.is_debuff = is_debuff
