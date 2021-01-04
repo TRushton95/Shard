@@ -16,6 +16,8 @@ func _on_Blob_died():
 
 
 func _on_threat_unit_died(target_id: int) -> void:
+	threat_table.remove_threat_data(target_id)
+	
 	if threat_table.empty():
 		_reset()
 
@@ -35,7 +37,7 @@ func _on_threat_unit_healed(value: int, source_id: int, caster_id: int, body_id:
 
 
 func _on_AggroArea_body_entered(body):
-	if !body is Unit || body == self:
+	if !body is Unit || body == self || body.dead:
 		return
 		
 	if threat_table.empty():

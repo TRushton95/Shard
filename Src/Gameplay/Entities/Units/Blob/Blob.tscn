@@ -171,7 +171,7 @@ extents = Vector2( 56, 58 )
 script = ExtResource( 12 )
 icon = ExtResource( 3 )
 base_movement_speed = 150
-base_health = 5
+base_health = 40
 base_attack_power = 20
 
 [node name="Sprite" type="Sprite" parent="."]
