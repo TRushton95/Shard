@@ -109,7 +109,10 @@ func _on_unit_left_clicked(unit: Unit) -> void:
 
 func _on_unit_right_clicked(unit: Unit) -> void:
 	if unit != player && unit.team != player.team:
-		rpc("_unit_attack_target", player_name, unit.name)
+		if !unit.dead:
+			rpc("_unit_attack_target", player_name, unit.name)
+		else:
+			rpc("_unit_move_to_point", player_name, unit.position)
 
 
 func _on_player_path_set(path: PoolVector2Array) -> void:
@@ -649,6 +652,10 @@ remotesync func _unit_cast(unit_name: String, action_source: int, action_index: 
 		print("No target provided")
 		
 	var clean_target = dirty_target if dirty_target is Vector2 else get_node(dirty_target)
+	
+	if clean_target is Unit && clean_target.dead:
+		print("Target is dead")
+		return
 	
 	var unit = get_node(unit_name)
 	var ability = find_action(ActionLookup.new(action_source, action_index))

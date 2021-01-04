@@ -16,7 +16,8 @@ func _on_Blob_died():
 
 
 func _on_threat_unit_died(target_id: int) -> void:
-	_reset()
+	if threat_table.empty():
+		_reset()
 
 
 func _on_Blob_damage_received(value: int, source_id: int, caster_id: int) -> void:
