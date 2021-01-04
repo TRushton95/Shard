@@ -4,22 +4,31 @@ class_name Blob
 var default_animation_type = Enums.UnitAnimationType.IDLE
 var playing_priority_animation := false
 var threat_table := ThreatTable.new()
+var resetting := false
+var _leash_position : Vector2
+
+
+func _on_Blob_died():
+	if playing_priority_animation:
+		play_priority_animation("dead")
+	
+	set_default_animation_type(Enums.UnitAnimationType.DEAD)
+
+
+func _on_threat_unit_died(target_id: int) -> void:
+	_reset()
 
 
 func _on_Blob_damage_received(value: int, source_id: int, caster_id: int) -> void:
 	if !threat_table.get_threat_data(caster_id):
-		var caster = instance_from_id(caster_id)
-		caster.connect("healing_received", self, "_on_threat_unit_healed", [caster_id])
-		caster.add_combat_target(self)
+		_setup_combat_target(caster_id)
 		
 	threat_table.add_threat(caster_id, 1)
 
 
 func _on_threat_unit_healed(value: int, source_id: int, caster_id: int, body_id: int) -> void:
 	if !threat_table.get_threat_data(caster_id):
-		var caster = instance_from_id(caster_id)
-		caster.connect("healing_received", self, "_on_threat_unit_healed", [caster_id])
-		caster.add_combat_target(self)
+		_setup_combat_target(caster_id)
 	
 	threat_table.add_threat(caster_id, 1)
 
@@ -29,10 +38,10 @@ func _on_AggroArea_body_entered(body):
 		return
 		
 	if threat_table.empty():
+		_leash_position = position
 		var body_id = body.get_instance_id()
+		_setup_combat_target(body_id)
 		threat_table.add_threat(body_id, 1)
-		body.connect("healing_received", self, "_on_threat_unit_healed", [body_id])
-		body.add_combat_target(self)
 
 
 func _on_state_entered(state_name: String) -> void:
@@ -101,3 +110,17 @@ func play_priority_animation(anim_name: String, position := 0.0) -> void:
 	
 	if position > 0.0:
 		$Sprite/AnimationPlayer.seek(position, true)
+
+
+func _reset() -> void:
+	resetting = true
+	_set_current_health(health_attr.value)
+	_set_current_mana(mana_attr.value)
+	move_to_point(_leash_position)
+
+
+func _setup_combat_target(target_id) -> void:
+	var target = instance_from_id(target_id)
+	target.connect("healing_received", self, "_on_threat_unit_healed", [target_id])
+	target.connect("died", self, "_on_threat_unit_died", [target_id])
+	target.add_combat_target(self)

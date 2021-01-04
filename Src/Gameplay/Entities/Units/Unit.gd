@@ -19,6 +19,7 @@ var is_casting := false
 var is_channelling := false
 var is_basic_attacking := false
 var _combat_targets := []
+var dead := false
 
 var _navigation_state = IdleNavigationState.new()
 var _combat_state = IdleCombatState.new()
@@ -59,6 +60,7 @@ signal healing_received(value, source_id, caster_id)
 signal combat_entered
 signal combat_exited
 signal team_changed
+signal died
 signal mana_changed(value)
 signal health_attr_changed(value)
 signal mana_attr_changed(value)
@@ -186,6 +188,9 @@ func _ready() -> void:
 func _process(delta: float) -> void:
 	z_index = position.y
 	
+	if dead:
+		return
+	
 	if _navigation_state.has_method("update"):
 		var new_navigation_state = _navigation_state.update(self, delta)
 		if new_navigation_state:
@@ -215,6 +220,16 @@ remotesync func damage(value: int, source_id: int, owner_id: int) -> void:
 	var source = instance_from_id(source_id)
 	print("%s received %s damage from %s's %s" % [name, value, owner.name, source.name])
 	emit_signal("damage_received", value, source_id, owner_id)
+	
+	if current_health == 0:
+		dead = true
+		switch_navigation_state(IdleNavigationState.new())
+		switch_combat_state(IdleCombatState.new())
+		
+		for status_effect in get_node("StatusEffects").get_children():
+			remove_status_effect(status_effect.name)
+			
+		emit_signal("died")
 
 
 remotesync func heal(value: int, source_id: int,  owner_id: int) -> void:
@@ -327,6 +342,8 @@ func _get_animation_name(animation_type: int, current_direction: int) -> String:
 			animation_name = "walking"
 		Enums.UnitAnimationType.CASTING:
 			animation_name = "casting"
+		Enums.UnitAnimationType.DEAD:
+			return "dead"
 	
 	return animation_name + direction_suffix
 
@@ -356,7 +373,7 @@ func _set_current_mana(value: int) -> void:
 ########################
 
 func input_command(command) -> void:
-	if command.has_method("execute"):
+	if command.has_method("execute") && !dead:
 		command.execute(self)
 
 

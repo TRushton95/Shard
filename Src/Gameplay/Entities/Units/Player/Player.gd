@@ -61,6 +61,17 @@ func _on_TorsoAnimationPlayer_animation_finished(anim_name: String):
 	$TorsoSprite/AnimationPlayer.seek(arms_animation_position, true)
 
 
+func _on_Player_died() -> void:
+	if playing_priority_torso_animation:
+		play_priority_torso_animation("dead")
+		
+	if playing_priority_arms_animation:
+		play_priority_arms_animation("dead")
+	
+	set_default_torso_animation_type(Enums.UnitAnimationType.DEAD)
+	set_default_arms_animation_type(Enums.UnitAnimationType.DEAD)
+
+
 func _ready() -> void:
 	# super class called by default
 	set_default_torso_animation_type(Enums.UnitAnimationType.IDLE)

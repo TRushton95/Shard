@@ -554,7 +554,7 @@ func setup(player_name: String, player_lookup: Dictionary) -> void:
 			$CanvasLayer/ActionBar.set_max_health(unit.health_attr.value)
 			$CanvasLayer/ActionBar.set_max_mana(unit.mana_attr.value)
 			$CanvasLayer/CharacterPanel.set_character_name(player_name)
-			$CanvasLayer/CharacterPanel.set_character_image(unit.get_node("Sprite").texture)
+			$CanvasLayer/CharacterPanel.set_character_image(unit.get_node("TorsoSprite").texture)
 			$CanvasLayer/CharacterPanel.set_health_attr(unit.health_attr.value)
 			$CanvasLayer/CharacterPanel.set_mana_attr(unit.mana_attr.value)
 			$CanvasLayer/CharacterPanel.set_attack_power_attr(unit.attack_power_attr.value)
