@@ -1,6 +1,6 @@
 extends Node
 
-var aggressive := false
+var target
 
 
 # No type: cyclical reference
@@ -8,7 +8,13 @@ func update(unit) -> void:
 	if unit.resetting:
 		return
 	
-	if !aggressive && !unit.threat_table.empty():
-		var top_threat_data = unit.threat_table.get_highest_threat_target()
-		unit.input_command(AttackCommand.new(instance_from_id(top_threat_data.unit_id)))
-		aggressive = true
+	var top_threat = unit.threat_table.get_highest_valid_threat()
+	
+	if !top_threat && target:
+		target = null
+		unit.reset()
+		return
+	
+	if top_threat != target:
+		target = top_threat
+		unit.input_command(AttackCommand.new(instance_from_id(target.unit_id)))

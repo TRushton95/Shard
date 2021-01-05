@@ -27,13 +27,13 @@ func clear_threat_data() -> void:
 	_threats = []
 
 
-func get_highest_threat_target() -> ThreatData:
-	var result
+func get_highest_valid_threat() -> ThreatData:
+	for threat in _threats:
+		var unit = instance_from_id(threat.unit_id)
+		if !unit.dead:
+			return threat
 	
-	if _threats.size() > 0:
-		result = _threats[0]
-	
-	return result
+	return null
 
 
 func get_threat_data(unit_id: int) -> ThreatData:
