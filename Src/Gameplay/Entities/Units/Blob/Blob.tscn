@@ -8,7 +8,7 @@
 [ext_resource path="res://Gameplay/Entities/Inventory/Inventory.tscn" type="PackedScene" id=11]
 [ext_resource path="res://Gameplay/Entities/Units/Blob/Blob.gd" type="Script" id=12]
 
-[sub_resource type="Animation" id=12]
+[sub_resource type="Animation" id=1]
 resource_name = "dead"
 tracks/0/type = "value"
 tracks/0/path = NodePath(".:frame")
@@ -23,9 +23,8 @@ tracks/0/keys = {
 "values": [ 12 ]
 }
 
-[sub_resource type="Animation" id=1]
+[sub_resource type="Animation" id=2]
 resource_local_to_scene = true
-resource_name = "idle_down"
 loop = true
 tracks/0/type = "value"
 tracks/0/path = NodePath(".:frame")
@@ -40,9 +39,8 @@ tracks/0/keys = {
 "values": [ 0 ]
 }
 
-[sub_resource type="Animation" id=2]
+[sub_resource type="Animation" id=3]
 resource_local_to_scene = true
-resource_name = "idle_left"
 loop = true
 tracks/0/type = "value"
 tracks/0/path = NodePath(".:frame")
@@ -57,9 +55,8 @@ tracks/0/keys = {
 "values": [ 3 ]
 }
 
-[sub_resource type="Animation" id=3]
+[sub_resource type="Animation" id=4]
 resource_local_to_scene = true
-resource_name = "idle_right"
 loop = true
 tracks/0/type = "value"
 tracks/0/path = NodePath(".:frame")
@@ -74,9 +71,8 @@ tracks/0/keys = {
 "values": [ 6 ]
 }
 
-[sub_resource type="Animation" id=4]
+[sub_resource type="Animation" id=5]
 resource_local_to_scene = true
-resource_name = "idle_up"
 loop = true
 tracks/0/type = "value"
 tracks/0/path = NodePath(".:frame")
@@ -91,7 +87,7 @@ tracks/0/keys = {
 "values": [ 9 ]
 }
 
-[sub_resource type="Animation" id=5]
+[sub_resource type="Animation" id=6]
 resource_local_to_scene = true
 length = 0.8
 tracks/0/type = "value"
@@ -107,9 +103,8 @@ tracks/0/keys = {
 "values": [ 1, 0, 2, 0 ]
 }
 
-[sub_resource type="Animation" id=6]
+[sub_resource type="Animation" id=7]
 resource_local_to_scene = true
-resource_name = "walking_left"
 length = 0.8
 tracks/0/type = "value"
 tracks/0/path = NodePath(".:frame")
@@ -124,9 +119,8 @@ tracks/0/keys = {
 "values": [ 4, 3, 5, 3 ]
 }
 
-[sub_resource type="Animation" id=7]
+[sub_resource type="Animation" id=8]
 resource_local_to_scene = true
-resource_name = "walking_right"
 length = 0.8
 tracks/0/type = "value"
 tracks/0/path = NodePath(".:frame")
@@ -141,9 +135,8 @@ tracks/0/keys = {
 "values": [ 7, 6, 8, 6 ]
 }
 
-[sub_resource type="Animation" id=8]
+[sub_resource type="Animation" id=9]
 resource_local_to_scene = true
-resource_name = "walking_up"
 length = 0.8
 tracks/0/type = "value"
 tracks/0/path = NodePath(".:frame")
@@ -158,13 +151,13 @@ tracks/0/keys = {
 "values": [ 10, 9, 11, 9 ]
 }
 
-[sub_resource type="CircleShape2D" id=9]
+[sub_resource type="CircleShape2D" id=10]
 radius = 58.0
 
-[sub_resource type="CircleShape2D" id=10]
+[sub_resource type="CircleShape2D" id=11]
 radius = 256.125
 
-[sub_resource type="RectangleShape2D" id=11]
+[sub_resource type="RectangleShape2D" id=12]
 extents = Vector2( 56, 58 )
 
 [node name="Blob" type="KinematicBody2D"]
@@ -181,32 +174,32 @@ vframes = 5
 hframes = 3
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="Sprite"]
-anims/dead = SubResource( 12 )
-anims/idle_down = SubResource( 1 )
-anims/idle_left = SubResource( 2 )
-anims/idle_right = SubResource( 3 )
-anims/idle_up = SubResource( 4 )
-anims/walking_down = SubResource( 5 )
-anims/walking_left = SubResource( 6 )
-anims/walking_right = SubResource( 7 )
-anims/walking_up = SubResource( 8 )
+anims/dead = SubResource( 1 )
+anims/idle_down = SubResource( 2 )
+anims/idle_left = SubResource( 3 )
+anims/idle_right = SubResource( 4 )
+anims/idle_up = SubResource( 5 )
+anims/walking_down = SubResource( 6 )
+anims/walking_left = SubResource( 7 )
+anims/walking_right = SubResource( 8 )
+anims/walking_up = SubResource( 9 )
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 position = Vector2( 0, -42 )
-shape = SubResource( 9 )
+shape = SubResource( 10 )
 
 [node name="AggroArea" type="Area2D" parent="."]
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="AggroArea"]
 position = Vector2( 0, -40 )
-shape = SubResource( 10 )
+shape = SubResource( 11 )
 
 [node name="Clickbox" type="Area2D" parent="."]
 position = Vector2( 0, -48 )
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Clickbox"]
 position = Vector2( 0, 6 )
-shape = SubResource( 11 )
+shape = SubResource( 12 )
 
 [node name="AI" type="Node" parent="."]
 script = ExtResource( 2 )

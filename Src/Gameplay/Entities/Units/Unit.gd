@@ -208,6 +208,11 @@ func _process(delta: float) -> void:
 		get_node("AI").update(self)
 
 
+func clear_status_effects() -> void:
+	for status_effect in get_node("StatusEffects").get_children():
+			remove_status_effect(status_effect.name)
+
+
 remotesync func damage(value: int, source_id: int, owner_id: int) -> void:
 	var new_health = current_health - value
 	
@@ -223,11 +228,9 @@ remotesync func damage(value: int, source_id: int, owner_id: int) -> void:
 	
 	if current_health == 0:
 		dead = true
+		clear_status_effects()
 		switch_navigation_state(IdleNavigationState.new())
 		switch_combat_state(IdleCombatState.new())
-		
-		for status_effect in get_node("StatusEffects").get_children():
-			remove_status_effect(status_effect.name)
 			
 		emit_signal("died")
 

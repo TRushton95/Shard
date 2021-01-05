@@ -110,9 +110,34 @@ func play_priority_animation(anim_name: String, position := 0.0) -> void:
 
 func reset() -> void:
 	resetting = true
+	clear_status_effects()
 	_set_current_health(health_attr.value)
 	_set_current_mana(mana_attr.value)
 	move_to_point(_leash_position)
+
+
+remotesync func push_status_effect(status_effect_data: Dictionary) -> void:
+	if resetting:
+		print("Evaded status effet")
+		return
+		
+	.push_status_effect(status_effect_data)
+
+
+remotesync func damage(value: int, source_id: int, owner_id: int) -> void:
+	if resetting:
+		print("Evaded damage")
+		return
+	
+	.damage(value, source_id, owner_id)
+
+
+remotesync func heal(value: int, source_id: int, owner_id: int) -> void:
+	if resetting:
+		print("Evaded healing")
+		return
+		
+	.heal(value, source_id, owner_id)
 
 
 func _setup_combat_target(target_id) -> void:
