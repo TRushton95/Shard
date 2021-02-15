@@ -1,0 +1,12 @@
+[gd_scene load_steps=4 format=2]
+
+[ext_resource path="res://Gameplay/Entities/Items/Consumables/FireballScroll.gd" type="Script" id=1]
+[ext_resource path="res://Gameplay/AbilitySystem/Abilities/Fireball/Fireball.tscn" type="PackedScene" id=2]
+[ext_resource path="res://Gameplay/Entities/Items/Consumables/icon.png" type="Texture" id=3]
+
+[node name="FireballScroll" type="Node"]
+script = ExtResource( 1 )
+icon = ExtResource( 3 )
+display_name = "Scroll of Fireball"
+
+[node name="Fireball" parent="." instance=ExtResource( 2 )]

@@ -15,7 +15,12 @@ var dragging_button : ActionButton
 
 #This should hook into whatever mechanism determines when an ability key is clicked
 func _on_action_button_pressed(button: ActionButton) -> void:
-	process_ability_press(button.action_lookup)
+	if button.action_lookup.source == Enums.ActionSource.Inventory:
+		var item = player.get_node("Inventory").get_item(button.action_lookup.index)
+		if item is Gear:
+			print("Equip gear")
+	else:
+		process_ability_press(button.action_lookup)
 
 
 func _on_action_button_mouse_entered(button: ActionButton) -> void:
@@ -306,15 +311,12 @@ func _process(_delta: float) -> void:
 		player.get_node("Inventory").pop_item(0)
 		$CanvasLayer/Bag.remove_action_button(0)
 	if Input.is_action_just_pressed("test_left"):
-		var fireball_scroll_scene = load("res://Gameplay/Entities/Items/FireballScroll.tscn")
-		var fireball_scroll = fireball_scroll_scene.instance()
-		var success = player.get_node("Inventory").push_item(fireball_scroll)
+		var bronze_chestplate_scene = load("res://Gameplay/Entities/Items/Gear/BronzeChestplate.tscn")
+		var bronze_chestplate = bronze_chestplate_scene.instance()
+		var success = player.get_node("Inventory").push_item(bronze_chestplate)
 		
 		if success:
-			var item_ability = player.get_node("Inventory").get_item(0).get_ability()
-			var icon = item_ability.icon # This should probably be the icon from the item, not the ability
-			
-			var item_button = _create_action_button(item_ability.name, icon, Enums.ActionSource.Inventory, item_ability.get_index(), Enums.ButtonSource.Bag)
+			var item_button = _create_action_button(bronze_chestplate.display_name, bronze_chestplate.icon, Enums.ActionSource.Inventory, bronze_chestplate.get_index(), Enums.ButtonSource.Bag)
 			
 			if player.get_node("Inventory").get_item(1):
 				item_button.modulate = Color(0, 1, 1)

@@ -59,6 +59,11 @@ _global_script_classes=[ {
 "language": "GDScript",
 "path": "res://Gameplay/Entities/Units/States/CombatStates/ChannellingCombatState.gd"
 }, {
+"base": "Item",
+"class": "Gear",
+"language": "GDScript",
+"path": "res://Gameplay/Entities/Items/Gear/Gear.gd"
+}, {
 "base": "State",
 "class": "IdleCombatState",
 "language": "GDScript",
@@ -160,6 +165,7 @@ _global_script_class_icons={
 "CastCommand": "",
 "CastingCombatState": "",
 "ChannellingCombatState": "",
+"Gear": "",
 "IdleCombatState": "",
 "IdleNavigationState": "",
 "Item": "",

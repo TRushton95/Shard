@@ -25,6 +25,10 @@ func _on_ActionButton_mouse_exited() -> void:
 		$ActiveTexture.hide()
 
 
+func _ready() -> void:
+	button_mask = BUTTON_MASK_LEFT | BUTTON_MASK_RIGHT
+
+
 func _process(delta: float) -> void:
 	if _force_dragging:
 		_drag_preview = self.duplicate() # HACK: It's screaming at me without reassigning this every frame

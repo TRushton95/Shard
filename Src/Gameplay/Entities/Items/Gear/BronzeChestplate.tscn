@@ -1,0 +1,12 @@
+[gd_scene load_steps=3 format=2]
+
+[ext_resource path="res://Gameplay/Entities/Items/Gear/BronzeChestplate.gd" type="Script" id=1]
+[ext_resource path="res://Gameplay/Entities/Items/Gear/bronze_chestplate_icon.png" type="Texture" id=2]
+
+[node name="BronzeChestplate" type="Node"]
+script = ExtResource( 1 )
+icon = ExtResource( 2 )
+display_name = "Bronze Chestplate"
+health_stat = 10
+mana_stat = 5
+attack_power_stat = 5

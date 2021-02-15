@@ -677,7 +677,7 @@ tracks/9/keys = {
 "values": [ Vector2( 0, -5 ), Vector2( 0, 0 ), Vector2( 0, -5 ), Vector2( 0, 0 ) ]
 }
 
-[sub_resource type="Animation" id=29]
+[sub_resource type="Animation" id=24]
 resource_local_to_scene = true
 resource_name = "walking_left"
 length = 0.8
@@ -803,7 +803,7 @@ tracks/9/keys = {
 "values": [ Vector2( 0, -5 ), Vector2( 0, 0 ), Vector2( 0, -5 ), Vector2( 0, 0 ) ]
 }
 
-[sub_resource type="Animation" id=30]
+[sub_resource type="Animation" id=25]
 resource_local_to_scene = true
 resource_name = "walking_right"
 length = 0.8
@@ -929,7 +929,7 @@ tracks/9/keys = {
 "values": [ Vector2( 0, -5 ), Vector2( 0, 0 ), Vector2( 0, -5 ), Vector2( 0, 0 ) ]
 }
 
-[sub_resource type="Animation" id=31]
+[sub_resource type="Animation" id=26]
 resource_local_to_scene = true
 resource_name = "walking_up"
 length = 0.8
@@ -1131,9 +1131,9 @@ anims/idle_left = SubResource( 20 )
 anims/idle_right = SubResource( 21 )
 anims/idle_up = SubResource( 22 )
 anims/walking_down = SubResource( 23 )
-anims/walking_left = SubResource( 29 )
-anims/walking_right = SubResource( 30 )
-anims/walking_up = SubResource( 31 )
+anims/walking_left = SubResource( 24 )
+anims/walking_right = SubResource( 25 )
+anims/walking_up = SubResource( 26 )
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 position = Vector2( 0, -16 )
