@@ -103,17 +103,23 @@ func _on_ActionBar_button_dropped_on_button(dropped_button: ActionButton, target
 	button_drag_handled = true
 
 
-func _on_CharacterPanel_button_dropped_in_slot(button: ActionButton, slot: ButtonSlot) -> void:
+func _on_CharacterPanel_button_dropped_in_slot(button: ActionButton, slot: GearButtonSlot) -> void:
 	if button.source != Enums.ButtonSource.Bag:
 		return
-		
-	var clone_button = _create_action_button(button.action_name, button.texture_normal, button.action_lookup.source, button.action_lookup.index, Enums.ButtonSource.Armoury)
-	slot.add_button(clone_button)
 	
 	var bag_index = $CanvasLayer/Bag.get_button_index(button)
+	var item = player.get_node("Inventory").get_item(bag_index)
+	
+	if !player.can_equip(item, slot.gear_slot):
+		print("Equip failed")
+		return
+		
+	var popped_item = player.get_node("Inventory").pop_item(bag_index)
+	player.equip_gear(popped_item)
+	
 	$CanvasLayer/Bag.remove_action_button(bag_index)
-	var item = player.get_node("Inventory").pop_item(bag_index)
-	player.equip_gear(item)
+	var clone_button = _create_action_button(button.action_name, button.texture_normal, button.action_lookup.source, button.action_lookup.index, Enums.ButtonSource.Armoury)
+	slot.add_button(clone_button)
  
 
 func _on_CharacterPanel_button_dropped_on_button() -> void:

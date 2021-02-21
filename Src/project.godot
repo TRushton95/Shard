@@ -74,6 +74,11 @@ _global_script_classes=[ {
 "language": "GDScript",
 "path": "res://Gameplay/Entities/Items/Gear/Gear.gd"
 }, {
+"base": "ButtonSlot",
+"class": "GearButtonSlot",
+"language": "GDScript",
+"path": "res://Gameplay/UI/CharacterPanel/GearButtonSlot.gd"
+}, {
 "base": "Gear",
 "class": "HandsGear",
 "language": "GDScript",
@@ -193,6 +198,7 @@ _global_script_class_icons={
 "ChestGear": "",
 "FeetGear": "",
 "Gear": "",
+"GearButtonSlot": "",
 "HandsGear": "",
 "HeadGear": "",
 "IdleCombatState": "",

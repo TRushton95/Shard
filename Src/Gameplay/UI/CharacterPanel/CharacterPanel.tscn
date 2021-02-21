@@ -1,8 +1,9 @@
-[gd_scene load_steps=4 format=2]
+[gd_scene load_steps=5 format=2]
 
 [ext_resource path="res://Gameplay/UI/CharacterPanel/CharacterPanel.gd" type="Script" id=1]
 [ext_resource path="res://Gameplay/UI/CharacterPanel/character_panel.png" type="Texture" id=2]
 [ext_resource path="res://Gameplay/UI/ButtonSlot/ButtonSlot.tscn" type="PackedScene" id=3]
+[ext_resource path="res://Gameplay/UI/CharacterPanel/GearButtonSlot.gd" type="Script" id=4]
 
 [node name="CharacterPanel" type="TextureRect"]
 size_flags_horizontal = 3
@@ -228,59 +229,46 @@ margin_left = 52.0
 margin_top = 105.0
 margin_right = -1864.0
 margin_bottom = -911.0
+script = ExtResource( 4 )
 
 [node name="ChestSlot" parent="GearSlots" instance=ExtResource( 3 )]
 margin_left = 52.0
 margin_top = 183.0
 margin_right = -1864.0
 margin_bottom = -833.0
+script = ExtResource( 4 )
+gear_slot = 1
 
 [node name="LegsSlot" parent="GearSlots" instance=ExtResource( 3 )]
 margin_left = 52.0
 margin_top = 261.0
 margin_right = -1864.0
 margin_bottom = -755.0
+script = ExtResource( 4 )
+gear_slot = 2
 
 [node name="FeetSlot" parent="GearSlots" instance=ExtResource( 3 )]
 margin_left = 52.0
 margin_top = 339.0
 margin_right = -1864.0
 margin_bottom = -677.0
+script = ExtResource( 4 )
+gear_slot = 3
 
 [node name="HandsSlot" parent="GearSlots" instance=ExtResource( 3 )]
 margin_left = 52.0
 margin_top = 417.0
 margin_right = -1864.0
 margin_bottom = -599.0
-
-[node name="RingSlot1" parent="GearSlots" instance=ExtResource( 3 )]
-margin_left = 392.0
-margin_top = 105.0
-margin_right = -1524.0
-margin_bottom = -911.0
-
-[node name="RingSlot2" parent="GearSlots" instance=ExtResource( 3 )]
-margin_left = 392.0
-margin_top = 183.0
-margin_right = -1524.0
-margin_bottom = -833.0
-
-[node name="TrinketSlot1" parent="GearSlots" instance=ExtResource( 3 )]
-margin_left = 392.0
-margin_top = 261.0
-margin_right = -1524.0
-margin_bottom = -755.0
-
-[node name="TrinketSlot2" parent="GearSlots" instance=ExtResource( 3 )]
-margin_left = 392.0
-margin_top = 339.0
-margin_right = -1524.0
-margin_bottom = -677.0
+script = ExtResource( 4 )
+gear_slot = 4
 
 [node name="WeaponSlot" parent="GearSlots" instance=ExtResource( 3 )]
 margin_left = 392.0
 margin_top = 417.0
 margin_right = -1524.0
 margin_bottom = -599.0
+script = ExtResource( 4 )
+gear_slot = 5
 [connection signal="button_down" from="GrabBox" to="." method="_on_GrabBox_button_down"]
 [connection signal="button_up" from="GrabBox" to="." method="_on_GrabBox_button_up"]

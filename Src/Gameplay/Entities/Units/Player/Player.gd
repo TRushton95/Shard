@@ -6,16 +6,14 @@ var default_arms_animation_type = Enums.UnitAnimationType.IDLE
 var playing_priority_arms_animation := false
 var playing_priority_body_animation := false
 
+# FIXME: The order of this dictionary needs to match that of the gearslot nodes in the character panel
+# This is very tightly coupled, needs a looser way to connect character panel button slots to player gear slots
 var gear_slots := {
 	Enums.GearSlot.HEAD: null,
 	Enums.GearSlot.CHEST: null,
 	Enums.GearSlot.LEGS: null,
 	Enums.GearSlot.FEET: null,
 	Enums.GearSlot.HANDS: null,
-	Enums.GearSlot.RING1: null,
-	Enums.GearSlot.RING2: null,
-	Enums.GearSlot.TRINKET1: null,
-	Enums.GearSlot.TRINKET2: null,
 	Enums.GearSlot.WEAPON: null
 }
 
@@ -112,6 +110,22 @@ func change_direction(new_direction: int) -> void:
 	var full_arms_animation_name = current_arms_animation_type + "_" + direction_name
 	$ArmsAnimationPlayer.play(full_arms_animation_name)
 	$ArmsAnimationPlayer.seek(current_arms_animation_position, true)
+
+
+func can_equip(item: Item, slot_to_equip := -1) -> bool:
+	if !item is Gear:
+		print("Item is not equippable")
+		return false
+		
+	if !Enums.GearSlot.keys()[item.slot]:
+		print("Item slot does not exist")
+		return false
+		
+	if slot_to_equip == -1 || item.slot != slot_to_equip:
+		print("Cannot equip item in that slot")
+		return false
+		
+	return true
 
 
 func equip_gear(gear: Gear) -> void:
