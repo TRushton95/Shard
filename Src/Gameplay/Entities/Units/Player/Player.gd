@@ -115,6 +115,10 @@ func change_direction(new_direction: int) -> void:
 
 
 func equip_gear(gear: Gear) -> void:
+	# TODO: Needs prevention mechanism to stop incorrect gear types being equipped
+	# TODO: Needs to move item from inventory into armory, or maybe dictionary will do, as has been done here
+	#			but needs to be moved back into inventory on unequip too
+	
 	var slot = gear.slot
 	
 	if gear_slots[slot]:
