@@ -1,4 +1,4 @@
-[gd_scene load_steps=45 format=2]
+[gd_scene load_steps=46 format=2]
 
 [ext_resource path="res://Gameplay/Entities/Units/Player/DefaultSprites/hero_base_arms.png" type="Texture" id=1]
 [ext_resource path="res://Gameplay/Entities/Units/Player/DefaultSprites/hero_base_torso.png" type="Texture" id=2]
@@ -16,6 +16,7 @@
 [ext_resource path="res://Gameplay/Entities/Units/Player/DefaultSprites/hero_base_legs.png" type="Texture" id=14]
 [ext_resource path="res://Gameplay/Entities/Units/Player/DefaultSprites/hero_base_head.png" type="Texture" id=15]
 [ext_resource path="res://Gameplay/Entities/Units/Player/DefaultSprites/hero_base_feet.png" type="Texture" id=16]
+[ext_resource path="res://Gameplay/Entities/Equipment/Equipment.tscn" type="PackedScene" id=17]
 
 [sub_resource type="Animation" id=1]
 resource_local_to_scene = true
@@ -1146,6 +1147,8 @@ position = Vector2( 0, -48 )
 shape = SubResource( 28 )
 
 [node name="Inventory" parent="." instance=ExtResource( 11 )]
+
+[node name="Equipment" parent="." instance=ExtResource( 17 )]
 
 [node name="Abilities" type="Node" parent="."]
 

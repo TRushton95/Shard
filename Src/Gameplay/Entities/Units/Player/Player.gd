@@ -13,17 +13,6 @@ var default_arms_animation_type = Enums.UnitAnimationType.IDLE
 var playing_priority_arms_animation := false
 var playing_priority_body_animation := false
 
-# FIXME: The order of this dictionary needs to match that of the gearslot nodes in the character panel
-# This is very tightly coupled, needs a looser way to connect character panel button slots to player gear slots
-var gear_slots := {
-	Enums.GearSlot.HEAD: null,
-	Enums.GearSlot.CHEST: null,
-	Enums.GearSlot.LEGS: null,
-	Enums.GearSlot.FEET: null,
-	Enums.GearSlot.HANDS: null,
-	Enums.GearSlot.WEAPON: null
-}
-
 
 func _on_state_entered(state_name: String) -> void:
 	match state_name:
@@ -79,73 +68,7 @@ func _on_TorsoAnimationPlayer_animation_finished(anim_name: String):
 	$BodyAnimationPlayer.seek(arms_animation_position, true)
 
 
-func _on_Player_died() -> void:
-	if playing_priority_body_animation:
-		play_priority_body_animation("dead")
-		
-	if playing_priority_arms_animation:
-		play_priority_arms_animation("dead")
-	
-	set_default_body_animation_type(Enums.UnitAnimationType.DEAD)
-	set_default_arms_animation_type(Enums.UnitAnimationType.DEAD)
-
-
-func _ready() -> void:
-	# super class called by default
-	set_default_body_animation_type(Enums.UnitAnimationType.IDLE)
-	set_default_arms_animation_type(Enums.UnitAnimationType.IDLE)
-	
-	$ArmsAnimationPlayer.connect("animation_finished", self, "_on_ArmsAnimationPlayer_animation_finished")
-	$BodyAnimationPlayer.connect("animation_finished", self, "_on_TorsoAnimationPlayer_animation_finished")
-
-
-func change_direction(new_direction: int) -> void:
-	.change_direction(new_direction)
-	
-	var direction_name = Direction.keys()[direction].to_lower() # FIXME: Do this properly
-	
-	var current_torso_animation_type = get_body_animation_name().split("_")[0]
-	var current_torso_animation_position = get_body_animation_position()
-	
-	var full_torso_animation_name = current_torso_animation_type + "_" + direction_name
-	$BodyAnimationPlayer.play(full_torso_animation_name)
-	$BodyAnimationPlayer.seek(current_torso_animation_position, true)
-	
-	var current_arms_animation_type = get_arms_animation_name().split("_")[0]
-	var current_arms_animation_position = get_arms_animation_position()
-	
-	var full_arms_animation_name = current_arms_animation_type + "_" + direction_name
-	$ArmsAnimationPlayer.play(full_arms_animation_name)
-	$ArmsAnimationPlayer.seek(current_arms_animation_position, true)
-
-
-func can_equip(item: Item, slot_to_equip := -1) -> bool:
-	if !item is Gear:
-		print("Item is not equippable")
-		return false
-		
-	if !Enums.GearSlot.keys()[item.slot]:
-		print("Item slot does not exist")
-		return false
-		
-	if slot_to_equip == -1 || item.slot != slot_to_equip:
-		print("Cannot equip item in that slot")
-		return false
-		
-	return true
-
-
-func equip_gear(gear: Gear) -> void:
-	# TODO: Needs to move item from inventory into armory, or maybe dictionary will do, as has been done here
-	#			but needs to be moved back into inventory on unequip too
-	
-	var slot = gear.slot
-	
-	if gear_slots[slot]:
-		unequip_gear(slot)
-		
-	gear_slots[slot] = gear
-	
+func _on_Equipment_item_equipped(gear: Gear) -> void:
 	if gear.health_stat > 0:
 		health_attr.push_modifier(gear.health_modifier)
 	if gear.mana_stat > 0:
@@ -169,13 +92,8 @@ func equip_gear(gear: Gear) -> void:
 	elif gear is HandsGear:
 		$HandsSprite.texture = gear.sprite
 
-func unequip_gear(slot: int) -> Gear:
-	var gear = gear_slots[slot]
-	
-	if !gear:
-		print("Cannot unequip gear, slot %s is already empty." % slot)
-		return null
-	
+
+func _on_Equipment_item_unequipped(gear: Gear) -> void:
 	if gear.health_stat > 0:
 		health_attr.remove_modifier(gear.health_modifier)
 	if gear.mana_stat > 0:
@@ -186,8 +104,6 @@ func unequip_gear(slot: int) -> Gear:
 		spell_power_attr.remove_modifier(gear.spell_power_modifier)
 	if gear.movement_speed_stat > 0:
 		movement_speed_attr.remove_modifier(gear.movement_speed_modifier)
-		
-	gear_slots[slot] = null
 	
 	if gear is HeadGear:
 		$HeadSprite.texture = default_head_sprite
@@ -200,8 +116,49 @@ func unequip_gear(slot: int) -> Gear:
 		$FeetSprite.texture = default_feet_sprite
 	elif gear is HandsGear:
 		$HandsSprite.texture = default_hands_sprite
+
+
+func _on_Player_died() -> void:
+	if playing_priority_body_animation:
+		play_priority_body_animation("dead")
+		
+	if playing_priority_arms_animation:
+		play_priority_arms_animation("dead")
 	
-	return gear
+	set_default_body_animation_type(Enums.UnitAnimationType.DEAD)
+	set_default_arms_animation_type(Enums.UnitAnimationType.DEAD)
+
+
+func _ready() -> void:
+	# super class called by default
+	set_default_body_animation_type(Enums.UnitAnimationType.IDLE)
+	set_default_arms_animation_type(Enums.UnitAnimationType.IDLE)
+	
+	$ArmsAnimationPlayer.connect("animation_finished", self, "_on_ArmsAnimationPlayer_animation_finished")
+	$BodyAnimationPlayer.connect("animation_finished", self, "_on_TorsoAnimationPlayer_animation_finished")
+	
+	$Equipment.connect("item_equipped", self, "_on_Equipment_item_equipped")
+	$Equipment.connect("item_unequipped", self, "_on_Equipment_item_unequipped")
+
+
+func change_direction(new_direction: int) -> void:
+	.change_direction(new_direction)
+	
+	var direction_name = Direction.keys()[direction].to_lower() # FIXME: Do this properly
+	
+	var current_torso_animation_type = get_body_animation_name().split("_")[0]
+	var current_torso_animation_position = get_body_animation_position()
+	
+	var full_torso_animation_name = current_torso_animation_type + "_" + direction_name
+	$BodyAnimationPlayer.play(full_torso_animation_name)
+	$BodyAnimationPlayer.seek(current_torso_animation_position, true)
+	
+	var current_arms_animation_type = get_arms_animation_name().split("_")[0]
+	var current_arms_animation_position = get_arms_animation_position()
+	
+	var full_arms_animation_name = current_arms_animation_type + "_" + direction_name
+	$ArmsAnimationPlayer.play(full_arms_animation_name)
+	$ArmsAnimationPlayer.seek(current_arms_animation_position, true)
 
 
 func get_arms_animation_name() -> String:
