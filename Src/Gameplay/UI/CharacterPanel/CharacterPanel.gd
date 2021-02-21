@@ -45,14 +45,6 @@ func add_action_button(action_button: ActionButton, gear_slot: int) -> void:
 			slot = $GearSlots/FeetSlot
 		Enums.GearSlot.HANDS:
 			slot = $GearSlots/HandsSlot
-		Enums.GearSlot.RING1:
-			slot = $GearSlots/RingSlot1
-		Enums.GearSlot.RING2:
-			slot = $GearSlots/RingSlot2
-		Enums.GearSlot.TRINKET1:
-			slot = $GearSlots/TrinketSlot1
-		Enums.GearSlot.TRINKET2:
-			slot = $GearSlots/TrinketSlot2
 		Enums.GearSlot.WEAPON:
 			slot = $GearSlots/WeaponSlot
 		_:
@@ -75,14 +67,6 @@ func remove_action_button(gear_slot: int) -> void:
 			slot = $GearSlots/FeetSlot
 		Enums.GearSlot.HANDS:
 			slot = $GearSlots/HandsSlot
-		Enums.GearSlot.RING1:
-			slot = $GearSlots/RingSlot1
-		Enums.GearSlot.RING2:
-			slot = $GearSlots/RingSlot2
-		Enums.GearSlot.TRINKET1:
-			slot = $GearSlots/TrinketSlot1
-		Enums.GearSlot.TRINKET2:
-			slot = $GearSlots/TrinketSlot2
 		Enums.GearSlot.WEAPON:
 			slot = $GearSlots/WeaponSlot
 		_:
@@ -90,6 +74,16 @@ func remove_action_button(gear_slot: int) -> void:
 			
 	var action_button = slot.pop_button()
 	action_button.queue_free()
+
+
+func get_button_index(button: ActionButton) -> int:
+	var gear_slots = $GearSlots.get_children()
+	
+	for slot in gear_slots:
+		if slot.get_button() == button:
+			return slot.get_index()
+			
+	return -1
 
 
 func set_character_name(character_name: String) -> void:

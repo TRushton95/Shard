@@ -1,6 +1,13 @@
 extends Unit
 class_name Player
 
+var default_head_sprite = preload("res://Gameplay/Entities/Units/Player/DefaultSprites/hero_base_head.png")
+var default_torso_sprite = preload("res://Gameplay/Entities/Units/Player/DefaultSprites/hero_base_torso.png")
+var default_legs_sprite = preload("res://Gameplay/Entities/Units/Player/DefaultSprites/hero_base_legs.png")
+var default_feet_sprite = preload("res://Gameplay/Entities/Units/Player/DefaultSprites/hero_base_feet.png")
+var default_arms_sprite = preload("res://Gameplay/Entities/Units/Player/DefaultSprites/hero_base_arms.png")
+var default_hands_sprite = preload("res://Gameplay/Entities/Units/Player/DefaultSprites/hero_base_hands.png")
+
 var default_torso_animation_type = Enums.UnitAnimationType.IDLE
 var default_arms_animation_type = Enums.UnitAnimationType.IDLE
 var playing_priority_arms_animation := false
@@ -129,7 +136,6 @@ func can_equip(item: Item, slot_to_equip := -1) -> bool:
 
 
 func equip_gear(gear: Gear) -> void:
-	# TODO: Needs prevention mechanism to stop incorrect gear types being equipped
 	# TODO: Needs to move item from inventory into armory, or maybe dictionary will do, as has been done here
 	#			but needs to be moved back into inventory on unequip too
 	
@@ -163,12 +169,12 @@ func equip_gear(gear: Gear) -> void:
 	elif gear is HandsGear:
 		$HandsSprite.texture = gear.sprite
 
-func unequip_gear(slot: int) -> void:
+func unequip_gear(slot: int) -> Gear:
 	var gear = gear_slots[slot]
 	
 	if !gear:
 		print("Cannot unequip gear, slot %s is already empty." % slot)
-		return
+		return null
 	
 	if gear.health_stat > 0:
 		health_attr.remove_modifier(gear.health_modifier)
@@ -180,6 +186,22 @@ func unequip_gear(slot: int) -> void:
 		spell_power_attr.remove_modifier(gear.spell_power_modifier)
 	if gear.movement_speed_stat > 0:
 		movement_speed_attr.remove_modifier(gear.movement_speed_modifier)
+		
+	gear_slots[slot] = null
+	
+	if gear is HeadGear:
+		$HeadSprite.texture = default_head_sprite
+	elif gear is ChestGear:
+		$ChestSprite.texture = default_torso_sprite
+		$ArmsSprite.texture = default_arms_sprite
+	elif gear is LegsGear:
+		$LegsSprite.texture = default_legs_sprite
+	elif gear is FeetGear:
+		$FeetSprite.texture = default_feet_sprite
+	elif gear is HandsGear:
+		$HandsSprite.texture = default_hands_sprite
+	
+	return gear
 
 
 func get_arms_animation_name() -> String:

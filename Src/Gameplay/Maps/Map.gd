@@ -61,6 +61,16 @@ func _on_Bag_button_dropped_in_slot(button: ActionButton, slot: ButtonSlot) -> v
 			var to_index = slot.get_index()
 			$CanvasLayer/Bag.move(from_index, to_index)
 			player.get_node("Inventory").move(from_index, to_index)
+		Enums.ButtonSource.Armoury:
+			var from_index = $CanvasLayer/CharacterPanel.get_button_index(button)
+			var to_index = slot.get_index()
+			
+			var item = player.unequip_gear(from_index)
+			player.get_node("Inventory").push_item(item)
+			
+			$CanvasLayer/CharacterPanel.remove_action_button(from_index)
+			var clone_button = _create_action_button(button.action_name, button.texture_normal, button.action_lookup.source, button.action_lookup.index, Enums.ButtonSource.Bag)
+			slot.add_button(clone_button)
 			
 	button_drag_handled = true
 
