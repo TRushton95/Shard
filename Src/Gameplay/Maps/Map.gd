@@ -112,7 +112,7 @@ func _on_CharacterPanel_button_dropped_in_slot(button: ActionButton, slot: Butto
 	
 	var bag_index = $CanvasLayer/Bag.get_button_index(button)
 	$CanvasLayer/Bag.remove_action_button(bag_index)
-	var item = player.get_node("Inventory").get_item(bag_index)
+	var item = player.get_node("Inventory").pop_item(bag_index)
 	player.equip_gear(item)
  
 
