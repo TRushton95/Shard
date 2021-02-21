@@ -13,4 +13,4 @@ var attack_power_modifier = Modifier.new(Enums.ModifierType.Additive, attack_pow
 var spell_power_modifier = Modifier.new(Enums.ModifierType.Additive, spell_power_stat)
 var movement_speed_modifier = Modifier.new(Enums.ModifierType.Additive, movement_speed_stat)
 
-var slot = Enums.GearSlot.NOTSET
+var slot = -1

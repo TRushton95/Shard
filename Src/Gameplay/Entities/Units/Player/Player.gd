@@ -6,6 +6,19 @@ var default_arms_animation_type = Enums.UnitAnimationType.IDLE
 var playing_priority_arms_animation := false
 var playing_priority_body_animation := false
 
+var gear_slots := {
+	Enums.GearSlot.HEAD: null,
+	Enums.GearSlot.CHEST: null,
+	Enums.GearSlot.LEGS: null,
+	Enums.GearSlot.FEET: null,
+	Enums.GearSlot.HANDS: null,
+	Enums.GearSlot.RING1: null,
+	Enums.GearSlot.RING2: null,
+	Enums.GearSlot.TRINKET1: null,
+	Enums.GearSlot.TRINKET2: null,
+	Enums.GearSlot.WEAPON: null
+}
+
 
 func _on_state_entered(state_name: String) -> void:
 	match state_name:
@@ -99,6 +112,56 @@ func change_direction(new_direction: int) -> void:
 	var full_arms_animation_name = current_arms_animation_type + "_" + direction_name
 	$ArmsAnimationPlayer.play(full_arms_animation_name)
 	$ArmsAnimationPlayer.seek(current_arms_animation_position, true)
+
+
+func equip_gear(gear: Gear) -> void:
+	var slot = gear.slot
+	
+	if gear_slots[slot]:
+		unequip_gear(slot)
+		
+	gear_slots[slot] = gear
+	
+	if gear.health_stat > 0:
+		health_attr.push_modifier(gear.health_modifier)
+	if gear.mana_stat > 0:
+		mana_attr.push_modifier(gear.mana_modifier)
+	if gear.attack_power_stat > 0:
+		attack_power_attr.push_modifier(gear.attack_power_modifier)
+	if gear.spell_power_stat > 0:
+		spell_power_attr.push_modifier(gear.spell_power_modifier)
+	if gear.movement_speed_stat > 0:
+		movement_speed_attr.push_modifier(gear.movement_speed_modifier)
+		
+	if gear is HeadGear:
+		$HeadSprite.texture = gear.sprite
+	elif gear is ChestGear:
+		$ChestSprite.texture = gear.torso_sprite
+		$ArmsSprite.texture = gear.arms_sprite
+	elif gear is LegsGear:
+		$LegsSprite.texture = gear.sprite
+	elif gear is FeetGear:
+		$FeetSprite.texture = gear.sprite
+	elif gear is HandsGear:
+		$HandsSprite.texture = gear.sprite
+
+func unequip_gear(slot: int) -> void:
+	var gear = gear_slots[slot]
+	
+	if !gear:
+		print("Cannot unequip gear, slot %s is already empty." % slot)
+		return
+	
+	if gear.health_stat > 0:
+		health_attr.remove_modifier(gear.health_modifier)
+	if gear.mana_stat > 0:
+		mana_attr.remove_modifier(gear.mana_modifier)
+	if gear.attack_power_stat > 0:
+		attack_power_attr.remove_modifier(gear.attack_power_modifier)
+	if gear.spell_power_stat > 0:
+		spell_power_attr.remove_modifier(gear.spell_power_modifier)
+	if gear.movement_speed_stat > 0:
+		movement_speed_attr.remove_modifier(gear.movement_speed_modifier)
 
 
 func get_arms_animation_name() -> String:

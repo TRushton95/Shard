@@ -103,6 +103,23 @@ func _on_ActionBar_button_dropped_on_button(dropped_button: ActionButton, target
 	button_drag_handled = true
 
 
+func _on_CharacterPanel_button_dropped_in_slot(button: ActionButton, slot: ButtonSlot) -> void:
+	if button.source != Enums.ButtonSource.Bag:
+		return
+		
+	var clone_button = _create_action_button(button.action_name, button.texture_normal, button.action_lookup.source, button.action_lookup.index, Enums.ButtonSource.Armoury)
+	slot.add_button(clone_button)
+	
+	var bag_index = $CanvasLayer/Bag.get_button_index(button)
+	$CanvasLayer/Bag.remove_action_button(bag_index)
+	var item = player.get_node("Inventory").get_item(bag_index)
+	player.equip_gear(item)
+ 
+
+func _on_CharacterPanel_button_dropped_on_button() -> void:
+	pass
+
+
 func _on_unit_left_clicked(unit: Unit) -> void:
 	if selected_action_lookup && selected_action_lookup.is_valid():
 		rpc("_unit_cast", player_name, selected_action_lookup.source, selected_action_lookup.index, unit.name)
@@ -571,6 +588,9 @@ func setup(player_name: String, player_lookup: Dictionary) -> void:
 			
 			$CanvasLayer/ActionBar.connect("button_dropped_in_slot", self, "_on_ActionBar_button_dropped_in_slot")
 			$CanvasLayer/ActionBar.connect("button_dropped_on_button", self, "_on_ActionBar_button_dropped_on_button")
+			
+			$CanvasLayer/CharacterPanel.connect("button_dropped_in_slot", self, "_on_CharacterPanel_button_dropped_in_slot")
+			$CanvasLayer/CharacterPanel.connect("button_dropped_on_button", self, "_on_CharacterPanel_button_dropped_on_button")
 			
 		spawn_index += 1
 
