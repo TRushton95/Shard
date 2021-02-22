@@ -4,7 +4,7 @@ signal item_equipped(gear)
 signal item_unequipped(gear)
 
 
-func try_equip_gear(gear: Gear, slot_type: int) -> bool:
+func equip_gear(gear: Gear, slot_type: int) -> bool:
 	if !gear:
 		return false
 	
@@ -15,7 +15,8 @@ func try_equip_gear(gear: Gear, slot_type: int) -> bool:
 	var slot = get_slot(slot_type)
 	
 	if slot.get_child_count() > 0:
-		unequip_gear(gear.slot)
+		print("Gear slot is already equipped")
+		return false
 		
 	slot.add_child(gear)
 	emit_signal("item_equipped", gear)

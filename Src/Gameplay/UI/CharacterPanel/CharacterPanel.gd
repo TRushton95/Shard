@@ -81,7 +81,7 @@ func get_button_index(button: ActionButton) -> int:
 	
 	for slot in gear_slots:
 		if slot.get_button() == button:
-			return slot.get_index()
+			return slot.gear_slot
 			
 	return -1
 

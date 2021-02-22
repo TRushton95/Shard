@@ -113,7 +113,6 @@ func _on_CharacterPanel_button_dropped_in_slot(button: ActionButton, slot: GearB
 		return
 		
 	var item_index = $CanvasLayer/Bag.get_button_index(button)
-	
 	var item = player.get_node("Inventory").get_item(item_index)
 	
 	if !item is Gear:
@@ -125,13 +124,36 @@ func _on_CharacterPanel_button_dropped_in_slot(button: ActionButton, slot: GearB
 		return
 		
 	player.get_node("Inventory").pop_item(item_index)
-	var success = player.get_node("Equipment").try_equip_gear(item, slot.gear_slot)
+	var success = player.get_node("Equipment").equip_gear(item, slot.gear_slot)
 	if !success:
-		player.get_node("Inventory").push_item(item_index)
+		player.get_node("Inventory").push_item(item)
  
 
-func _on_CharacterPanel_button_dropped_on_button(button: ActionButton, slot: GearButtonSlot) -> void:
-	pass
+func _on_CharacterPanel_button_dropped_on_button(button: ActionButton, target_button: ActionButton) -> void:
+	if button.source != Enums.ButtonSource.Bag:
+		return
+		
+	var item_index = $CanvasLayer/Bag.get_button_index(button)
+	var item = player.get_node("Inventory").get_item(item_index)
+	
+	var gear_slot_type = $CanvasLayer/CharacterPanel.get_button_index(target_button)
+	
+	if !item is Gear:
+		print("Cannot equip item")
+		return
+		
+	if item.slot != gear_slot_type:
+		print("Cannot equip in that slot")
+		return
+		
+	player.get_node("Inventory").pop_item(item_index)
+	var unequipped_gear = player.get_node("Equipment").unequip_gear(gear_slot_type)
+	var success = player.get_node("Equipment").equip_gear(item, gear_slot_type)
+	
+	if !success:
+		player.get_node("Inventory").push_item(item)
+		
+	player.get_node("Inventory").push_item(unequipped_gear)
 
 
 func _on_unit_left_clicked(unit: Unit) -> void:
@@ -620,9 +642,13 @@ func setup(player_name: String, player_lookup: Dictionary) -> void:
 			var bronze_chestplate = bronze_chestplate_scene.instance()
 			player.get_node("Inventory").push_item(bronze_chestplate)
 			
-			var fireball_scroll_scene = load("res://Gameplay/Entities/Items/Consumables/FireballScroll.tscn")
-			var fireball_scroll = fireball_scroll_scene.instance()
-			player.get_node("Inventory").push_item(fireball_scroll)
+			var bronze_chestplate_2 = bronze_chestplate_scene.instance()
+			bronze_chestplate_2.icon = load("res://Gameplay/Entities/Items/Consumables/icon.png")
+			player.get_node("Inventory").push_item(bronze_chestplate_2)
+			
+#			var fireball_scroll_scene = load("res://Gameplay/Entities/Items/Consumables/FireballScroll.tscn")
+#			var fireball_scroll = fireball_scroll_scene.instance()
+#			player.get_node("Inventory").push_item(fireball_scroll)
 			
 		spawn_index += 1
 
