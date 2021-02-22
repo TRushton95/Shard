@@ -46,15 +46,30 @@ func get_button_index(action_button: ActionButton) -> int:
 	return result
 
 
-func add_action_button(action_button: ActionButton) -> void:
-	for slot in $VBoxContainer/GridContainer.get_children():
-		if slot.is_free():
-			slot.add_button(action_button)
-			action_button.connect("button_dropped", self, "_on_ActionButton_button_dropped_on_button", [action_button])
-				
-			return
+func add_action_button(action_button: ActionButton, index := -1) -> void:
+	var success = false
 	
-	print(name + " is full")
+	if index == -1:
+		for slot in $VBoxContainer/GridContainer.get_children():
+			if slot.is_free():
+				slot.add_button(action_button)
+				success = true
+				
+				return
+				
+		print(name + " is full")
+	else:
+		var slot = $VBoxContainer/GridContainer.get_child(index)
+		
+		if !slot:
+			print("Cannot add action button to slot %s" % index)
+			return
+			
+		slot.add_button(action_button)
+		success = true
+		
+	if success:
+		action_button.connect("button_dropped", self, "_on_ActionButton_button_dropped_on_button", [action_button])
 
 
 func remove_action_button(index: int) -> void:

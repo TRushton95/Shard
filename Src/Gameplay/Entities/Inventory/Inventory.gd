@@ -1,5 +1,9 @@
 extends Node
 
+signal item_added(item, slot)
+signal item_removed(item, slot)
+signal item_moved(item1, slot1, item2, slot2)
+
 export var size := 12
 
 
@@ -23,6 +27,8 @@ func push_item(item: Node, index := -1) -> bool:
 		return false
 		
 	slot.add_child(item)
+	emit_signal("item_added", item, slot.get_index())
+	
 	return true
 
 
@@ -43,6 +49,7 @@ func pop_item(index: int) -> Item:
 	if slot.get_child_count() > 0:
 		result = slot.get_child(0)
 		slot.remove_child(result)
+		emit_signal("item_removed", result, slot.get_index())
 		
 	return result
 
@@ -59,6 +66,8 @@ func move(from_index: int, to_index: int) -> void:
 		push_item(to_item, from_index)
 		
 	push_item(from_item, to_index)
+	
+	emit_signal("item_moved", from_item, to_index, to_item, from_index)
 
 
 func _is_slot_free(index: int) -> bool:

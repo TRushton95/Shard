@@ -4,10 +4,10 @@ signal item_equipped(gear)
 signal item_unequipped(gear)
 
 
-func equip_gear(gear: Gear, slot_type: int) -> void:
+func try_equip_gear(gear: Gear, slot_type: int) -> bool:
 	if gear.slot != slot_type:
 		print("Cannot equip item to that slot")
-		return
+		return false
 	
 	var slot = get_slot(slot_type)
 	
@@ -16,14 +16,19 @@ func equip_gear(gear: Gear, slot_type: int) -> void:
 		
 	slot.add_child(gear)
 	emit_signal("item_equipped", gear)
-
-func unequip_gear(slot_type: int) -> void:
-	var slot = get_slot(slot_type)
 	
+	return true
+
+func unequip_gear(slot_type: int) -> Gear:
+	var result = null
+	
+	var slot = get_slot(slot_type)
 	if slot.get_child_count() > 0:
-		var item = slot.get_child(0)
-		item.remove_child(item)
-		emit_signal("item_unequipped", item)
+		result = slot.get_child(0)
+		slot.remove_child(result)
+		emit_signal("item_unequipped", result)
+		
+	return result
 
 
 func get_slot(slot_type: int) -> Node:

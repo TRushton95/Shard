@@ -1,6 +1,12 @@
 extends Unit
 class_name Player
 
+signal gear_equipped(gear)
+signal gear_unequipped(gear)
+signal item_added(item, index)
+signal item_removed(item, index)
+signal item_moved(item1, index1, item2, index2)
+
 var default_head_sprite = preload("res://Gameplay/Entities/Units/Player/DefaultSprites/hero_base_head.png")
 var default_torso_sprite = preload("res://Gameplay/Entities/Units/Player/DefaultSprites/hero_base_torso.png")
 var default_legs_sprite = preload("res://Gameplay/Entities/Units/Player/DefaultSprites/hero_base_legs.png")
@@ -91,6 +97,8 @@ func _on_Equipment_item_equipped(gear: Gear) -> void:
 		$FeetSprite.texture = gear.sprite
 	elif gear is HandsGear:
 		$HandsSprite.texture = gear.sprite
+		
+	emit_signal("gear_equipped", gear)
 
 
 func _on_Equipment_item_unequipped(gear: Gear) -> void:
@@ -116,6 +124,20 @@ func _on_Equipment_item_unequipped(gear: Gear) -> void:
 		$FeetSprite.texture = default_feet_sprite
 	elif gear is HandsGear:
 		$HandsSprite.texture = default_hands_sprite
+		
+	emit_signal("gear_unequipped", gear)
+
+
+func _on_Inventory_item_added(item: Item, index: int) -> void:
+	emit_signal("item_added", item, index)
+
+
+func _on_Inventory_item_removed(item: Item, index: int) -> void:
+	emit_signal("item_removed", item, index)
+
+
+func _on_Inventory_item_moved(item1: Item, index1: int, item2: Item, index2: int) -> void:
+	emit_signal("item_moved", item1, index1, item2, index2)
 
 
 func _on_Player_died() -> void:
@@ -139,6 +161,9 @@ func _ready() -> void:
 	
 	$Equipment.connect("item_equipped", self, "_on_Equipment_item_equipped")
 	$Equipment.connect("item_unequipped", self, "_on_Equipment_item_unequipped")
+	$Inventory.connect("item_added", self, "_on_Inventory_item_added")
+	$Inventory.connect("item_removed", self, "_on_Inventory_item_removed")
+	$Inventory.connect("item_moved", self, "_on_Inventory_item_moved")
 
 
 func change_direction(new_direction: int) -> void:

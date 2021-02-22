@@ -61,16 +61,12 @@ func _on_Bag_button_dropped_in_slot(button: ActionButton, slot: ButtonSlot) -> v
 			var to_index = slot.get_index()
 			$CanvasLayer/Bag.move(from_index, to_index)
 			player.get_node("Inventory").move(from_index, to_index)
-		Enums.ButtonSource.Armoury:
+		Enums.ButtonSource.Equipment:
 			var from_index = $CanvasLayer/CharacterPanel.get_button_index(button)
 			var to_index = slot.get_index()
 			
-			var item = player.unequip_gear(from_index)
-			player.get_node("Inventory").push_item(item)
-			
-			$CanvasLayer/CharacterPanel.remove_action_button(from_index)
-			var clone_button = _create_action_button(button.action_name, button.texture_normal, button.action_lookup.source, button.action_lookup.index, Enums.ButtonSource.Bag)
-			slot.add_button(clone_button)
+			var gear = player.get_node("Equipment").unequip_gear(from_index)
+			player.get_node("Inventory").push_item(gear, to_index)
 			
 	button_drag_handled = true
 
@@ -116,20 +112,13 @@ func _on_ActionBar_button_dropped_on_button(dropped_button: ActionButton, target
 func _on_CharacterPanel_button_dropped_in_slot(button: ActionButton, slot: GearButtonSlot) -> void:
 	if button.source != Enums.ButtonSource.Bag:
 		return
-	
-	var bag_index = $CanvasLayer/Bag.get_button_index(button)
-	var item = player.get_node("Inventory").get_item(bag_index)
-	
-	if !player.can_equip(item, slot.gear_slot):
-		print("Equip failed")
-		return
 		
-	var popped_item = player.get_node("Inventory").pop_item(bag_index)
-	player.equip_gear(popped_item)
+	var item_index = $CanvasLayer/Bag.get_button_index(button)
+	var item = player.get_node("Inventory").pop_item(item_index)
 	
-	$CanvasLayer/Bag.remove_action_button(bag_index)
-	var clone_button = _create_action_button(button.action_name, button.texture_normal, button.action_lookup.source, button.action_lookup.index, Enums.ButtonSource.Armoury)
-	slot.add_button(clone_button)
+	var success = player.get_node("Equipment").try_equip_gear(item, slot.gear_slot)
+	if !success:
+		player.get_node("Inventory").push_item(item_index)
  
 
 func _on_CharacterPanel_button_dropped_on_button() -> void:
@@ -215,6 +204,28 @@ func _on_player_combat_entered() -> void:
 
 func _on_player_combat_exited() -> void:
 	print("Exited combat")
+
+
+func _on_player_gear_equipped(gear: Gear) -> void:
+	var button = _create_action_button(gear.display_name, gear.icon, Enums.ActionSource.Equip, gear.get_index(), Enums.ButtonSource.Equipment)
+	$CanvasLayer/CharacterPanel.add_action_button(button, gear.slot)
+
+
+func _on_player_gear_unequipped(gear: Gear) -> void:
+	$CanvasLayer/CharacterPanel.remove_action_button(gear.slot)
+
+
+func _on_player_item_added(item: Item, index: int) -> void:
+	var item_button = _create_action_button(item.display_name, item.icon, Enums.ActionSource.Inventory, index, Enums.ButtonSource.Bag)
+	$CanvasLayer/Bag.add_action_button(item_button, index)
+
+
+func _on_player_item_removed(item: Item, index: int) -> void:
+	$CanvasLayer/Bag.remove_action_button(index)
+
+
+func _on_player_item_moved(item1: Item, index1: int, item2: Item, index2: int) -> void:
+	$CanvasLayer/Bag.move(index1, index2)
 
 
 func _on_unit_damage_received(value: int, source_id: int, caster_id: int, unit: Unit) -> void:
@@ -346,15 +357,7 @@ func _process(_delta: float) -> void:
 	if Input.is_action_just_pressed("test_left"):
 		var bronze_chestplate_scene = load("res://Gameplay/Entities/Items/Gear/BronzeChestplate.tscn")
 		var bronze_chestplate = bronze_chestplate_scene.instance()
-		var success = player.get_node("Inventory").push_item(bronze_chestplate)
-		
-		if success:
-			var item_button = _create_action_button(bronze_chestplate.display_name, bronze_chestplate.icon, Enums.ActionSource.Inventory, bronze_chestplate.get_index(), Enums.ButtonSource.Bag)
-			
-			if player.get_node("Inventory").get_item(1):
-				item_button.modulate = Color(0, 1, 1)
-			
-			$CanvasLayer/Bag.add_action_button(item_button)
+		player.get_node("Inventory").push_item(bronze_chestplate)
 	# End of test commands
 	
 	if Input.is_action_just_pressed("cancel"):
@@ -570,6 +573,11 @@ func setup(player_name: String, player_lookup: Dictionary) -> void:
 			unit.connect("path_set", self, "_on_player_path_set")
 			unit.connect("combat_entered", self, "_on_player_combat_entered")
 			unit.connect("combat_exited", self, "_on_player_combat_exited")
+			unit.connect("gear_equipped", self, "_on_player_gear_equipped")
+			unit.connect("gear_unequipped", self, "_on_player_gear_unequipped")
+			unit.connect("item_added", self, "_on_player_item_added")
+			unit.connect("item_removed", self, "_on_player_item_removed")
+			unit.connect("item_moved", self, "_on_player_item_moved")
 			
 			player = unit
 			
