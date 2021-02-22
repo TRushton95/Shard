@@ -130,7 +130,7 @@ func _on_CharacterPanel_button_dropped_in_slot(button: ActionButton, slot: GearB
 		player.get_node("Inventory").push_item(item_index)
  
 
-func _on_CharacterPanel_button_dropped_on_button() -> void:
+func _on_CharacterPanel_button_dropped_on_button(button: ActionButton, slot: GearButtonSlot) -> void:
 	pass
 
 
