@@ -59,14 +59,14 @@ func _on_Bag_button_dropped_in_slot(button: ActionButton, slot: ButtonSlot) -> v
 		Enums.ButtonSource.Bag:
 			var from_index = $CanvasLayer/Bag.get_button_index(button)
 			var to_index = slot.get_index()
-			$CanvasLayer/Bag.move(from_index, to_index)
 			player.get_node("Inventory").move(from_index, to_index)
 		Enums.ButtonSource.Equipment:
 			var from_index = $CanvasLayer/CharacterPanel.get_button_index(button)
 			var to_index = slot.get_index()
 			
 			var gear = player.get_node("Equipment").unequip_gear(from_index)
-			player.get_node("Inventory").push_item(gear, to_index)
+			if gear:
+				player.get_node("Inventory").push_item(gear, to_index)
 			
 	button_drag_handled = true
 
@@ -76,7 +76,6 @@ func _on_Bag_button_dropped_on_button(dropped_button: ActionButton, target_butto
 		Enums.ButtonSource.Bag:
 			var from_index = $CanvasLayer/Bag.get_button_index(dropped_button)
 			var to_index = $CanvasLayer/Bag.get_button_index(target_button)
-			$CanvasLayer/Bag.move(from_index, to_index)
 			player.get_node("Inventory").move(from_index, to_index)
 			
 	button_drag_handled = true
@@ -114,8 +113,18 @@ func _on_CharacterPanel_button_dropped_in_slot(button: ActionButton, slot: GearB
 		return
 		
 	var item_index = $CanvasLayer/Bag.get_button_index(button)
-	var item = player.get_node("Inventory").pop_item(item_index)
 	
+	var item = player.get_node("Inventory").get_item(item_index)
+	
+	if !item is Gear:
+		print("Cannot equip item")
+		return
+		
+	if item.slot != slot.gear_slot:
+		print("Cannot equip in that slot")
+		return
+		
+	player.get_node("Inventory").pop_item(item_index)
 	var success = player.get_node("Equipment").try_equip_gear(item, slot.gear_slot)
 	if !success:
 		player.get_node("Inventory").push_item(item_index)
@@ -222,10 +231,6 @@ func _on_player_item_added(item: Item, index: int) -> void:
 
 func _on_player_item_removed(item: Item, index: int) -> void:
 	$CanvasLayer/Bag.remove_action_button(index)
-
-
-func _on_player_item_moved(item1: Item, index1: int, item2: Item, index2: int) -> void:
-	$CanvasLayer/Bag.move(index1, index2)
 
 
 func _on_unit_damage_received(value: int, source_id: int, caster_id: int, unit: Unit) -> void:
@@ -354,10 +359,6 @@ func _process(_delta: float) -> void:
 	if Input.is_action_just_pressed("test_right"):
 		player.get_node("Inventory").pop_item(0)
 		$CanvasLayer/Bag.remove_action_button(0)
-	if Input.is_action_just_pressed("test_left"):
-		var bronze_chestplate_scene = load("res://Gameplay/Entities/Items/Gear/BronzeChestplate.tscn")
-		var bronze_chestplate = bronze_chestplate_scene.instance()
-		player.get_node("Inventory").push_item(bronze_chestplate)
 	# End of test commands
 	
 	if Input.is_action_just_pressed("cancel"):
@@ -577,7 +578,6 @@ func setup(player_name: String, player_lookup: Dictionary) -> void:
 			unit.connect("gear_unequipped", self, "_on_player_gear_unequipped")
 			unit.connect("item_added", self, "_on_player_item_added")
 			unit.connect("item_removed", self, "_on_player_item_removed")
-			unit.connect("item_moved", self, "_on_player_item_moved")
 			
 			player = unit
 			
@@ -615,6 +615,14 @@ func setup(player_name: String, player_lookup: Dictionary) -> void:
 			
 			$CanvasLayer/CharacterPanel.connect("button_dropped_in_slot", self, "_on_CharacterPanel_button_dropped_in_slot")
 			$CanvasLayer/CharacterPanel.connect("button_dropped_on_button", self, "_on_CharacterPanel_button_dropped_on_button")
+			
+			var bronze_chestplate_scene = load("res://Gameplay/Entities/Items/Gear/BronzeChestplate.tscn")
+			var bronze_chestplate = bronze_chestplate_scene.instance()
+			player.get_node("Inventory").push_item(bronze_chestplate)
+			
+			var fireball_scroll_scene = load("res://Gameplay/Entities/Items/Consumables/FireballScroll.tscn")
+			var fireball_scroll = fireball_scroll_scene.instance()
+			player.get_node("Inventory").push_item(fireball_scroll)
 			
 		spawn_index += 1
 

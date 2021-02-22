@@ -5,6 +5,9 @@ signal item_unequipped(gear)
 
 
 func try_equip_gear(gear: Gear, slot_type: int) -> bool:
+	if !gear:
+		return false
+	
 	if gear.slot != slot_type:
 		print("Cannot equip item to that slot")
 		return false

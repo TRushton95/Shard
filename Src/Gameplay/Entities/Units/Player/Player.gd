@@ -5,7 +5,6 @@ signal gear_equipped(gear)
 signal gear_unequipped(gear)
 signal item_added(item, index)
 signal item_removed(item, index)
-signal item_moved(item1, index1, item2, index2)
 
 var default_head_sprite = preload("res://Gameplay/Entities/Units/Player/DefaultSprites/hero_base_head.png")
 var default_torso_sprite = preload("res://Gameplay/Entities/Units/Player/DefaultSprites/hero_base_torso.png")
@@ -163,7 +162,6 @@ func _ready() -> void:
 	$Equipment.connect("item_unequipped", self, "_on_Equipment_item_unequipped")
 	$Inventory.connect("item_added", self, "_on_Inventory_item_added")
 	$Inventory.connect("item_removed", self, "_on_Inventory_item_removed")
-	$Inventory.connect("item_moved", self, "_on_Inventory_item_moved")
 
 
 func change_direction(new_direction: int) -> void:

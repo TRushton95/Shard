@@ -2,7 +2,6 @@ extends Node
 
 signal item_added(item, slot)
 signal item_removed(item, slot)
-signal item_moved(item1, slot1, item2, slot2)
 
 export var size := 12
 
@@ -66,8 +65,6 @@ func move(from_index: int, to_index: int) -> void:
 		push_item(to_item, from_index)
 		
 	push_item(from_item, to_index)
-	
-	emit_signal("item_moved", from_item, to_index, to_item, from_index)
 
 
 func _is_slot_free(index: int) -> bool:
