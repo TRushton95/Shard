@@ -153,7 +153,7 @@ func _on_CharacterPanel_button_dropped_on_button(button: ActionButton, target_bu
 	if !success:
 		player.get_node("Inventory").push_item(item)
 		
-	player.get_node("Inventory").push_item(unequipped_gear)
+	player.get_node("Inventory").push_item(unequipped_gear, item_index)
 
 
 func _on_unit_left_clicked(unit: Unit) -> void:

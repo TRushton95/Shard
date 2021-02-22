@@ -22,7 +22,7 @@ func push_item(item: Node, index := -1) -> bool:
 		slot = _get_free_slot()
 	
 	if !slot:
-		print("Inventory is full")
+		print("Cannot push item to inventory")
 		return false
 		
 	slot.add_child(item)
