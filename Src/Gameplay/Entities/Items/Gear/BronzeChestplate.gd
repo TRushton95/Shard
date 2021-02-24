@@ -1,4 +1,4 @@
 extends ChestGear
 
 func _init() -> void:
-	slot = Enums.GearSlot.CHEST
+	slot = Enums.GearSlotType.CHEST

@@ -8,5 +8,6 @@
 [node name="BronzeChestplate" type="Node"]
 script = ExtResource( 1 )
 icon = ExtResource( 2 )
+display_name = "Bronze Chestplate"
 torso_sprite = ExtResource( 4 )
 arms_sprite = ExtResource( 3 )

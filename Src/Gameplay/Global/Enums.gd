@@ -7,4 +7,4 @@ enum Team { Ally, Enemy }
 enum ActionSource { Spell, Inventory, Equip }
 enum ButtonSource { Bag, Spellbook, ActionBar, Equipment }
 enum UnitAnimationType { IDLE, WALKING, CASTING, DEAD }
-enum GearSlot { HEAD, CHEST, LEGS, FEET, HANDS, WEAPON }
+enum GearSlotType { HEAD, CHEST, LEGS, FEET, HANDS, WEAPON }

@@ -237,7 +237,6 @@ margin_top = 183.0
 margin_right = -1864.0
 margin_bottom = -833.0
 script = ExtResource( 4 )
-gear_slot = 1
 
 [node name="LegsSlot" parent="GearSlots" instance=ExtResource( 3 )]
 margin_left = 52.0
@@ -245,7 +244,6 @@ margin_top = 261.0
 margin_right = -1864.0
 margin_bottom = -755.0
 script = ExtResource( 4 )
-gear_slot = 2
 
 [node name="FeetSlot" parent="GearSlots" instance=ExtResource( 3 )]
 margin_left = 52.0
@@ -253,7 +251,6 @@ margin_top = 339.0
 margin_right = -1864.0
 margin_bottom = -677.0
 script = ExtResource( 4 )
-gear_slot = 3
 
 [node name="HandsSlot" parent="GearSlots" instance=ExtResource( 3 )]
 margin_left = 52.0
@@ -261,7 +258,6 @@ margin_top = 417.0
 margin_right = -1864.0
 margin_bottom = -599.0
 script = ExtResource( 4 )
-gear_slot = 4
 
 [node name="WeaponSlot" parent="GearSlots" instance=ExtResource( 3 )]
 margin_left = 392.0
@@ -269,6 +265,5 @@ margin_top = 417.0
 margin_right = -1524.0
 margin_bottom = -599.0
 script = ExtResource( 4 )
-gear_slot = 5
 [connection signal="button_down" from="GrabBox" to="." method="_on_GrabBox_button_down"]
 [connection signal="button_up" from="GrabBox" to="." method="_on_GrabBox_button_up"]

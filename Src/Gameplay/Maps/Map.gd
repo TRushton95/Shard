@@ -119,12 +119,12 @@ func _on_CharacterPanel_button_dropped_in_slot(button: ActionButton, slot: GearB
 		print("Cannot equip item")
 		return
 		
-	if item.slot != slot.gear_slot:
+	if item.slot != slot.gear_slot_type:
 		print("Cannot equip in that slot")
 		return
 		
 	player.get_node("Inventory").pop_item(item_index)
-	var success = player.get_node("Equipment").equip_gear(item, slot.gear_slot)
+	var success = player.get_node("Equipment").equip_gear(item, slot.gear_slot_type)
 	if !success:
 		player.get_node("Inventory").push_item(item)
  

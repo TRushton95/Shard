@@ -23,6 +23,12 @@ func _on_GrabBox_button_up() -> void:
 
 
 func _ready() -> void:
+	$GearSlots/HeadSlot.gear_slot_type = Enums.GearSlotType.HEAD
+	$GearSlots/ChestSlot.gear_slot_type = Enums.GearSlotType.CHEST
+	$GearSlots/LegsSlot.gear_slot_type = Enums.GearSlotType.LEGS
+	$GearSlots/FeetSlot.gear_slot_type = Enums.GearSlotType.FEET
+	$GearSlots/HandsSlot.gear_slot_type = Enums.GearSlotType.HANDS
+	
 	for slot in $GearSlots.get_children():
 		slot.connect("button_dropped", self, "_on_ButtonSlot_button_dropped_on_slot", [slot])
 
@@ -32,20 +38,20 @@ func _input(event) -> void:
 		rect_position += event.relative
 
 
-func add_action_button(action_button: ActionButton, gear_slot: int) -> void:
+func add_action_button(action_button: ActionButton, gear_slot_type: int) -> void:
 	var slot
-	match gear_slot:
-		Enums.GearSlot.HEAD:
+	match gear_slot_type:
+		Enums.GearSlotType.HEAD:
 			slot = $GearSlots/HeadSlot
-		Enums.GearSlot.CHEST:
+		Enums.GearSlotType.CHEST:
 			slot = $GearSlots/ChestSlot
-		Enums.GearSlot.LEGS:
+		Enums.GearSlotType.LEGS:
 			slot = $GearSlots/LegsSlot
-		Enums.GearSlot.FEET:
+		Enums.GearSlotType.FEET:
 			slot = $GearSlots/FeetSlot
-		Enums.GearSlot.HANDS:
+		Enums.GearSlotType.HANDS:
 			slot = $GearSlots/HandsSlot
-		Enums.GearSlot.WEAPON:
+		Enums.GearSlotType.WEAPON:
 			slot = $GearSlots/WeaponSlot
 		_:
 			return
@@ -54,20 +60,20 @@ func add_action_button(action_button: ActionButton, gear_slot: int) -> void:
 	action_button.connect("button_dropped", self, "_on_ActionButton_button_dropped_on_button", [action_button])
 
 
-func remove_action_button(gear_slot: int) -> void:
+func remove_action_button(gear_slot_type: int) -> void:
 	var slot
-	match gear_slot:
-		Enums.GearSlot.HEAD:
+	match gear_slot_type:
+		Enums.GearSlotType.HEAD:
 			slot = $GearSlots/HeadSlot
-		Enums.GearSlot.CHEST:
+		Enums.GearSlotType.CHEST:
 			slot = $GearSlots/ChestSlot
-		Enums.GearSlot.LEGS:
+		Enums.GearSlotType.LEGS:
 			slot = $GearSlots/LegsSlot
-		Enums.GearSlot.FEET:
+		Enums.GearSlotType.FEET:
 			slot = $GearSlots/FeetSlot
-		Enums.GearSlot.HANDS:
+		Enums.GearSlotType.HANDS:
 			slot = $GearSlots/HandsSlot
-		Enums.GearSlot.WEAPON:
+		Enums.GearSlotType.WEAPON:
 			slot = $GearSlots/WeaponSlot
 		_:
 			return
@@ -81,7 +87,7 @@ func get_button_index(button: ActionButton) -> int:
 	
 	for slot in gear_slots:
 		if slot.get_button() == button:
-			return slot.gear_slot
+			return slot.gear_slot_type
 			
 	return -1
 

@@ -4,15 +4,15 @@ signal item_equipped(gear)
 signal item_unequipped(gear)
 
 
-func equip_gear(gear: Gear, slot_type: int) -> bool:
+func equip_gear(gear: Gear, gear_slot_type: int) -> bool:
 	if !gear:
 		return false
 	
-	if gear.slot != slot_type:
+	if gear.slot != gear_slot_type:
 		print("Cannot equip item to that slot")
 		return false
 	
-	var slot = get_slot(slot_type)
+	var slot = get_slot(gear_slot_type)
 	
 	if slot.get_child_count() > 0:
 		print("Gear slot is already equipped")
@@ -23,10 +23,10 @@ func equip_gear(gear: Gear, slot_type: int) -> bool:
 	
 	return true
 
-func unequip_gear(slot_type: int) -> Gear:
+func unequip_gear(gear_slot_type: int) -> Gear:
 	var result = null
 	
-	var slot = get_slot(slot_type)
+	var slot = get_slot(gear_slot_type)
 	if slot.get_child_count() > 0:
 		result = slot.get_child(0)
 		slot.remove_child(result)
@@ -35,21 +35,21 @@ func unequip_gear(slot_type: int) -> Gear:
 	return result
 
 
-func get_slot(slot_type: int) -> Node:
+func get_slot(gear_slot_type: int) -> Node:
 	var result
 	
-	match slot_type:
-		Enums.GearSlot.HEAD:
+	match gear_slot_type:
+		Enums.GearSlotType.HEAD:
 			result = $HeadSlot
-		Enums.GearSlot.CHEST:
+		Enums.GearSlotType.CHEST:
 			result = $ChestSlot
-		Enums.GearSlot.LEGS:
+		Enums.GearSlotType.LEGS:
 			result = $LegsSlot
-		Enums.GearSlot.FEET:
+		Enums.GearSlotType.FEET:
 			result = $FeetSlot
-		Enums.GearSlot.HANDS:
+		Enums.GearSlotType.HANDS:
 			result = $HandsSlot
-		Enums.GearSlot.WEAPON:
+		Enums.GearSlotType.WEAPON:
 			result = $WeaponSlot
 			
 	return result

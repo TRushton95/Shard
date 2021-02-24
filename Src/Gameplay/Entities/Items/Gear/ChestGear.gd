@@ -6,4 +6,4 @@ export var arms_sprite : Texture
 
 
 func ready() -> void:
-	slot = Enums.GearSlot.CHEST
+	slot = Enums.GearSlotType.CHEST
