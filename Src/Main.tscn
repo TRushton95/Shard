@@ -11,5 +11,6 @@ margin_left = 80.0903
 margin_top = 6.67419
 margin_right = 80.0903
 margin_bottom = 6.67419
+
 [connection signal="client_button_pressed" from="Login" to="." method="_on_Login_client_button_pressed"]
 [connection signal="server_button_pressed" from="Login" to="." method="_on_Login_server_button_pressed"]
