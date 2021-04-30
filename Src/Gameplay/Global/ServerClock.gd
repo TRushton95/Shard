@@ -13,7 +13,7 @@ var _decimal_collector := 0.0
 
 
 func _on_LatencyTimer_timeout() -> void:
-	rpc_id(1, "_determine_latency", OS.get_system_time_msecs())
+	rpc_id(Constants.SERVER_ID, "_determine_latency", OS.get_system_time_msecs())
 
 
 func _physics_process(delta: float) -> void:
@@ -39,7 +39,7 @@ func setup() -> void:
 
 func synchronise() -> void:
 	if is_network_master():
-		rpc_id(1, "_get_server_time", OS.get_system_time_msecs())
+		rpc_id(Constants.SERVER_ID, "_get_server_time", OS.get_system_time_msecs())
 	else:
 		print("Server may not sync it's own clock.")
 
