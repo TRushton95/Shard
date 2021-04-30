@@ -70,6 +70,7 @@ remote func register_player(name) -> void:
 
 remotesync func switch_to_game() -> void:
 	get_node("Lobby").queue_free()
+	ServerClock.setup()
 	var map = map_scene.instance()
 	add_child(map)
 	map.setup(player_name, player_lookup)

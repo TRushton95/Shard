@@ -8,7 +8,6 @@ var _time : int
 var _latency: int
 var _delta_latency := 0.0
 var _latency_sample := []
-var _total_latency := 0
 var _decimal_collector := 0.0
 
 
@@ -26,9 +25,13 @@ func _physics_process(delta: float) -> void:
 	if _decimal_collector >= 1.0:
 		_time += 1.0
 		_decimal_collector -= 1.0
+		
+	print("T: " + str(_time) + ", L: " + str(_latency))
 
 
 func setup() -> void:
+	_synchronise()
+	
 	if !is_network_master():
 		var _latency_timer = Timer.new()
 		_latency_timer.wait_time = LATENCY_SAMPLE_TIME
@@ -37,19 +40,19 @@ func setup() -> void:
 		add_child(_latency_timer)
 
 
-func synchronise() -> void:
+func _synchronise() -> void:
 	if is_network_master():
-		rpc_id(Constants.SERVER_ID, "_get_server_time", OS.get_system_time_msecs())
+		_time = OS.get_system_time_msecs()
 	else:
-		print("Server may not sync it's own clock.")
+		rpc_id(Constants.SERVER_ID, "_get_server_time", OS.get_system_time_msecs())
 
 
-func _get_server_time(client_time: int) -> void:
+remote func _get_server_time(client_time: int) -> void:
 	var player_id = get_tree().get_rpc_sender_id()
 	rpc_id(player_id, "_return_server_time", OS.get_system_time_msecs(), client_time)
 
 
-func _determine_latency(client_time: int) -> void:
+remote func _determine_latency(client_time: int) -> void:
 	var player_id = get_tree().get_rpc_sender_id()
 	rpc_id(player_id, "_return_latency", client_time)
 
@@ -60,9 +63,10 @@ remote func _return_server_time(server_time: int, client_time: int) -> void:
 
 
 remote func _return_latency(client_time: int) -> void:
-	_latency_sample.push_back((OS.get_system_time_msecs - client_time) / 2)
+	_latency_sample.push_back((OS.get_system_time_msecs() - client_time) / 2)
 	
 	if _latency_sample.size() == MAX_LATENCY_SAMPLE_SIZE:
+		var _total_latency := 0
 		_latency_sample.sort()
 		var middle_index = int(ceil(MAX_LATENCY_SAMPLE_SIZE / 2))
 		var median = _latency_sample[middle_index]

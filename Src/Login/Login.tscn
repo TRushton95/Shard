@@ -64,7 +64,7 @@ margin_right = 185.0
 margin_bottom = 24.0
 size_flags_horizontal = 3
 size_flags_vertical = 3
-text = "27"
+text = "1026"
 align = 1
 
 [node name="ClientButton" type="Button" parent="VBoxContainer/NetworkPanel/VBoxContainer"]
@@ -80,5 +80,6 @@ margin_top = 65.0
 margin_right = 374.0
 margin_bottom = 79.0
 align = 1
+
 [connection signal="pressed" from="VBoxContainer/NetworkPanel/ServerButton" to="." method="_on_ServerButton_pressed"]
 [connection signal="pressed" from="VBoxContainer/NetworkPanel/VBoxContainer/ClientButton" to="." method="_on_ClientButton_pressed"]

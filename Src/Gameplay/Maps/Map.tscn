@@ -269,4 +269,5 @@ position = Vector2( 608, 704 )
 
 [node name="Tree4" parent="Node" instance=ExtResource( 12 )]
 position = Vector2( 288, 320 )
+
 [connection signal="data_expired" from="CanvasLayer/ThreatMeter" to="." method="_on_ThreatMeter_data_expired"]
