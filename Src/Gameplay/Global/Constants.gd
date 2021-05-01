@@ -3,6 +3,7 @@ extends Node
 const ALL_CONNECTED_PEERS_ID := 0
 const SERVER_ID := 1
 const SERVER_TICK_RATE := 20
+const INTERPOLATION_OFFSET := 100
 
 const GLOBAL_COOLDOWN := 1.0
 const INDEFINITE_DURATION := 0.0 # Used for zones and status

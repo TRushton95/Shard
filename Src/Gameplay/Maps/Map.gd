@@ -16,6 +16,7 @@ var dragging_button : ActionButton
 var simulating_lag := false
 
 var world_state := {}
+var world_state_buffer := []
 var player_states := {}
 var prev_world_state_timestamp := 0
 
@@ -392,16 +393,37 @@ func _on_ThreatMeter_data_expired():
 
 
 func _physics_process(delta: float) -> void:
-	if !get_tree().is_network_server():
-		return
-		
-	if !player_states.empty():
-		world_state = player_states.duplicate(true)
-		for player in world_state.keys():
-			world_state[player].erase(Constants.Network.TIME)
+	if get_tree().is_network_server():
+		if !player_states.empty():
+			world_state = player_states.duplicate(true)
+			for player in world_state.keys():
+				world_state[player].erase(Constants.Network.TIME)
+				
+			world_state[Constants.Network.TIME] = OS.get_system_time_msecs()
+			_send_world_state(world_state)
 			
-		world_state[Constants.Network.TIME] = OS.get_system_time_msecs()
-		_send_world_state(world_state)
+	var render_time = ServerClock.get_time() - Constants.INTERPOLATION_OFFSET
+	if world_state_buffer.size() > 1:
+		while world_state_buffer.size() > 2 && world_state_buffer[1][Constants.Network.TIME] < render_time:
+			world_state_buffer.remove(0)
+			
+		var interpolation_factor = (render_time - world_state_buffer[0][Constants.Network.TIME]) / (world_state_buffer[1][Constants.Network.TIME] - world_state_buffer[0][Constants.Network.TIME])
+		
+		for key in world_state_buffer[1].keys():
+			if str(key) == Constants.Network.TIME:
+				continue
+			if key == get_tree().get_network_unique_id():
+				continue
+			if !world_state_buffer[0].has(key):
+				continue
+				
+			var user_name = ServerInfo.get_user_name(key)
+			if has_node(user_name):
+				var new_position = lerp(world_state_buffer[0][key][Constants.Network.POSITION], world_state_buffer[1][key][Constants.Network.POSITION], interpolation_factor)
+				get_node(user_name).position = new_position
+			else:
+				# TODO: Spawn player
+				pass
 
 
 func _process(_delta: float) -> void:
@@ -777,22 +799,13 @@ func _send_world_state(world_state: Dictionary) -> void:
 	if simulating_lag:
 		return
 	
-	rpc_unreliable_id(Constants.ALL_CONNECTED_PEERS_ID, "_recieve_world_state", world_state)
+	rpc_unreliable_id(Constants.ALL_CONNECTED_PEERS_ID, "_receive_world_state", world_state)
 
 
-remotesync func _recieve_world_state(world_state: Dictionary) -> void:
+remotesync func _receive_world_state(world_state: Dictionary) -> void:
 	if world_state[Constants.Network.TIME] > prev_world_state_timestamp:
 		prev_world_state_timestamp = world_state[Constants.Network.TIME]
-		world_state.erase(Constants.Network.TIME)
-		world_state.erase(get_tree().get_network_unique_id())
-		
-		for user_id in world_state.keys():
-			var player_name = ServerInfo.get_user_name(user_id)
-			if has_node(str(player_name)): # TODO: Move all players under a Players node - THIS IS THE PLAYER ID, NOT THE PLAYER NAME, WON'T MATCH
-				get_node(player_name).position = world_state[user_id][Constants.Network.POSITION]
-			else:
-				# TODO: Spawn player
-				pass
+		world_state_buffer.append(world_state)
 
 
 remotesync func _unit_cast(unit_name: String, action_source: int, action_index: int, dirty_target) -> void:
