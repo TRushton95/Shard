@@ -1,6 +1,8 @@
 extends Node
 
+const ALL_CONNECTED_PEERS_ID := 0
 const SERVER_ID := 1
+const SERVER_TICK_RATE := 20
 
 const GLOBAL_COOLDOWN := 1.0
 const INDEFINITE_DURATION := 0.0 # Used for zones and status
@@ -18,3 +20,7 @@ class StateNames:
 	const ATTACKING_COMBAT = "AttackingCombatState"
 	const CASTING_COMBAT = "CastingCombatState"
 	const CHANNELLING_COMBAT = "ChannellingCombatState"
+
+class Network:
+	const TIME = "T"
+	const POSITION = "P"

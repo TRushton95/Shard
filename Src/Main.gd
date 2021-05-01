@@ -43,6 +43,7 @@ func _on_network_peer_connected(id) -> void:
 
 func _on_network_peer_disconnected(id) -> void:
 	player_lookup.erase(id)
+	ServerInfo.remove_user(id)
 	get_node("Lobby").set_players(player_lookup)
 
 
@@ -66,6 +67,8 @@ remote func register_player(name) -> void:
 	var sender_id = get_tree().get_rpc_sender_id()
 	player_lookup[sender_id] = name
 	get_node("Lobby").set_players(player_lookup)
+	
+	ServerInfo.add_user(sender_id, name)
 
 
 remotesync func switch_to_game() -> void:
@@ -73,7 +76,7 @@ remotesync func switch_to_game() -> void:
 	ServerClock.setup()
 	var map = map_scene.instance()
 	add_child(map)
-	map.setup(player_name, player_lookup)
+	map.setup()
 
 
 func switch_to_lobby() -> void:
@@ -82,6 +85,8 @@ func switch_to_lobby() -> void:
 	lobby.player_name = player_name
 	add_child(lobby)
 	lobby.set_players(player_lookup)
+	
+	ServerInfo.add_user(get_tree().get_network_unique_id(), player_name)
 	
 	lobby.connect("disconnect_button_pressed", self, "_on_Lobby_disconnect_button_pressed")
 	lobby.connect("start_game_button_pressed", self, "_on_Lobby_start_game_button_pressed")

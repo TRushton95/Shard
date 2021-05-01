@@ -12,6 +12,10 @@ var selected_action_lookup : ActionLookup
 var button_drag_handled := false
 var dragging_button : ActionButton
 
+var world_state := {}
+var player_states := {}
+var prev_world_state_timestamp := 0
+
 
 #This should hook into whatever mechanism determines when an ability key is clicked
 func _on_action_button_pressed(button: ActionButton) -> void:
@@ -170,7 +174,7 @@ func _on_unit_right_clicked(unit: Unit) -> void:
 		if !unit.dead:
 			rpc("_unit_attack_target", player_name, unit.name)
 		else:
-			rpc("_unit_move_to_point", player_name, unit.position)
+			_unit_move_to_point(player_name, unit.position)
 
 
 func _on_player_path_set(path: PoolVector2Array) -> void:
@@ -376,6 +380,19 @@ func _on_ThreatMeter_data_expired():
 	$CanvasLayer/ThreatMeter.set_data($Enemy.threat_table)
 
 
+func _physics_process(delta: float) -> void:
+	if !get_tree().is_network_server():
+		return
+		
+	if !player_states.empty():
+		world_state = player_states.duplicate(true)
+		for player in world_state.keys():
+			world_state[player].erase(Constants.Network.TIME)
+			
+		world_state[Constants.Network.TIME] = OS.get_system_time_msecs()
+		_send_world_state(world_state)
+
+
 func _process(_delta: float) -> void:
 	# Test commands for testing whatever
 	if Input.is_action_just_pressed("test_right"):
@@ -505,7 +522,7 @@ func _unhandled_input(event) -> void:
 		
 	if event.pressed:
 		if event.button_index == BUTTON_RIGHT:
-			rpc("_unit_move_to_point", player_name, get_global_mouse_position())
+			_unit_move_to_point(player_name, get_global_mouse_position())
 			if selected_action_lookup && selected_action_lookup.is_valid():
 				select_ability(null)
 			
@@ -530,14 +547,10 @@ func _unhandled_input(event) -> void:
 							
 				button_drag_handled = false
 				dragging_button = null
-				
-			
 
 
-func setup(player_name: String, player_lookup: Dictionary) -> void:
+func setup() -> void:
 	NavigationHelper.set_nav_instance($Navigation2D)
-	
-	self.player_name = player_name
 	
 	#TEST ENEMY
 	$Enemy.set_name($Enemy.name) # set name label
@@ -553,18 +566,21 @@ func setup(player_name: String, player_lookup: Dictionary) -> void:
 	$Enemy.connect("team_changed", self, "_on_unit_team_changed", [$Enemy])
 	#END OF TEST ENEMY
 	
-	var player_list = player_lookup.values()
-	player_list.append(player_name)
-	player_list.sort()
-	
 	var spawn_index = 0
-	for player_list_entry in player_list:
+	for user_id in ServerInfo.get_sorted_user_ids():
+		var user_name = ServerInfo.get_user_name(user_id)
+		
 		var unit = player_scene.instance()
-		unit.set_name(player_list_entry)
+		unit.set_name(user_name)
 		unit.position = $PlayerSpawnPoints.get_node(str(spawn_index)).position
 		add_child(unit)
 		unit.team = Enums.Team.Ally
 		unit.set_health_bar_color(Color.green)
+		unit.set_network_master(user_id)
+		
+		if user_id == get_tree().get_network_unique_id():
+			self.player_name = ServerInfo.get_user_name(user_id)
+		
 		unit.connect("left_clicked", self, "_on_unit_left_clicked", [unit])
 		unit.connect("right_clicked", self, "_on_unit_right_clicked", [unit])
 		unit.connect("damage_received", self, "_on_unit_damage_received", [unit])
@@ -580,7 +596,7 @@ func setup(player_name: String, player_lookup: Dictionary) -> void:
 		unit.connect("status_effect_removed", self, "_on_unit_status_effect_removed", [unit])
 		unit.connect("team_changed", self, "_on_unit_team_changed", [unit])
 		
-		if player_list_entry == player_name:
+		if user_name == player_name:
 			unit.connect("path_finished", self, "_on_player_path_finished")
 			unit.connect("health_attr_changed", self, "_on_player_health_attr_changed")
 			unit.connect("mana_attr_changed", self, "_on_player_mana_attr_changed")
@@ -727,6 +743,39 @@ func _get_action_buttons_by_action_name(ability_name: String) -> Array:
 	return result
 
 
+func _send_player_state(player_state: Dictionary) -> void:
+	rpc_unreliable_id(Constants.SERVER_ID, "_recieve_player_state", player_state)
+
+
+master func _recieve_player_state(new_player_state: Dictionary) -> void:
+	var sender_id = get_tree().get_rpc_sender_id()
+	
+	if player_states.has(sender_id):
+		if player_states[sender_id][Constants.Network.TIME] < new_player_state[Constants.Network.TIME]:
+			player_states[sender_id] = new_player_state
+	else:
+		player_states[sender_id] = new_player_state
+
+
+func _send_world_state(world_state: Dictionary) -> void:
+	rpc_unreliable_id(Constants.ALL_CONNECTED_PEERS_ID, "_recieve_world_state", world_state)
+
+
+remotesync  func _recieve_world_state(new_world_state: Dictionary) -> void:
+	if new_world_state[Constants.Network.TIME] > prev_world_state_timestamp:
+		prev_world_state_timestamp = new_world_state[Constants.Network.TIME]
+		new_world_state.erase(Constants.Network.TIME)
+		new_world_state.erase(get_tree().get_network_unique_id())
+		
+		for user_id in new_world_state.keys():
+			var player_name = ServerInfo.get_user_name(user_id)
+			if has_node(str(player_name)): # TODO: Move all players under a Players node - THIS IS THE PLAYER ID, NOT THE PLAYER NAME, WON'T MATCH
+				get_node(player_name).position = new_world_state[user_id][Constants.Network.POSITION]
+			else:
+				# TODO: Spawn player
+				pass
+
+
 remotesync func _unit_cast(unit_name: String, action_source: int, action_index: int, dirty_target) -> void:
 	if !dirty_target:
 		print("No target provided")
@@ -742,7 +791,7 @@ remotesync func _unit_cast(unit_name: String, action_source: int, action_index: 
 	unit.input_command(CastCommand.new(ability, clean_target))
 
 
-remotesync func _unit_move_to_point(unit_name: String, position: Vector2) -> void:
+func _unit_move_to_point(unit_name: String, position: Vector2) -> void:
 	get_node(unit_name).input_command(MoveCommand.new(position))
 
 

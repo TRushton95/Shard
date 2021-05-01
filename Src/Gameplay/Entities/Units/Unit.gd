@@ -195,17 +195,17 @@ func _process(delta: float) -> void:
 		var new_navigation_state = _navigation_state.update(self, delta)
 		if new_navigation_state:
 			switch_navigation_state(new_navigation_state)
-			
-	if _combat_state.has_method("update"):
-		var new_combat_state = _combat_state.update(self, delta)
-		if new_combat_state:
-			switch_combat_state(new_combat_state)
+#
+#	if _combat_state.has_method("update"):
+#		var new_combat_state = _combat_state.update(self, delta)
+#		if new_combat_state:
+#			switch_combat_state(new_combat_state)
 		
-	if $AutoAttackTimer.time_left > 0:
-		emit_signal("auto_attack_cooldown_progressed", $AutoAttackTimer.time_left)
+#	if $AutoAttackTimer.time_left > 0:
+#		emit_signal("auto_attack_cooldown_progressed", $AutoAttackTimer.time_left)
 		
-	if has_node("AI"):
-		get_node("AI").update(self)
+#	if has_node("AI"):
+#		get_node("AI").update(self)
 
 
 func clear_status_effects() -> void:

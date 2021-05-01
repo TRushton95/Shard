@@ -25,8 +25,6 @@ func _physics_process(delta: float) -> void:
 	if _decimal_collector >= 1.0:
 		_time += 1.0
 		_decimal_collector -= 1.0
-		
-	print("T: " + str(_time) + ", L: " + str(_latency))
 
 
 func setup() -> void:
