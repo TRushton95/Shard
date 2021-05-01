@@ -780,16 +780,16 @@ func _send_world_state(world_state: Dictionary) -> void:
 	rpc_unreliable_id(Constants.ALL_CONNECTED_PEERS_ID, "_recieve_world_state", world_state)
 
 
-remotesync func _recieve_world_state(new_world_state: Dictionary) -> void:
-	if new_world_state[Constants.Network.TIME] > prev_world_state_timestamp:
-		prev_world_state_timestamp = new_world_state[Constants.Network.TIME]
-		new_world_state.erase(Constants.Network.TIME)
-		new_world_state.erase(get_tree().get_network_unique_id())
+remotesync func _recieve_world_state(world_state: Dictionary) -> void:
+	if world_state[Constants.Network.TIME] > prev_world_state_timestamp:
+		prev_world_state_timestamp = world_state[Constants.Network.TIME]
+		world_state.erase(Constants.Network.TIME)
+		world_state.erase(get_tree().get_network_unique_id())
 		
-		for user_id in new_world_state.keys():
+		for user_id in world_state.keys():
 			var player_name = ServerInfo.get_user_name(user_id)
 			if has_node(str(player_name)): # TODO: Move all players under a Players node - THIS IS THE PLAYER ID, NOT THE PLAYER NAME, WON'T MATCH
-				get_node(player_name).position = new_world_state[user_id][Constants.Network.POSITION]
+				get_node(player_name).position = world_state[user_id][Constants.Network.POSITION]
 			else:
 				# TODO: Spawn player
 				pass
