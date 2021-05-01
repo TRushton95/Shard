@@ -20,6 +20,9 @@ var player_states := {}
 var prev_world_state_timestamp := 0
 
 
+func _on_ServerClock_ping_updated(ping: int) -> void:
+	$CanvasLayer/MarginContainer/Ping.text = "Ping: " + str(ping) + " ms"
+
 
 func _on_LagSimTimer_timeout() -> void:
 	simulating_lag = false
@@ -563,6 +566,7 @@ func _unhandled_input(event) -> void:
 
 func setup() -> void:
 	NavigationHelper.set_nav_instance($Navigation2D)
+	ServerClock.connect("ping_updated", self, "_on_ServerClock_ping_updated")
 	
 	#TEST ENEMY
 	$Enemy.set_name($Enemy.name) # set name label

@@ -1,5 +1,7 @@
 extends Node
 
+signal ping_updated(_latency)
+
 const MAX_LATENCY_SAMPLE_SIZE := 9
 const LATENCY_REMOVAL_THRESHOLD := 20
 const LATENCY_SAMPLE_TIME := 0.5
@@ -81,6 +83,8 @@ remote func _return_latency(client_time: int) -> void:
 		_latency = new_latency
 		
 		_latency_sample.clear()
+		
+		emit_signal("ping_updated", _latency)
 
 
 func get_time() -> int:
