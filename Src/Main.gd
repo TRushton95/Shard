@@ -4,7 +4,6 @@ var map_scene = load("res://Gameplay/Maps/Map.tscn")
 var lobby_scene = load("res://Lobby/Lobby.tscn")
 var login_scene = load("res://Login/Login.tscn")
 
-var player_lookup := {}
 var player_name : String
 
 
@@ -22,6 +21,7 @@ func _on_Login_server_button_pressed() -> void:
 	peer.create_server(1026, 2)
 	get_tree().set_network_peer(peer)
 	player_name = "Server"
+	ServerInfo.add_user(get_tree().get_network_unique_id(), player_name)
 	switch_to_lobby()
 
 
@@ -30,6 +30,7 @@ func _on_Login_client_button_pressed(ip, port) -> void:
 	peer.create_client(ip, int(port))
 	get_tree().set_network_peer(peer)
 	player_name = "Client"
+	ServerInfo.add_user(get_tree().get_network_unique_id(), player_name)
 	$Login/VBoxContainer/Label.text = "Connecting..."
 
 
@@ -42,9 +43,8 @@ func _on_network_peer_connected(id) -> void:
 
 
 func _on_network_peer_disconnected(id) -> void:
-	player_lookup.erase(id)
 	ServerInfo.remove_user(id)
-	get_node("Lobby").set_players(player_lookup)
+	get_node("Lobby").set_players()
 
 
 func _on_Lobby_disconnect_button_pressed() -> void:
@@ -65,10 +65,9 @@ func _ready() -> void:
 
 remote func register_player(name) -> void:
 	var sender_id = get_tree().get_rpc_sender_id()
-	player_lookup[sender_id] = name
-	get_node("Lobby").set_players(player_lookup)
-	
 	ServerInfo.add_user(sender_id, name)
+	
+	get_node("Lobby").set_players()
 
 
 remotesync func switch_to_game() -> void:
@@ -84,9 +83,7 @@ func switch_to_lobby() -> void:
 	var lobby = lobby_scene.instance()
 	lobby.player_name = player_name
 	add_child(lobby)
-	lobby.set_players(player_lookup)
-	
-	ServerInfo.add_user(get_tree().get_network_unique_id(), player_name)
+	lobby.set_players()
 	
 	lobby.connect("disconnect_button_pressed", self, "_on_Lobby_disconnect_button_pressed")
 	lobby.connect("start_game_button_pressed", self, "_on_Lobby_start_game_button_pressed")
@@ -99,5 +96,5 @@ func switch_to_login() -> void:
 	login.connect("server_button_pressed", self, "_on_Login_server_button_pressed")
 	login.connect("client_button_pressed", self, "_on_Login_client_button_pressed")
 	
-	player_lookup.clear()
 	get_tree().set_network_peer(null)
+	ServerInfo.clear()

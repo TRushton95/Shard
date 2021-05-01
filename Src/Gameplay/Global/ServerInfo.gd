@@ -38,3 +38,7 @@ func get_sorted_user_ids() -> Array:
 	result.sort()
 	
 	return result
+
+
+func clear() -> void:
+	_players = {}

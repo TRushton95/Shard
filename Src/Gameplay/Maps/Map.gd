@@ -761,7 +761,7 @@ func _send_world_state(world_state: Dictionary) -> void:
 	rpc_unreliable_id(Constants.ALL_CONNECTED_PEERS_ID, "_recieve_world_state", world_state)
 
 
-remotesync  func _recieve_world_state(new_world_state: Dictionary) -> void:
+remotesync func _recieve_world_state(new_world_state: Dictionary) -> void:
 	if new_world_state[Constants.Network.TIME] > prev_world_state_timestamp:
 		prev_world_state_timestamp = new_world_state[Constants.Network.TIME]
 		new_world_state.erase(Constants.Network.TIME)
