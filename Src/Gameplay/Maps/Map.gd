@@ -14,6 +14,7 @@ var selected_action_lookup : ActionLookup
 var button_drag_handled := false
 var dragging_button : ActionButton
 var simulating_lag := false
+var network_update_time := 0.0
 
 var world_state := {}
 var world_state_buffer := []
@@ -394,20 +395,24 @@ func _on_ThreatMeter_data_expired():
 
 func _physics_process(delta: float) -> void:
 	if get_tree().is_network_server():
-		if !player_states.empty():
-			world_state = player_states.duplicate(true)
-			for player in world_state.keys():
-				world_state[player].erase(Constants.Network.TIME)
-				
-			world_state[Constants.Network.TIME] = OS.get_system_time_msecs()
-			_send_world_state(world_state)
+		network_update_time += delta * 1000
+		if network_update_time >= Constants.SERVER_TICK_RATE_MS:
+			network_update_time -= Constants.SERVER_TICK_RATE_MS
+		
+			if !player_states.empty():
+				world_state = player_states.duplicate(true)
+				for player in world_state.keys():
+					world_state[player].erase(Constants.Network.TIME)
+					
+				world_state[Constants.Network.TIME] = OS.get_system_time_msecs()
+				_send_world_state(world_state)
 			
-	var render_time = ServerClock.get_time() - Constants.INTERPOLATION_OFFSET
+	var render_time = ServerClock.get_time() - Constants.INTERPOLATION_OFFSET_MS
 	if world_state_buffer.size() > 1:
 		while world_state_buffer.size() > 2 && world_state_buffer[1][Constants.Network.TIME] < render_time:
 			world_state_buffer.remove(0)
 			
-		var interpolation_factor = (render_time - world_state_buffer[0][Constants.Network.TIME]) / (world_state_buffer[1][Constants.Network.TIME] - world_state_buffer[0][Constants.Network.TIME])
+		var interpolation_factor = float(render_time - world_state_buffer[0][Constants.Network.TIME]) / float(world_state_buffer[1][Constants.Network.TIME] - world_state_buffer[0][Constants.Network.TIME])
 		
 		for key in world_state_buffer[1].keys():
 			if str(key) == Constants.Network.TIME:
