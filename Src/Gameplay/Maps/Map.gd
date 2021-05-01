@@ -5,16 +5,24 @@ var player_scene = load("res://Gameplay/Entities/Units/Player/Player.tscn")
 var floating_text_scene = load("res://Gameplay/UI/FloatingText/FloatingText.tscn")
 var action_button_scene = load("res://Gameplay/UI/ActionButton/ActionButton.tscn")
 
+const lag_sim_duration = 2.0
+
 var player : Unit
 var player_name : String
 var selected_unit : Unit
 var selected_action_lookup : ActionLookup
 var button_drag_handled := false
 var dragging_button : ActionButton
+var simulating_lag := false
 
 var world_state := {}
 var player_states := {}
 var prev_world_state_timestamp := 0
+
+
+
+func _on_LagSimTimer_timeout() -> void:
+	simulating_lag = false
 
 
 #This should hook into whatever mechanism determines when an ability key is clicked
@@ -459,6 +467,10 @@ func _process(_delta: float) -> void:
 		button_index = 11
 	if Input.is_action_just_pressed("stop"):
 		rpc("_unit_stop", player_name)
+	if Input.is_action_just_pressed("LagSgim"):
+		simulating_lag = true
+		$LagSimTimer.start(lag_sim_duration)
+		
 		
 	if Input.is_action_just_pressed("test_interrupt"):
 		player.rpc("interrupt")
@@ -758,6 +770,9 @@ master func _recieve_player_state(new_player_state: Dictionary) -> void:
 
 
 func _send_world_state(world_state: Dictionary) -> void:
+	if simulating_lag:
+		return
+	
 	rpc_unreliable_id(Constants.ALL_CONNECTED_PEERS_ID, "_recieve_world_state", world_state)
 
 

@@ -148,6 +148,8 @@ default_color = Color( 1, 1, 1, 1 )
 [node name="Enemy" parent="." instance=ExtResource( 1 )]
 position = Vector2( 944, 432 )
 
+[node name="LagSimTimer" type="Timer" parent="."]
+
 [node name="Navigation2D" type="Navigation2D" parent="."]
 
 [node name="NavigationPolygonInstance" type="NavigationPolygonInstance" parent="Navigation2D"]
@@ -270,4 +272,5 @@ position = Vector2( 608, 704 )
 [node name="Tree4" parent="Node" instance=ExtResource( 12 )]
 position = Vector2( 288, 320 )
 
+[connection signal="timeout" from="LagSimTimer" to="." method="_on_LagSimTimer_timeout"]
 [connection signal="data_expired" from="CanvasLayer/ThreatMeter" to="." method="_on_ThreatMeter_data_expired"]
