@@ -258,19 +258,26 @@ margin_top = -16.0
 margin_right = -59.0
 margin_bottom = 16.0
 
-[node name="MarginContainer" type="MarginContainer" parent="CanvasLayer"]
+[node name="NetworkInfo" type="MarginContainer" parent="CanvasLayer"]
 anchor_left = 1.0
 anchor_right = 1.0
 margin_left = -200.0
-margin_bottom = 50.0
+margin_top = 20.0
+margin_bottom = 64.0
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="Ping" type="Label" parent="CanvasLayer/MarginContainer"]
-margin_top = 18.0
+[node name="VBoxContainer" type="VBoxContainer" parent="CanvasLayer/NetworkInfo"]
 margin_right = 200.0
-margin_bottom = 32.0
+margin_bottom = 44.0
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Ping" type="Label" parent="CanvasLayer/NetworkInfo/VBoxContainer"]
+margin_right = 200.0
+margin_bottom = 14.0
 custom_colors/font_color = Color( 0, 0, 0, 1 )
 text = "Ping: 0 ms"
 align = 1
@@ -278,6 +285,15 @@ valign = 1
 __meta__ = {
 "_edit_use_anchors_": false
 }
+
+[node name="LagWarning" type="Label" parent="CanvasLayer/NetworkInfo/VBoxContainer"]
+visible = false
+margin_top = 18.0
+margin_right = 200.0
+margin_bottom = 32.0
+custom_colors/font_color = Color( 1, 0, 0, 1 )
+text = "SIMULATING LAG"
+align = 1
 
 [node name="Node" type="Node" parent="."]
 

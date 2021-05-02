@@ -23,11 +23,12 @@ var prev_world_state_timestamp := 0
 
 
 func _on_ServerClock_ping_updated(ping: int) -> void:
-	$CanvasLayer/MarginContainer/Ping.text = "Ping: " + str(ping) + " ms"
+	$CanvasLayer/NetworkInfo/VBoxContainer/Ping.text = "Ping: " + str(ping) + " ms"
 
 
 func _on_LagSimTimer_timeout() -> void:
 	simulating_lag = false
+	$CanvasLayer/NetworkInfo/VBoxContainer/LagWarning.hide()
 
 
 #This should hook into whatever mechanism determines when an ability key is clicked
@@ -409,27 +410,46 @@ func _physics_process(delta: float) -> void:
 			
 	var render_time = ServerClock.get_time() - Constants.INTERPOLATION_OFFSET_MS
 	if world_state_buffer.size() > 1:
-		while world_state_buffer.size() > 2 && world_state_buffer[1][Constants.Network.TIME] < render_time:
+		while world_state_buffer.size() > 2 && world_state_buffer[2][Constants.Network.TIME] < render_time:
 			world_state_buffer.remove(0)
 			
-		var interpolation_factor = float(render_time - world_state_buffer[0][Constants.Network.TIME]) / float(world_state_buffer[1][Constants.Network.TIME] - world_state_buffer[0][Constants.Network.TIME])
-		
-		for key in world_state_buffer[1].keys():
-			if str(key) == Constants.Network.TIME:
-				continue
-			if key == get_tree().get_network_unique_id():
-				continue
-			if !world_state_buffer[0].has(key):
-				continue
-				
-			var user_name = ServerInfo.get_user_name(key)
-			if has_node(user_name):
-				var new_position = lerp(world_state_buffer[0][key][Constants.Network.POSITION], world_state_buffer[1][key][Constants.Network.POSITION], interpolation_factor)
-				get_node(user_name).position = new_position
-			else:
-				# TODO: Spawn player
-				pass
-
+		if world_state_buffer.size() > 2: # We have a future state
+			var interpolation_factor = float(render_time - world_state_buffer[1][Constants.Network.TIME]) / float(world_state_buffer[2][Constants.Network.TIME] - world_state_buffer[1][Constants.Network.TIME])
+			
+			for key in world_state_buffer[2].keys():
+				if str(key) == Constants.Network.TIME:
+					continue
+				if key == get_tree().get_network_unique_id():
+					continue
+				if !world_state_buffer[1].has(key):
+					continue
+					
+				var user_name = ServerInfo.get_user_name(key)
+				if has_node(user_name):
+					var new_position = lerp(world_state_buffer[1][key][Constants.Network.POSITION], world_state_buffer[2][key][Constants.Network.POSITION], interpolation_factor)
+					get_node(user_name).position = new_position
+				else:
+					# TODO: Spawn player
+					pass
+		elif render_time > world_state_buffer[1][Constants.Network.TIME]: # No future state
+			var extrapolation_factor = float(render_time - world_state_buffer[0][Constants.Network.TIME]) / float(world_state_buffer[1][Constants.Network.TIME] - world_state_buffer[0][Constants.Network.TIME]) - 1.0
+			
+			for key in world_state_buffer[1].keys():
+				if str(key) == Constants.Network.TIME:
+					continue
+				if key == get_tree().get_network_unique_id():
+					continue
+				if !world_state_buffer[1].has(key):
+					continue
+					
+				var user_name = ServerInfo.get_user_name(key)
+				if has_node(user_name):
+					var delta_position = world_state_buffer[1][key][Constants.Network.POSITION] - world_state_buffer[0][key][Constants.Network.POSITION]
+					var new_position = world_state_buffer[1][key][Constants.Network.POSITION] + (delta_position * extrapolation_factor)
+					get_node(user_name).position = new_position
+				else:
+					# TODO: Spawn player - there is some extrapolation funniness with this apparently, double check
+					pass
 
 func _process(_delta: float) -> void:
 	# Test commands for testing whatever
@@ -500,6 +520,7 @@ func _process(_delta: float) -> void:
 	if Input.is_action_just_pressed("LagSgim"):
 		simulating_lag = true
 		$LagSimTimer.start(lag_sim_duration)
+		$CanvasLayer/NetworkInfo/VBoxContainer/LagWarning.show()
 		
 		
 	if Input.is_action_just_pressed("test_interrupt"):
