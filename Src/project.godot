@@ -237,6 +237,7 @@ NavigationHelper="*res://Gameplay/Global/NavigationHelper.gd"
 TargetHelper="*res://Gameplay/Global/TargetHelper.gd"
 ServerClock="*res://Gameplay/Global/ServerClock.gd"
 ServerInfo="*res://Gameplay/Global/ServerInfo.gd"
+GameServer="*res://Gameplay/Global/GameServer.gd"
 
 [debug]
 

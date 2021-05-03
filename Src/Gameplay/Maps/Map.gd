@@ -564,10 +564,12 @@ func process_ability_press(action_lookup: ActionLookup):
 	
 	match ability.target_type:
 		Enums.TargetType.Self:
-				rpc("_unit_cast", player_name, action_lookup.source, action_lookup.index, player_name)
+				#rpc("_unit_cast", player_name, action_lookup.source, action_lookup.index, player_name)
+				GameServer.send_ability_cast(action_lookup.source, action_lookup.index, player_name)
 		Enums.TargetType.Unit:
 			if selected_unit && ability.autocast_on_target:
-				rpc("_unit_cast", player_name, action_lookup.source, action_lookup.index, selected_unit.name)
+				#rpc("_unit_cast", player_name, action_lookup.source, action_lookup.index, selected_unit.name)
+				GameServer.send_ability_cast(action_lookup.source, action_lookup.index, selected_unit.name)
 				select_ability(null)
 			else:
 				select_ability(action_lookup)
@@ -594,7 +596,8 @@ func _unhandled_input(event) -> void:
 				var ability = find_action(selected_action_lookup)
 				
 				if ability && ability.target_type == Enums.TargetType.Position:
-					rpc("_unit_cast", player_name, selected_action_lookup.source, selected_action_lookup.index, get_global_mouse_position())
+					#rpc("_unit_cast", player_name, selected_action_lookup.source, selected_action_lookup.index, get_global_mouse_position())
+					GameServer.send_ability_cast(selected_action_lookup.source, selected_action_lookup.index, get_global_mouse_position())
 					select_ability(null)
 			else:
 				select_unit(null)
@@ -834,6 +837,18 @@ remotesync func _receive_world_state(world_state: Dictionary) -> void:
 		world_state_buffer.append(world_state)
 
 
+master func receive_ability_cast(action_source: int, action_index: int, dirty_target) -> void:
+	var caster_name = ServerInfo.get_user_name(get_tree().get_network_unique_id())
+	if !has_node(caster_name):
+		return
+	
+	var caster = get_node(caster_name)
+	var clean_target = _get_clean_target(dirty_target)
+	var ability = find_action(ActionLookup.new(action_source, action_index))
+	
+	ability.execute(clean_target, caster)
+
+
 remotesync func _unit_cast(unit_name: String, action_source: int, action_index: int, dirty_target) -> void:
 	if !dirty_target:
 		print("No target provided")
@@ -858,3 +873,15 @@ func _unit_stop(unit_name: String) -> void:
 
 remotesync func _unit_attack_target(unit_name: String, target_name: String) -> void:
 	get_node(unit_name).input_command(AttackCommand.new(get_node(target_name)))
+
+
+# Get target from dirty target that may be a Vector2 or a node name
+func _get_clean_target(dirty_target):
+	var result
+	
+	if dirty_target is Vector2:
+		result = dirty_target
+	elif has_node(dirty_target):
+		result = get_node(dirty_target)
+		
+	return result
