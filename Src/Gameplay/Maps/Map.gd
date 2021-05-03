@@ -516,7 +516,7 @@ func _process(_delta: float) -> void:
 	if Input.is_action_just_pressed("cast_12"):
 		button_index = 11
 	if Input.is_action_just_pressed("stop"):
-		rpc("_unit_stop", player_name)
+		_unit_stop(player_name)
 	if Input.is_action_just_pressed("LagSgim"):
 		simulating_lag = true
 		$LagSimTimer.start(lag_sim_duration)
@@ -853,7 +853,7 @@ func _unit_move_to_point(unit_name: String, position: Vector2) -> void:
 	get_node(unit_name).input_command(MoveCommand.new(position))
 
 
-remotesync func _unit_stop(unit_name: String) -> void:
+func _unit_stop(unit_name: String) -> void:
 	get_node(unit_name).input_command(StopCommand.new())
 
 remotesync func _unit_attack_target(unit_name: String, target_name: String) -> void:
