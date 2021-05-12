@@ -837,7 +837,7 @@ remotesync func _receive_world_state(world_state: Dictionary) -> void:
 		world_state_buffer.append(world_state)
 
 
-master func receive_ability_cast(action_source: int, action_index: int, dirty_target) -> void:
+master func send_ability_cast(action_source: int, action_index: int, dirty_target) -> void:
 	var caster_name = ServerInfo.get_user_name(get_tree().get_network_unique_id())
 	if !has_node(caster_name):
 		return
