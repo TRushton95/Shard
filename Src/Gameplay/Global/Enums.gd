@@ -8,3 +8,7 @@ enum ActionSource { Spell, Inventory, Equip }
 enum ButtonSource { Bag, Spellbook, ActionBar, Equipment }
 enum UnitAnimationType { IDLE, WALKING, CASTING, DEAD }
 enum GearSlotType { HEAD, CHEST, LEGS, FEET, HANDS, WEAPON }
+
+enum AbilityEntity {
+	FIREBALL
+}

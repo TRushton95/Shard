@@ -9,6 +9,9 @@ const GLOBAL_COOLDOWN := 1.0
 const INDEFINITE_DURATION := 0.0 # Used for zones and status
 const ONE_SHOT_DURATION := -1.0 # Used for zones only
 
+class Groups:
+	const ABILITY_ENTITY = "AbilityEntity"
+
 class ClassNames:
 	const ACTION_BUTTON = "ActionButton"
 	const UNIT = "Unit"
@@ -23,5 +26,9 @@ class StateNames:
 	const CHANNELLING_COMBAT = "ChannellingCombatState"
 
 class Network:
+	const ID = "ID"
 	const TIME = "T"
 	const POSITION = "P"
+	const ABILITY_ENTITY_TYPE = "AET"
+	const OWNER_ID = "OID"
+	const TARGET_ID = "TID"

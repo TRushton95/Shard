@@ -1081,29 +1081,29 @@ frame = 3
 [node name="LegsSprite" type="Sprite" parent="."]
 position = Vector2( 0, -48 )
 texture = ExtResource( 14 )
-vframes = 5
 hframes = 3
+vframes = 5
 frame = 9
 
 [node name="FeetSprite" type="Sprite" parent="."]
 position = Vector2( 0, -48 )
 texture = ExtResource( 16 )
-vframes = 5
 hframes = 3
+vframes = 5
 frame = 9
 
 [node name="ArmsSprite" type="Sprite" parent="."]
 position = Vector2( 0, -48 )
 texture = ExtResource( 1 )
-vframes = 5
 hframes = 3
+vframes = 5
 frame = 10
 
 [node name="HandsSprite" type="Sprite" parent="."]
 position = Vector2( 0, -48 )
 texture = ExtResource( 3 )
-vframes = 5
 hframes = 3
+vframes = 5
 frame = 10
 
 [node name="ArmsAnimationPlayer" type="AnimationPlayer" parent="."]
@@ -1210,6 +1210,7 @@ margin_right = 75.0
 margin_bottom = 28.0
 mouse_filter = 2
 texture_progress = ExtResource( 4 )
+
 [connection signal="died" from="." to="." method="_on_Player_died"]
 [connection signal="input_event" from="Clickbox" to="." method="_on_Clickbox_input_event"]
 [connection signal="timeout" from="AutoAttackTimer" to="." method="_on_AutoAttackTimer_timeout"]

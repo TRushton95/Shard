@@ -307,6 +307,10 @@ func get_type() -> String:
 	return Constants.ClassNames.UNIT
 
 
+func get_size() -> Vector2:
+	return get_node("Clickbox/CollisionShape2D").shape.extents
+
+
 func _get_direction_to_point(point: Vector2) -> int:
 	var result = -1
 	

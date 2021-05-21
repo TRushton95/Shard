@@ -19,6 +19,7 @@ var network_update_time := 0.0
 var world_state := {}
 var world_state_buffer := []
 var player_states := {}
+var ability_entity_states = {}
 var prev_world_state_timestamp := 0
 
 
@@ -399,12 +400,22 @@ func _physics_process(delta: float) -> void:
 		network_update_time += delta * 1000
 		if network_update_time >= Constants.SERVER_TICK_RATE_MS:
 			network_update_time -= Constants.SERVER_TICK_RATE_MS
-		
+			
+			world_state = {}
+			
 			if !player_states.empty():
 				world_state = player_states.duplicate(true)
-				for player in world_state.keys():
-					world_state[player].erase(Constants.Network.TIME)
+				for player_id in world_state.keys():
+					world_state[player_id].erase(Constants.Network.TIME)
 					
+			for ability_entity_id in ability_entity_states.keys():
+				print("Got an ability id " + str(ability_entity_id))
+				if !world_state.has(ability_entity_id):
+					world_state[ability_entity_id] = ability_entity_states[ability_entity_id]
+				else:
+					print('ERROR: World state key collision on key ' + str(ability_entity_id))
+					
+			if !world_state.empty():
 				world_state[Constants.Network.TIME] = OS.get_system_time_msecs()
 				_send_world_state(world_state)
 			
@@ -426,10 +437,22 @@ func _physics_process(delta: float) -> void:
 					
 				var user_name = ServerInfo.get_user_name(key)
 				if has_node(user_name):
-					var new_position = lerp(world_state_buffer[1][key][Constants.Network.POSITION], world_state_buffer[2][key][Constants.Network.POSITION], interpolation_factor)
-					get_node(user_name).position = new_position
+					if get_node(user_name) is Unit: # TODO: This if else is fucked
+						var new_position = lerp(world_state_buffer[1][key][Constants.Network.POSITION], world_state_buffer[2][key][Constants.Network.POSITION], interpolation_factor)
+						get_node(user_name).position = new_position
 				else:
+					print("Is not unit")
+					var ability_entity_type = world_state_buffer[2][key][Constants.Network.ABILITY_ENTITY_TYPE]
+					var ability_entity = AbilityHelper.get_ability_entity(ability_entity_type)
+					var owner = get_node(world_state_buffer[2][key][Constants.Network.OWNER_ID])
+					var target = get_node(world_state_buffer[2][key][Constants.Network.TARGET_ID])
+					ability_entity.position = owner.position
+					ability_entity.target = target
+					add_child(ability_entity)
+					
+					print("Created new entity: owner[" + str(owner.name) + "]" + ", target[" + str(target.name) + "]")
 					# TODO: Spawn player
+					
 					pass
 		elif render_time > world_state_buffer[1][Constants.Network.TIME]: # No future state
 			var extrapolation_factor = float(render_time - world_state_buffer[0][Constants.Network.TIME]) / float(world_state_buffer[1][Constants.Network.TIME] - world_state_buffer[0][Constants.Network.TIME]) - 1.0
@@ -692,6 +715,7 @@ func setup() -> void:
 			
 			for ability in unit.get_node("Abilities").get_children():
 				ability.setup(unit.get_instance_id())
+				ability.connect("ability_entity_created", self, "_on_player_ability_entity_created")
 				
 				if ability.get_index() == 0: # HACK: To leave out basic attack, should add an ability category
 					continue
@@ -824,7 +848,18 @@ master func _recieve_player_state(new_player_state: Dictionary) -> void:
 		player_states[sender_id] = new_player_state
 
 
-func _send_world_state(world_state: Dictionary) -> void:
+func _send_ability_entity_state (ability_entity_state: Dictionary) -> void:
+	rpc_id(Constants.SERVER_ID, "_recieve_ability_entity_state", ability_entity_state)
+
+
+master func _recieve_ability_entity_state(new_ability_entity_state: Dictionary) -> void:
+	var entity_id = new_ability_entity_state[Constants.Network.ID]
+	
+	if !ability_entity_states.has(entity_id):
+		ability_entity_states[entity_id] = new_ability_entity_state
+
+
+master func _send_world_state(world_state: Dictionary) -> void:
 	if simulating_lag:
 		return
 	
@@ -844,7 +879,7 @@ master func send_ability_cast(action_source: int, action_index: int, dirty_targe
 	
 	var caster = get_node(caster_name)
 	var clean_target = _get_clean_target(dirty_target)
-	var ability = find_action(ActionLookup.new(action_source, action_index))
+	var ability = find_action(ActionLookup.new(action_source, action_index)) # TODO: Lookup by index isn't reliable or cheat proof - need to reference spells by id
 	
 	ability.execute(clean_target, caster)
 
@@ -870,6 +905,7 @@ func _unit_move_to_point(unit_name: String, position: Vector2) -> void:
 
 func _unit_stop(unit_name: String) -> void:
 	get_node(unit_name).input_command(StopCommand.new())
+
 
 remotesync func _unit_attack_target(unit_name: String, target_name: String) -> void:
 	get_node(unit_name).input_command(AttackCommand.new(get_node(target_name)))

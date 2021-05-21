@@ -31,6 +31,10 @@ var hostile_status : Status
 var friendly_status : Status
 
 
+func _init() -> void:
+	add_to_group(Constants.Groups.ABILITY_ENTITY)
+
+
 func _on_Zone_body_entered(body) -> void:
 	if !body is Unit:
 		return

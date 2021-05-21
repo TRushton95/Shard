@@ -1,6 +1,7 @@
 extends Node
 class_name Ability
 
+signal ability_entity_created(ability_entity)
 signal cooldown_started(duration)
 signal cooldown_progressed
 signal cooldown_ended
