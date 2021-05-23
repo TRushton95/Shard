@@ -33,7 +33,7 @@ func _ready() -> void:
 	cast_range = 500
 
 
-remotesync func execute(target, caster: Unit) -> void:
+func execute(target, caster: Unit) -> void:
 	if !target is Unit:
 		return
 	
@@ -47,11 +47,13 @@ remotesync func execute(target, caster: Unit) -> void:
 	
 	var ability_entity_state = {
 		Constants.Network.ID: 99999,
+		Constants.Network.TIME: ServerClock.get_time(),
 		Constants.Network.ABILITY_ENTITY_TYPE: Enums.AbilityEntity.FIREBALL,
 		Constants.Network.POSITION: projectile.position,
 		Constants.Network.OWNER_ID: caster.name,
 		Constants.Network.TARGET_ID: target.name
 	}
+	
 	get_tree().get_root().get_node("Main/Map")._send_ability_entity_state(ability_entity_state)
 	
 	projectile.connect("target_reached", self, "_on_projectile_target_reached", [projectile, target, caster])

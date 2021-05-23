@@ -410,13 +410,6 @@ func _physics_process(delta: float) -> void:
 				for player_id in world_state.keys():
 					world_state[player_id].erase(Constants.Network.TIME)
 					
-			for ability_entity_id in ability_entity_states.keys():
-				print("Got an ability id " + str(ability_entity_id))
-				if !world_state.has(ability_entity_id):
-					world_state[ability_entity_id] = ability_entity_states[ability_entity_id]
-				else:
-					print('ERROR: World state key collision on key ' + str(ability_entity_id))
-					
 			if !world_state.empty():
 				world_state[Constants.Network.TIME] = OS.get_system_time_msecs()
 				_send_world_state(world_state)
@@ -443,18 +436,7 @@ func _physics_process(delta: float) -> void:
 						var new_position = lerp(world_state_buffer[1][key][Constants.Network.POSITION], world_state_buffer[2][key][Constants.Network.POSITION], interpolation_factor)
 						get_node(user_name).position = new_position
 				else:
-					print("Is not unit")
-					var ability_entity_type = world_state_buffer[2][key][Constants.Network.ABILITY_ENTITY_TYPE]
-					var ability_entity = AbilityHelper.get_ability_entity(ability_entity_type)
-					var owner = get_node(world_state_buffer[2][key][Constants.Network.OWNER_ID])
-					var target = get_node(world_state_buffer[2][key][Constants.Network.TARGET_ID])
-					ability_entity.position = owner.position
-					ability_entity.target = target
-					add_child(ability_entity)
-					
-					print("Created new entity: owner[" + str(owner.name) + "]" + ", target[" + str(target.name) + "]")
 					# TODO: Spawn player
-					
 					pass
 		elif render_time > world_state_buffer[1][Constants.Network.TIME]: # No future state
 			var extrapolation_factor = float(render_time - world_state_buffer[0][Constants.Network.TIME]) / float(world_state_buffer[1][Constants.Network.TIME] - world_state_buffer[0][Constants.Network.TIME]) - 1.0
@@ -475,6 +457,22 @@ func _physics_process(delta: float) -> void:
 				else:
 					# TODO: Spawn player - there is some extrapolation funniness with this apparently, double check
 					pass
+					
+		if !ability_entity_states.empty():
+			for entity_id in ability_entity_states.keys():
+				if ability_entity_states[entity_id][Constants.Network.TIME] < render_time:
+					print("Ability entity " + str(entity_id) + " ready to spawn")
+					var ability_entity_type = ability_entity_states[entity_id][Constants.Network.ABILITY_ENTITY_TYPE]
+					var ability_entity = AbilityHelper.get_ability_entity(ability_entity_type)
+					var owner = get_node(ability_entity_states[entity_id][Constants.Network.OWNER_ID])
+					var target = get_node(ability_entity_states[entity_id][Constants.Network.TARGET_ID])
+					ability_entity.position = owner.position
+					ability_entity.target = target
+					add_child(ability_entity)
+					
+					ability_entity_states.erase(entity_id)
+					
+					print("Created new entity: owner[" + str(owner.name) + "]" + ", target[" + str(target.name) + "]")
 
 func _process(_delta: float) -> void:
 	# Test commands for testing whatever
@@ -859,10 +857,10 @@ master func _recieve_player_state(new_player_state: Dictionary) -> void:
 
 
 func _send_ability_entity_state (ability_entity_state: Dictionary) -> void:
-	rpc_id(Constants.SERVER_ID, "_recieve_ability_entity_state", ability_entity_state)
+	rpc_id(Constants.ALL_CONNECTED_PEERS_ID, "_recieve_ability_entity_state", ability_entity_state)
 
 
-master func _recieve_ability_entity_state(new_ability_entity_state: Dictionary) -> void:
+remote func _recieve_ability_entity_state(new_ability_entity_state: Dictionary) -> void:
 	var entity_id = new_ability_entity_state[Constants.Network.ID]
 	
 	if !ability_entity_states.has(entity_id):
