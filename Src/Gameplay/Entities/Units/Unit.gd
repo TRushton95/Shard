@@ -20,6 +20,7 @@ var is_channelling := false
 var is_basic_attacking := false
 var _combat_targets := []
 var dead := false
+var ability_data_queue := []
 
 var _navigation_state = IdleNavigationState.new()
 var _combat_state = IdleCombatState.new()
@@ -183,6 +184,16 @@ func _ready() -> void:
 	$UnitProfile/VBoxContainer/SmallHealthBar.max_value = current_health
 	$UnitProfile/VBoxContainer/SmallHealthBar.value = current_health
 	$AutoAttackTimer.one_shot = true
+
+
+func _physics_process(delta: float) -> void:
+	for ability_data in ability_data_queue:
+		if ability_data["Time"] < ServerClock.get_time() - Constants.INTERPOLATION_OFFSET_MS:
+			var ability = ability_data["Ability"]
+			var target = ability_data["Target"]
+			
+			start_cast(ability, target)
+			ability_data_queue.erase(ability_data)
 
 
 func _process(delta: float) -> void:
@@ -422,6 +433,16 @@ func cast(ability: Ability, target) -> void:
 		ability.deactivate()
 		return
 
+	var target_position = TargetHelper.get_target_position(target)
+	
+	switch_combat_state(CastingCombatState.new(target, ability))
+	if position.distance_to(target_position) > ability.cast_range:
+		switch_navigation_state(PursueNavigationState.new(target, ability.cast_range, true))
+	elif ability.cast_time > 0  || "channel_time" in ability:
+		switch_navigation_state(IdleNavigationState.new())
+
+
+func start_cast(ability: Ability, target) -> void:
 	var target_position = TargetHelper.get_target_position(target)
 	
 	switch_combat_state(CastingCombatState.new(target, ability))

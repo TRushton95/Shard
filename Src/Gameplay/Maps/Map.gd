@@ -588,11 +588,11 @@ func process_ability_press(action_lookup: ActionLookup):
 	match ability.target_type:
 		Enums.TargetType.Self:
 				#rpc("_unit_cast", player_name, action_lookup.source, action_lookup.index, player_name)
-				GameServer.send_ability_cast(action_lookup.source, action_lookup.index, player_name)
+				GameServer.request_ability_cast(action_lookup.source, action_lookup.index, player_name)
 		Enums.TargetType.Unit:
 			if selected_unit && ability.autocast_on_target:
 				#rpc("_unit_cast", player_name, action_lookup.source, action_lookup.index, selected_unit.name)
-				GameServer.send_ability_cast(action_lookup.source, action_lookup.index, selected_unit.name)
+				GameServer.request_ability_cast(action_lookup.source, action_lookup.index, selected_unit.name)
 				select_ability(null)
 			else:
 				select_ability(action_lookup)
@@ -620,7 +620,7 @@ func _unhandled_input(event) -> void:
 				
 				if ability && ability.target_type == Enums.TargetType.Position:
 					#rpc("_unit_cast", player_name, selected_action_lookup.source, selected_action_lookup.index, get_global_mouse_position())
-					GameServer.send_ability_cast(selected_action_lookup.source, selected_action_lookup.index, get_global_mouse_position())
+					GameServer.request_ability_cast(selected_action_lookup.source, selected_action_lookup.index, get_global_mouse_position())
 					select_ability(null)
 			else:
 				select_unit(null)
@@ -872,7 +872,7 @@ remotesync func _receive_world_state(world_state: Dictionary) -> void:
 		world_state_buffer.append(world_state)
 
 
-master func send_ability_cast(action_source: int, action_index: int, dirty_target) -> void:
+master func recieve_ability_cast(action_source: int, action_index: int, dirty_target) -> void:
 	var caster_name = ServerInfo.get_user_name(get_tree().get_network_unique_id())
 	if !has_node(caster_name):
 		return
@@ -884,7 +884,56 @@ master func send_ability_cast(action_source: int, action_index: int, dirty_targe
 	ability.execute(clean_target, caster)
 
 
-remotesync func _unit_cast(unit_name: String, action_source: int, action_index: int, dirty_target) -> void:
+master func recieve_ability_cast_request(time: float, action_source: int, action_index: int, dirty_target) -> void:
+	var sender_id = get_tree().get_rpc_sender_id()
+	var caster_name = ServerInfo.get_user_name(sender_id)
+	if !has_node(caster_name):
+		return
+	
+	var caster = get_node(caster_name)
+	var clean_target = _get_clean_target(dirty_target)
+	var ability = find_action(ActionLookup.new(action_source, action_index)) # TODO: Lookup by index isn't reliable or cheat proof - need to reference spells by id
+	
+	if !ability:
+		print("Could not locate ability to cast")
+		return
+	
+	if !_is_team_target_valid(ability, clean_target):
+		print("Invalid target")
+		return
+		
+	if ability.is_on_cooldown():
+		print("Cannot cast ability while it is on cooldown")
+		return
+		
+	if "cost" in ability && caster.current_mana < ability.cost:
+		print("Insufficient mana for " + str(caster.name) + " to cast")
+		return
+	
+	caster.start_cast(ability, clean_target)
+	rpc_id(Constants.ALL_CONNECTED_PEERS_ID, "start_ability_cast", time, sender_id, action_source, action_index, dirty_target)
+
+
+remotesync func start_ability_cast(time: float, caster_id: int, action_source: int, action_index: int, dirty_target) -> void:
+	if caster_id != get_tree().get_network_unique_id():
+		var caster_name = ServerInfo.get_user_name(caster_id)
+		if !has_node(caster_name):
+			return
+			
+		var caster = get_node(caster_name)
+		var clean_target = _get_clean_target(dirty_target)
+		var ability = find_action(ActionLookup.new(action_source, action_index)) # TODO: Lookup by index isn't reliable or cheat proof - need to reference spells by id
+		
+		var queued_ability_data = {
+			"Ability": ability,
+			"Target": clean_target,
+			"Time": time
+		}
+		
+		caster.ability_data_queue.push_back(queued_ability_data)
+
+
+func _unit_cast(unit_name: String, action_source: int, action_index: int, dirty_target) -> void:
 	if !dirty_target:
 		print("No target provided")
 		
@@ -921,3 +970,8 @@ func _get_clean_target(dirty_target):
 		result = get_node(dirty_target)
 		
 	return result
+
+
+func _is_team_target_valid(ability: Ability, target) -> bool:
+	# If ability targets a unit and the target is a unit of a different team to the ability target team
+	return !(typeof(target) == TYPE_OBJECT && target.get_type() == "Unit" && ability.target_type == Enums.TargetType.Unit && ability.target_team != target.team)
