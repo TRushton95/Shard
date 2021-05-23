@@ -177,7 +177,9 @@ func _on_CharacterPanel_button_dropped_on_button(button: ActionButton, target_bu
 
 func _on_unit_left_clicked(unit: Unit) -> void:
 	if selected_action_lookup && selected_action_lookup.is_valid():
-		rpc("_unit_cast", player_name, selected_action_lookup.source, selected_action_lookup.index, unit.name)
+		#rpc("_unit_cast", player_name, selected_action_lookup.source, selected_action_lookup.index, unit.name)
+		var ability = find_action(selected_action_lookup)
+		_handle_ability_cast(ability, unit)
 		select_unit(unit)
 		select_ability(null)
 	else:
@@ -588,11 +590,11 @@ func process_ability_press(action_lookup: ActionLookup):
 	match ability.target_type:
 		Enums.TargetType.Self:
 				#rpc("_unit_cast", player_name, action_lookup.source, action_lookup.index, player_name)
-				GameServer.request_ability_cast(action_lookup.source, action_lookup.index, player_name)
+				_handle_ability_cast(ability, player)
 		Enums.TargetType.Unit:
 			if selected_unit && ability.autocast_on_target:
 				#rpc("_unit_cast", player_name, action_lookup.source, action_lookup.index, selected_unit.name)
-				GameServer.request_ability_cast(action_lookup.source, action_lookup.index, selected_unit.name)
+				_handle_ability_cast(ability, selected_unit)
 				select_ability(null)
 			else:
 				select_ability(action_lookup)
@@ -602,6 +604,14 @@ func process_ability_press(action_lookup: ActionLookup):
 			
 		_:
 			print("Invalid target type on ability press")
+
+
+func _handle_ability_cast(ability: Ability, target) -> void:
+	if player.is_in_range(ability, target):
+		player.switch_combat_state(CastingCombatState.new(target, ability))
+	else:
+		player.switch_combat_state(PendingCastCombatState.new(target, ability))
+		player.switch_navigation_state(PursueNavigationState.new(target, ability.cast_range, true))
 
 
 func _unhandled_input(event) -> void:
@@ -620,7 +630,7 @@ func _unhandled_input(event) -> void:
 				
 				if ability && ability.target_type == Enums.TargetType.Position:
 					#rpc("_unit_cast", player_name, selected_action_lookup.source, selected_action_lookup.index, get_global_mouse_position())
-					GameServer.request_ability_cast(selected_action_lookup.source, selected_action_lookup.index, get_global_mouse_position())
+					_handle_ability_cast(ability, get_global_mouse_position())
 					select_ability(null)
 			else:
 				select_unit(null)
@@ -884,7 +894,7 @@ master func recieve_ability_cast(action_source: int, action_index: int, dirty_ta
 	ability.execute(clean_target, caster)
 
 
-master func recieve_ability_cast_request(time: float, action_source: int, action_index: int, dirty_target) -> void:
+master func recieve_ability_cast_request(time: float, ability_instance_id: int, dirty_target) -> void:
 	var sender_id = get_tree().get_rpc_sender_id()
 	var caster_name = ServerInfo.get_user_name(sender_id)
 	if !has_node(caster_name):
@@ -892,29 +902,16 @@ master func recieve_ability_cast_request(time: float, action_source: int, action
 	
 	var caster = get_node(caster_name)
 	var clean_target = _get_clean_target(dirty_target)
-	var ability = find_action(ActionLookup.new(action_source, action_index)) # TODO: Lookup by index isn't reliable or cheat proof - need to reference spells by id
+	var ability = instance_from_id(ability_instance_id)
 	
-	if !ability:
-		print("Could not locate ability to cast")
-		return
-	
-	if !_is_team_target_valid(ability, clean_target):
-		print("Invalid target")
-		return
-		
-	if ability.is_on_cooldown():
-		print("Cannot cast ability while it is on cooldown")
-		return
-		
-	if "cost" in ability && caster.current_mana < ability.cost:
-		print("Insufficient mana for " + str(caster.name) + " to cast")
-		return
-	
-	caster.start_cast(ability, clean_target)
-	rpc_id(Constants.ALL_CONNECTED_PEERS_ID, "start_ability_cast", time, sender_id, action_source, action_index, dirty_target)
+	if caster.can_cast(ability, clean_target):
+		caster.start_cast(ability, clean_target)
+		rpc_id(Constants.ALL_CONNECTED_PEERS_ID, "start_ability_cast", time, ability_instance_id, dirty_target)
 
 
-remotesync func start_ability_cast(time: float, caster_id: int, action_source: int, action_index: int, dirty_target) -> void:
+remotesync func start_ability_cast(time: float, ability_instance_id: int, dirty_target) -> void:
+	var caster_id = get_tree().get_rpc_sender_id()
+	
 	if caster_id != get_tree().get_network_unique_id():
 		var caster_name = ServerInfo.get_user_name(caster_id)
 		if !has_node(caster_name):
@@ -922,7 +919,7 @@ remotesync func start_ability_cast(time: float, caster_id: int, action_source: i
 			
 		var caster = get_node(caster_name)
 		var clean_target = _get_clean_target(dirty_target)
-		var ability = find_action(ActionLookup.new(action_source, action_index)) # TODO: Lookup by index isn't reliable or cheat proof - need to reference spells by id
+		var ability = instance_from_id(ability_instance_id)
 		
 		var queued_ability_data = {
 			"Ability": ability,

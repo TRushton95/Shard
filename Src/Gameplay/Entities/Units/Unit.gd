@@ -206,11 +206,11 @@ func _process(delta: float) -> void:
 		var new_navigation_state = _navigation_state.update(self, delta)
 		if new_navigation_state:
 			switch_navigation_state(new_navigation_state)
-#
-#	if _combat_state.has_method("update"):
-#		var new_combat_state = _combat_state.update(self, delta)
-#		if new_combat_state:
-#			switch_combat_state(new_combat_state)
+
+	if _combat_state.has_method("update"):
+		var new_combat_state = _combat_state.update(self, delta)
+		if new_combat_state:
+			switch_combat_state(new_combat_state)
 		
 #	if $AutoAttackTimer.time_left > 0:
 #		emit_signal("auto_attack_cooldown_progressed", $AutoAttackTimer.time_left)
@@ -442,14 +442,41 @@ func cast(ability: Ability, target) -> void:
 		switch_navigation_state(IdleNavigationState.new())
 
 
+func is_in_range(ability: Ability, target) -> bool:
+	if position.distance_to(TargetHelper.get_target_position(target)) <= ability.cast_range:
+		return true
+		
+	return false
+
+
+func can_cast(ability: Ability, target) -> bool:
+	if !_is_team_target_valid(ability, target):
+		print("Invalid target")
+		return false
+		
+	if ability.is_on_cooldown():
+		print("Cannot cast ability while it is on cooldown")
+		return false
+		
+	if "cost" in ability && current_mana < ability.cost:
+		print("Insufficient mana to cast")
+		return false
+		
+	if "toggled" in ability && ability.toggled && ability.active:
+		ability.deactivate()
+		return false
+		
+	return true
+
+
 func start_cast(ability: Ability, target) -> void:
 	var target_position = TargetHelper.get_target_position(target)
 	
-	switch_combat_state(CastingCombatState.new(target, ability))
-	if position.distance_to(target_position) > ability.cast_range:
-		switch_navigation_state(PursueNavigationState.new(target, ability.cast_range, true))
-	elif ability.cast_time > 0  || "channel_time" in ability:
-		switch_navigation_state(IdleNavigationState.new())
+	switch_combat_state(PendingCastCombatState.new(target, ability))
+#	if position.distance_to(target_position) > ability.cast_range:
+#		switch_navigation_state(PursueNavigationState.new(target, ability.cast_range, true))
+#	elif ability.cast_time > 0  || "channel_time" in ability:
+#		switch_navigation_state(IdleNavigationState.new())
 
 
 func switch_navigation_state(new_state) -> void:
@@ -466,6 +493,7 @@ func switch_navigation_state(new_state) -> void:
 
 
 func switch_combat_state(new_state) -> void:
+	print("Switching to combat state " + str(new_state.state_name))
 	if !new_state:
 		print("No new combat state provided")
 		

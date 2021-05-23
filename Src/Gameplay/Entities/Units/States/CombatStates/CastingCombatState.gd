@@ -21,8 +21,14 @@ func _init(target, ability) -> void:
 func on_enter(unit) -> void:
 	.on_enter(unit)
 	
-	if unit.position.distance_to(TargetHelper.get_target_position(_target)) <= _ability.cast_range:
-		_start_cast(unit)
+	_cast = true
+	unit.is_casting = true
+	
+	var target_position = TargetHelper.get_target_position(_target)
+	unit.face_point(target_position)
+	_start_global_cooldown(unit)
+	
+	emit_signal("casting_started", _ability)
 
 
 func on_leave(unit) -> void:
@@ -32,13 +38,6 @@ func on_leave(unit) -> void:
 
 
 func update(unit, delta: float):
-	# If ability has not yet been cast then player was out of range, check if player can cast yet
-	if !_cast:
-		if unit.position.distance_to(TargetHelper.get_target_position(_target)) <= _ability.cast_range:
-			_start_cast(unit)
-			
-		return
-		
 	_progress += delta
 	emit_signal("casting_progressed", _ability, _progress)
 	
@@ -57,17 +56,6 @@ func update(unit, delta: float):
 			return ChannellingCombatState.new(_target, _ability)
 			
 		return IdleCombatState.new()
-
-
-func _start_cast(unit) -> void:
-	_cast = true
-	unit.is_casting = true
-	
-	var target_position = TargetHelper.get_target_position(_target)
-	unit.face_point(target_position)
-	_start_global_cooldown(unit)
-	
-	emit_signal("casting_started", _ability)
 
 
 func _start_global_cooldown(unit) -> void:
