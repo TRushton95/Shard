@@ -650,6 +650,7 @@ func _unhandled_input(event) -> void:
 func setup() -> void:
 	NavigationHelper.set_nav_instance($Navigation2D)
 	ServerClock.connect("ping_updated", self, "_on_ServerClock_ping_updated")
+	GameServer.initialise()
 	
 	#TEST ENEMY
 	$Enemy.set_name($Enemy.name) # set name label
