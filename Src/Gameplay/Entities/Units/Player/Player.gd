@@ -171,7 +171,7 @@ func _physics_process(delta: float) -> void:
 			Constants.Network.POSITION: get_global_position()
 		}
 		
-		get_parent()._send_player_state(player_state) # TODO: This and the other methods might be better moved into a singleton server interface
+		GameServer.send_player_state(player_state) # TODO: This and the other methods might be better moved into a singleton server interface
 
 
 func change_direction(new_direction: int) -> void:

@@ -412,7 +412,8 @@ func _physics_process(delta: float) -> void:
 					
 			if !world_state.empty():
 				world_state[Constants.Network.TIME] = OS.get_system_time_msecs()
-				_send_world_state(world_state)
+				if !simulating_lag:
+					GameServer.broadcast_world_state(world_state)
 			
 	var render_time = ServerClock.get_time() - Constants.INTERPOLATION_OFFSET_MS
 	if world_state_buffer.size() > 1:
@@ -842,11 +843,7 @@ func _get_action_buttons_by_action_name(ability_name: String) -> Array:
 	return result
 
 
-func _send_player_state(player_state: Dictionary) -> void:
-	rpc_unreliable_id(Constants.SERVER_ID, "_recieve_player_state", player_state)
-
-
-master func _recieve_player_state(new_player_state: Dictionary) -> void:
+master func receive_player_state(new_player_state: Dictionary) -> void:
 	var sender_id = get_tree().get_rpc_sender_id()
 	
 	if player_states.has(sender_id):
@@ -856,31 +853,20 @@ master func _recieve_player_state(new_player_state: Dictionary) -> void:
 		player_states[sender_id] = new_player_state
 
 
-func _send_ability_entity_state (ability_entity_state: Dictionary) -> void:
-	rpc_id(Constants.ALL_CONNECTED_PEERS_ID, "_recieve_ability_entity_state", ability_entity_state)
-
-
-remote func _recieve_ability_entity_state(new_ability_entity_state: Dictionary) -> void:
+remote func receive_ability_entity_state(new_ability_entity_state: Dictionary) -> void:
 	var entity_id = new_ability_entity_state[Constants.Network.ID]
 	
 	if !ability_entity_states.has(entity_id):
 		ability_entity_states[entity_id] = new_ability_entity_state
 
 
-master func _send_world_state(world_state: Dictionary) -> void:
-	if simulating_lag:
-		return
-	
-	rpc_unreliable_id(Constants.ALL_CONNECTED_PEERS_ID, "_receive_world_state", world_state)
-
-
-remotesync func _receive_world_state(world_state: Dictionary) -> void:
+remotesync func recieve_world_state(world_state: Dictionary) -> void:
 	if world_state[Constants.Network.TIME] > prev_world_state_timestamp:
 		prev_world_state_timestamp = world_state[Constants.Network.TIME]
 		world_state_buffer.append(world_state)
 
 
-master func recieve_ability_cast(action_source: int, action_index: int, dirty_target) -> void:
+master func receive_ability_cast(action_source: int, action_index: int, dirty_target) -> void:
 	var caster_name = ServerInfo.get_user_name(get_tree().get_network_unique_id())
 	if !has_node(caster_name):
 		return
@@ -892,7 +878,7 @@ master func recieve_ability_cast(action_source: int, action_index: int, dirty_ta
 	ability.execute(clean_target, caster)
 
 
-master func recieve_ability_cast_request(time: float, ability_instance_id: int, dirty_target) -> void:
+master func receive_ability_cast_request(time: float, ability_instance_id: int, dirty_target) -> void:
 	var sender_id = get_tree().get_rpc_sender_id()
 	var caster_name = ServerInfo.get_user_name(sender_id)
 	if !has_node(caster_name):

@@ -54,6 +54,6 @@ func execute(target, caster: Unit) -> void:
 		Constants.Network.TARGET_ID: target.name
 	}
 	
-	get_tree().get_root().get_node("Main/Map")._send_ability_entity_state(ability_entity_state)
+	GameServer.broadcast_ability_entity_state(ability_entity_state)
 	
 	projectile.connect("target_reached", self, "_on_projectile_target_reached", [projectile, target, caster])
