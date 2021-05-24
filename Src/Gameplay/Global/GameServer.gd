@@ -2,6 +2,7 @@ extends Node
 
 var game_map
 
+
 func initialise() -> void:
 	game_map = get_tree().get_root().get_node("Main/Map") # Initialising this on load results in attempting to reference map before it is instantiated
 

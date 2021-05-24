@@ -546,7 +546,6 @@ func _process(_delta: float) -> void:
 		$LagSimTimer.start(lag_sim_duration)
 		$CanvasLayer/NetworkInfo/VBoxContainer/LagWarning.show()
 		
-		
 	if Input.is_action_just_pressed("test_interrupt"):
 		player.rpc("interrupt")
 	if Input.is_action_just_pressed("test_mana_refill"):
@@ -861,7 +860,7 @@ remote func receive_ability_entity_state(new_ability_entity_state: Dictionary) -
 		ability_entity_states[entity_id] = new_ability_entity_state
 
 
-remotesync func recieve_world_state(world_state: Dictionary) -> void:
+remotesync func receive_world_state(world_state: Dictionary) -> void:
 	if world_state[Constants.Network.TIME] > prev_world_state_timestamp:
 		prev_world_state_timestamp = world_state[Constants.Network.TIME]
 		world_state_buffer.append(world_state)
@@ -873,7 +872,7 @@ master func receive_ability_cast(action_source: int, action_index: int, dirty_ta
 		return
 	
 	var caster = get_node(caster_name)
-	var clean_target = _get_clean_target(dirty_target)
+	var clean_target = TargetHelper.get_clean_target(dirty_target)
 	var ability = find_action(ActionLookup.new(action_source, action_index)) # TODO: Lookup by index isn't reliable or cheat proof - need to reference spells by id
 	
 	ability.execute(clean_target, caster)
@@ -886,7 +885,7 @@ master func receive_ability_cast_request(time: float, ability_instance_id: int, 
 		return
 	
 	var caster = get_node(caster_name)
-	var clean_target = _get_clean_target(dirty_target)
+	var clean_target = TargetHelper.get_clean_target(dirty_target)
 	var ability = instance_from_id(ability_instance_id)
 	
 	if caster.can_cast(ability, clean_target):
@@ -903,7 +902,7 @@ remotesync func start_ability_cast(time: float, ability_instance_id: int, dirty_
 			return
 			
 		var caster = get_node(caster_name)
-		var clean_target = _get_clean_target(dirty_target)
+		var clean_target = TargetHelper.get_clean_target(dirty_target)
 		var ability = instance_from_id(ability_instance_id)
 		
 		var queued_ability_data = {
@@ -940,20 +939,3 @@ func _unit_stop(unit_name: String) -> void:
 
 remotesync func _unit_attack_target(unit_name: String, target_name: String) -> void:
 	get_node(unit_name).input_command(AttackCommand.new(get_node(target_name)))
-
-
-# Get target from dirty target that may be a Vector2 or a node name
-func _get_clean_target(dirty_target):
-	var result
-	
-	if dirty_target is Vector2:
-		result = dirty_target
-	elif has_node(dirty_target):
-		result = get_node(dirty_target)
-		
-	return result
-
-
-func _is_team_target_valid(ability: Ability, target) -> bool:
-	# If ability targets a unit and the target is a unit of a different team to the ability target team
-	return !(typeof(target) == TYPE_OBJECT && target.get_type() == "Unit" && ability.target_type == Enums.TargetType.Unit && ability.target_team != target.team)
