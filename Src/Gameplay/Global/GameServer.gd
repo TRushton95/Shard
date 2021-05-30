@@ -7,6 +7,10 @@ func initialise() -> void:
 	game_map = get_tree().get_root().get_node("Main/Map") # Initialising this on load results in attempting to reference map before it is instantiated
 
 
+func is_server() -> bool:
+	return get_tree().get_root().is_network_master()
+
+
 ###################
 #  CLIENT METHODS #
 ###################
@@ -36,3 +40,7 @@ func broadcast_ability_entity_state(ability_entity_state) -> void:
 
 func broadcast_world_state(world_state: Dictionary) -> void:
 	game_map.rpc_unreliable_id(Constants.ALL_CONNECTED_PEERS_ID, "receive_world_state", world_state)
+
+
+func broadcast_unit_stat(unit_id: int, stat: int, value: int) -> void:
+	game_map.rpc_id(Constants.ALL_CONNECTED_PEERS_ID, "receive_unit_stat", unit_id, stat, value)

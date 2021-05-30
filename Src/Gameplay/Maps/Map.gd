@@ -865,7 +865,19 @@ remotesync func receive_world_state(world_state: Dictionary) -> void:
 		prev_world_state_timestamp = world_state[Constants.Network.TIME]
 		world_state_buffer.append(world_state)
 
+remotesync func receive_unit_stat(unit_id: int, stat: int, value: int) -> void:
+	var unit = instance_from_id(unit_id)
+	
+	match stat:
+		Enums.Stat.HEALTH:
+			unit.current_health = value
+			# TODO Needs to account for max health
+		Enums.Stat.MANA:
+			unit.current_mana = value
+			# TODO Needs to account for max mana
 
+
+# TODO: Think this is safe to be removed now, replaced by receive_ability_cast_request
 master func receive_ability_cast(action_source: int, action_index: int, dirty_target) -> void:
 	var caster_name = ServerInfo.get_user_name(get_tree().get_network_unique_id())
 	if !has_node(caster_name):
@@ -891,6 +903,9 @@ master func receive_ability_cast_request(time: float, ability_instance_id: int, 
 	if caster.can_cast(ability, clean_target):
 		caster.start_cast(ability, clean_target)
 		rpc_id(Constants.ALL_CONNECTED_PEERS_ID, "start_ability_cast", time, ability_instance_id, dirty_target)
+	else:
+		pass
+		# Inform caster that cast cannot go ahead
 
 
 remotesync func start_ability_cast(time: float, ability_instance_id: int, dirty_target) -> void:
