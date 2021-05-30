@@ -42,5 +42,5 @@ func broadcast_world_state(world_state: Dictionary) -> void:
 	game_map.rpc_unreliable_id(Constants.ALL_CONNECTED_PEERS_ID, "receive_world_state", world_state)
 
 
-func broadcast_unit_stat(unit_id: int, stat: int, value: int) -> void:
-	game_map.rpc_id(Constants.ALL_CONNECTED_PEERS_ID, "receive_unit_stat", unit_id, stat, value)
+func broadcast_unit_stat(unit_name: String, stat: int, value: int) -> void:
+	game_map.rpc_id(Constants.ALL_CONNECTED_PEERS_ID, "receive_unit_stat", unit_name, stat, value)

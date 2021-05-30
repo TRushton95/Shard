@@ -865,8 +865,8 @@ remotesync func receive_world_state(world_state: Dictionary) -> void:
 		prev_world_state_timestamp = world_state[Constants.Network.TIME]
 		world_state_buffer.append(world_state)
 
-remotesync func receive_unit_stat(unit_id: int, stat: int, value: int) -> void:
-	var unit = instance_from_id(unit_id)
+remotesync func receive_unit_stat(unit_name: String, stat: int, value: int) -> void:
+	var unit = get_node(unit_name)
 	
 	match stat:
 		Enums.Stat.HEALTH:

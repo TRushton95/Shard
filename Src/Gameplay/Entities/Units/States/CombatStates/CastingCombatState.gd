@@ -51,8 +51,7 @@ func update(unit, delta: float):
 		
 		if GameServer.is_server():
 			if "cost" in _ability:
-				unit._set_current_mana(unit.current_mana - _ability.cost)
-				GameServer.broadcast_unit_stat(Enums.Stat.MANA, unit.get_instance_id(), unit.current_mana - _ability.cost)
+				GameServer.broadcast_unit_stat(unit.name, Enums.Stat.MANA, unit.current_mana - _ability.cost)
 		
 		if "channel_time" in _ability && _ability.channel_time > 0:
 			return ChannellingCombatState.new(_target, _ability)
